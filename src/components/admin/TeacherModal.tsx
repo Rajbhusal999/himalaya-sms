@@ -181,18 +181,26 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSuccess }: Te
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Post</label>
-              <input type="text" name="post" value={formData.post} onChange={handleChange} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-slate-900" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Teacher Category</label>
-              <select name="teacher_category" value={formData.teacher_category} onChange={handleChange} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-white text-slate-900">
-                <option value="">Select Category</option>
+              <select name="post" value={formData.post} onChange={handleChange} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-white text-slate-900">
+                <option value="">Select Post</option>
                 <option value="Teacher">Teacher</option>
                 <option value="Staff">Staff</option>
                 <option value="Principal">Principal</option>
                 <option value="Assistant Principal">Assistant Principal</option>
                 <option value="Level co-ordinator">Level co-ordinator</option>
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Teacher Category</label>
+              <input list="categories" name="teacher_category" value={formData.teacher_category} onChange={handleChange} placeholder="Select or type..." className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-slate-900" />
+              <datalist id="categories">
+                <option value="स्थायी" />
+                <option value="अस्थायी" />
+                <option value="करार" />
+                <option value="स्थानीय तह अनुदान" />
+                <option value="निजि स्रोत" />
+                <option value="अन्य" />
+              </datalist>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Subject Teach</label>
