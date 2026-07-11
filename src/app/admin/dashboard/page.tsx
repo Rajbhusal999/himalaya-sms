@@ -12,7 +12,9 @@ import {
   LogOut,
   ArrowRight,
   Settings,
-  Bell
+  Bell,
+  GraduationCap,
+  UserCog
 } from "lucide-react";
 
 type Stat = {
@@ -245,6 +247,34 @@ export default function AdminDashboard() {
             >
               <FileSpreadsheet className="w-5 h-5 mr-3" />
               Tabulation Sheets
+            </button>
+          </nav>
+          
+          <div className="px-4 mt-8 mb-2 text-xs font-semibold text-brand-400 uppercase tracking-wider">
+            User Management
+          </div>
+          <nav className="space-y-1 px-2">
+            <button
+              onClick={() => setActiveTab("students")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "students" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <GraduationCap className="w-5 h-5 mr-3" />
+              Manage Students
+            </button>
+            <button
+              onClick={() => setActiveTab("teachers")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "teachers" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <UserCog className="w-5 h-5 mr-3" />
+              Manage Teachers
             </button>
           </nav>
         </div>
