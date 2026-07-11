@@ -171,8 +171,8 @@ export default function ManageAdmitCards() {
                       <h2 className="text-sm font-semibold mb-1">BHARATPUR-11, JAGRITICHOWK</h2>
                       <h3 className="text-lg font-bold uppercase mb-2">
                         {["Nursery", "KG", "ECD", "1", "2", "3", "4", "5"].includes(student.class)
-                          ? "Continuous / Terminal Examination"
-                          : selectedTerm} - {routines.length > 0 && routines[0].exam_date ? routines[0].exam_date.match(/\d{4}/)?.[0] || (new Date().getFullYear() + 56) : (new Date().getFullYear() + 56)}
+                          ? "FIRST PERIODICAL CAS ASSESSMENT"
+                          : selectedTerm} — {routines.length > 0 && routines[0].exam_date ? routines[0].exam_date.match(/\d{4}/)?.[0] || (new Date().getFullYear() + 56) : (new Date().getFullYear() + 56)}
                       </h3>
                       <div className="inline-block border-2 border-black bg-[#ffdbcc] px-6 py-1 font-bold text-lg shadow-[3px_3px_0px_rgba(0,0,0,1)]">
                         ADMIT CARD
