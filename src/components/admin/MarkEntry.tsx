@@ -206,7 +206,7 @@ export default function MarkEntry() {
             </div>
           ) : (
             <div className="overflow-x-auto border border-black max-w-full">
-              <table className="w-full text-center border-collapse text-sm">
+              <table className="w-full text-center border-collapse text-sm text-black">
                 <thead>
                   <tr>
                     <th rowSpan={2} className="border border-black px-2 py-2 w-24">Symbol No.</th>
