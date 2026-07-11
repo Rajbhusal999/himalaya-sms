@@ -19,20 +19,25 @@ export default function TeacherLogin() {
     setError(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Query the teachers table directly
+      const { data, error } = await supabase
+        .from("teachers")
+        .select("*")
+        .eq("username", email)
+        .eq("password", password)
+        .single();
 
-      if (error) {
-        throw error;
+      if (error || !data) {
+        throw new Error("Invalid username or password");
       }
 
-      if (data.session) {
-        router.push("/teacher/dashboard");
-      }
+      // Store teacher info in localStorage for the dashboard
+      localStorage.setItem("teacherId", data.id);
+      localStorage.setItem("teacherName", `${data.first_name} ${data.last_name}`);
+      
+      router.push("/teacher/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to login");
+      setError("Invalid username or password");
     } finally {
       setLoading(false);
     }
@@ -65,19 +70,19 @@ export default function TeacherLogin() {
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-brand-100 mb-1.5 ml-1">
-                Gmail Address
+                Username / Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-brand-300" />
                 </div>
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-xl leading-5 bg-white/5 text-white placeholder-brand-300/50 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400 sm:text-sm transition-all"
-                  placeholder="teacher@gmail.com"
+                  placeholder="username or email"
                 />
               </div>
             </div>
