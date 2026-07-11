@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
+import ManageStudents from "@/components/admin/ManageStudents";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -78,6 +79,10 @@ export default function AdminDashboard() {
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-brand-600"></div>
         </div>
       );
+    }
+
+    if (activeTab === "students") {
+      return <ManageStudents />;
     }
 
     return (

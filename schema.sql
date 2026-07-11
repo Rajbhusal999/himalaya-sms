@@ -7,7 +7,21 @@ create table public.students (
     name text not null,
     roll_no integer not null,
     class integer not null check (class >= 1 and class <= 8),
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    iemis_code text,
+    student_id_string text,
+    gender text,
+    father_name text,
+    mother_name text,
+    section text,
+    year text,
+    permanent_address text,
+    temporary_address text,
+    dob text,
+    mother_tongue text,
+    disability_type text,
+    guardian_name text,
+    guardian_contact_number text
 );
 
 -- Create Subjects Table
