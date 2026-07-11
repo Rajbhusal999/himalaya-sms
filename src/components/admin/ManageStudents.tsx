@@ -75,9 +75,6 @@ export default function ManageStudents() {
         // Map Excel headers to DB columns
         const newStudents = data.map((row: any) => {
           let cls = String(row["CurrentClass"] || row["Class"] || "1");
-          if (cls.toLowerCase() === "nursery" || cls.toLowerCase() === "kg") {
-            cls = "ECD";
-          }
           return {
             name: row["FullName"] || row["Full Name"] || "Unknown",
             roll_no: row["S.N"] || row["Roll No"] || Math.floor(Math.random() * 1000), // Fallback
@@ -195,6 +192,8 @@ export default function ManageStudents() {
             className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm text-slate-700 bg-white"
           >
             <option value="All Classes">All Classes</option>
+            <option value="Nursery">Nursery</option>
+            <option value="KG">KG</option>
             <option value="ECD">ECD</option>
             <option value="1">Class 1</option>
             <option value="2">Class 2</option>
