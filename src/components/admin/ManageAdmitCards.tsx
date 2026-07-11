@@ -161,9 +161,9 @@ export default function ManageAdmitCards() {
                   
                   {/* Header */}
                   <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-3">
-                    {/* Placeholder Logo Left */}
-                    <div className="w-24 h-24 border border-black flex items-center justify-center bg-white rounded-full">
-                      <span className="text-[10px] text-center font-bold">SHREE<br/>HIMALAYA<br/>SCHOOL</span>
+                    {/* Saraswati Image Left */}
+                    <div className="w-24 h-24 border border-black flex items-center justify-center bg-white rounded-full overflow-hidden p-1">
+                      <img src="/saraswati.png" alt="Saraswati" className="w-full h-full object-contain" />
                     </div>
                     
                     <div className="text-center flex-1">
@@ -175,9 +175,9 @@ export default function ManageAdmitCards() {
                       </div>
                     </div>
                     
-                    {/* Placeholder Logo Right */}
-                    <div className="w-24 h-24 border border-black flex items-center justify-center bg-white">
-                      <span className="text-[10px] text-center font-bold">LOGO</span>
+                    {/* School Logo Right */}
+                    <div className="w-24 h-24 border border-black flex items-center justify-center bg-white rounded-full overflow-hidden p-1">
+                      <img src="/logo.png" alt="School Logo" className="w-full h-full object-contain" />
                     </div>
                   </div>
 
