@@ -185,6 +185,14 @@ export default function ManageStudents() {
           </button>
 
           <button
+            onClick={() => alert("Add Student Form Coming Soon")}
+            className="flex items-center px-4 py-2 bg-brand-100 text-brand-700 border border-brand-200 rounded-lg hover:bg-brand-200 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Student
+          </button>
+
+          <button
             onClick={exportToExcel}
             className="flex items-center px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors text-sm font-medium"
           >

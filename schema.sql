@@ -48,20 +48,20 @@ alter table public.subjects enable row level security;
 alter table public.marks enable row level security;
 
 -- Create basic policies (Allow read access to authenticated users, write to authenticated users)
-create policy "Enable read access for authenticated users" on public.students for select to authenticated using (true);
-create policy "Enable insert for authenticated users" on public.students for insert to authenticated with check (true);
-create policy "Enable update for authenticated users" on public.students for update to authenticated using (true);
-create policy "Enable delete for authenticated users" on public.students for delete to authenticated using (true);
+create policy "Enable read access for anon users" on public.students for select to anon using (true);
+create policy "Enable insert for anon users" on public.students for insert to anon with check (true);
+create policy "Enable update for anon users" on public.students for update to anon using (true);
+create policy "Enable delete for anon users" on public.students for delete to anon using (true);
 
-create policy "Enable read access for authenticated users" on public.subjects for select to authenticated using (true);
-create policy "Enable insert for authenticated users" on public.subjects for insert to authenticated with check (true);
-create policy "Enable update for authenticated users" on public.subjects for update to authenticated using (true);
-create policy "Enable delete for authenticated users" on public.subjects for delete to authenticated using (true);
+create policy "Enable read access for anon users" on public.subjects for select to anon using (true);
+create policy "Enable insert for anon users" on public.subjects for insert to anon with check (true);
+create policy "Enable update for anon users" on public.subjects for update to anon using (true);
+create policy "Enable delete for anon users" on public.subjects for delete to anon using (true);
 
-create policy "Enable read access for authenticated users" on public.marks for select to authenticated using (true);
-create policy "Enable insert for authenticated users" on public.marks for insert to authenticated with check (true);
-create policy "Enable update for authenticated users" on public.marks for update to authenticated using (true);
-create policy "Enable delete for authenticated users" on public.marks for delete to authenticated using (true);
+create policy "Enable read access for anon users" on public.marks for select to anon using (true);
+create policy "Enable insert for anon users" on public.marks for insert to anon with check (true);
+create policy "Enable update for anon users" on public.marks for update to anon using (true);
+create policy "Enable delete for anon users" on public.marks for delete to anon using (true);
 
 -- Insert dummy subjects for Grades 1-8
 insert into public.subjects (subject_name, subject_code) values
