@@ -16,7 +16,13 @@ import {
   Settings,
   Bell,
   GraduationCap,
-  UserCog
+  UserCog,
+  BookOpen,
+  ClipboardCheck,
+  IdCard,
+  FileEdit,
+  Library,
+  FileText
 } from "lucide-react";
 
 type Stat = {
@@ -237,6 +243,50 @@ export default function AdminDashboard() {
               Create Routine
             </button>
             <button
+              onClick={() => setActiveTab("subjects")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "subjects" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <BookOpen className="w-5 h-5 mr-3" />
+              Subject Management
+            </button>
+            <button
+              onClick={() => setActiveTab("attendance")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "attendance" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <ClipboardCheck className="w-5 h-5 mr-3" />
+              Attendance
+            </button>
+            <button
+              onClick={() => setActiveTab("admit-card")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "admit-card" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <IdCard className="w-5 h-5 mr-3" />
+              Admit Card
+            </button>
+            <button
+              onClick={() => setActiveTab("mark-entry")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "mark-entry" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <FileEdit className="w-5 h-5 mr-3" />
+              Mark Entry
+            </button>
+            <button
               onClick={() => setActiveTab("ledger")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "ledger" 
@@ -246,6 +296,28 @@ export default function AdminDashboard() {
             >
               <BookMarked className="w-5 h-5 mr-3" />
               Mark Ledger
+            </button>
+            <button
+              onClick={() => setActiveTab("grade-ledger")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "grade-ledger" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <Library className="w-5 h-5 mr-3" />
+              Grade Ledger
+            </button>
+            <button
+              onClick={() => setActiveTab("grade-sheet")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "grade-sheet" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <FileText className="w-5 h-5 mr-3" />
+              Grade Sheet
             </button>
             <button
               onClick={() => setActiveTab("tabulation")}
