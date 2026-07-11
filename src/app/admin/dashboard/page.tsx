@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import ManageStudents from "@/components/admin/ManageStudents";
+import ManageTeachers from "@/components/admin/ManageTeachers";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -83,6 +84,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "students") {
       return <ManageStudents />;
+    }
+
+    if (activeTab === "teachers") {
+      return <ManageTeachers />;
     }
 
     return (

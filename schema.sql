@@ -70,3 +70,32 @@ insert into public.subjects (subject_name, subject_code) values
 ('Science', 'SCI'),
 ('Social Studies', 'SOC'),
 ('Nepali', 'NEP');
+
+-- Create Teachers Table
+create table public.teachers (
+    id uuid default uuid_generate_v4() primary key,
+    first_name text not null,
+    middle_name text,
+    last_name text not null,
+    gender text,
+    post text,
+    teacher_category text,
+    subject_teach text,
+    permanent_address text,
+    temporary_address text,
+    dob text,
+    joining_date text,
+    phone_number text,
+    account_number text,
+    username text,
+    password text,
+    pan_no text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS for Teachers
+alter table public.teachers enable row level security;
+create policy "Enable read access for anon users" on public.teachers for select to anon using (true);
+create policy "Enable insert for anon users" on public.teachers for insert to anon with check (true);
+create policy "Enable update for anon users" on public.teachers for update to anon using (true);
+create policy "Enable delete for anon users" on public.teachers for delete to anon using (true);
