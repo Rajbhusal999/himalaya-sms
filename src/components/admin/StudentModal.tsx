@@ -169,9 +169,7 @@ export default function StudentModal({ isOpen, onClose, student, onSuccess }: St
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Class *</label>
               <select required name="class" value={formData.class} onChange={handleChange} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-white">
-                <option value="Nursery">Nursery</option>
                 <option value="ECD">ECD</option>
-                <option value="KG">KG</option>
                 <option value="1">Class 1</option>
                 <option value="2">Class 2</option>
                 <option value="3">Class 3</option>

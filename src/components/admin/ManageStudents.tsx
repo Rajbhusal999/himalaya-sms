@@ -73,10 +73,15 @@ export default function ManageStudents() {
         const data = XLSX.utils.sheet_to_json(ws);
 
         // Map Excel headers to DB columns
-        const newStudents = data.map((row: any) => ({
-          name: row["FullName"] || row["Full Name"] || "Unknown",
-          roll_no: row["S.N"] || row["Roll No"] || Math.floor(Math.random() * 1000), // Fallback
-          class: String(row["CurrentClass"] || row["Class"] || "1"),
+        const newStudents = data.map((row: any) => {
+          let cls = String(row["CurrentClass"] || row["Class"] || "1");
+          if (cls.toLowerCase() === "nursery" || cls.toLowerCase() === "kg") {
+            cls = "ECD";
+          }
+          return {
+            name: row["FullName"] || row["Full Name"] || "Unknown",
+            roll_no: row["S.N"] || row["Roll No"] || Math.floor(Math.random() * 1000), // Fallback
+            class: cls,
           iemis_code: row["IEMIS Code"] ? String(row["IEMIS Code"]) : null,
           student_id_string: row["Student Id"] ? String(row["Student Id"]) : null,
           gender: row["Gender"] || null,
@@ -91,7 +96,8 @@ export default function ManageStudents() {
           disability_type: row["Disability Type"] || null,
           guardian_name: row["Guardian Name"] || null,
           guardian_contact_number: row["Guardian Contact Number"] ? String(row["Guardian Contact Number"]) : null,
-        }));
+        };
+        });
 
         if (newStudents.length > 0) {
           const { error } = await supabase.from("students").insert(newStudents);
@@ -189,9 +195,7 @@ export default function ManageStudents() {
             className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm text-slate-700 bg-white"
           >
             <option value="All Classes">All Classes</option>
-            <option value="Nursery">Nursery</option>
             <option value="ECD">ECD</option>
-            <option value="KG">KG</option>
             <option value="1">Class 1</option>
             <option value="2">Class 2</option>
             <option value="3">Class 3</option>
