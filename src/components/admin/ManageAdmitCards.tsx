@@ -154,7 +154,7 @@ export default function ManageAdmitCards() {
         <div className="print-area">
           {/* We chunk students by 2 to fit exactly 2 per page */}
           {Array.from({ length: Math.ceil(filteredStudents.length / 2) }).map((_, pageIndex) => (
-            <div key={pageIndex} className="page-break-after-always print:h-auto print:w-[210mm] print:box-border print:py-0 print:px-[10mm] flex flex-col justify-between gap-2 bg-slate-100 p-8 my-8 print:bg-white print:my-0 shadow-lg print:shadow-none mx-auto max-w-[210mm]">
+            <div key={pageIndex} className="break-after-page print:h-[297mm] print:w-[210mm] print:box-border print:p-[10mm] flex flex-col justify-between gap-2 bg-slate-100 p-8 my-8 print:bg-white print:my-0 shadow-lg print:shadow-none mx-auto max-w-[210mm]">
 
               {filteredStudents.slice(pageIndex * 2, pageIndex * 2 + 2).map((student, cardIndex) => (
                 <div key={student.id} className="admit-card-container border-2 border-black bg-[#ffebe0] p-4 relative h-[120mm] flex flex-col font-serif" style={{ color: 'black' }}>
