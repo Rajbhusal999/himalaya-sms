@@ -6,7 +6,7 @@ create table public.students (
     id uuid default uuid_generate_v4() primary key,
     name text not null,
     roll_no integer not null,
-    class integer not null check (class >= 1 and class <= 8),
+    class text not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     iemis_code text,
     student_id_string text,

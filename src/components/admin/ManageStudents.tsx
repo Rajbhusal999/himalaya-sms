@@ -9,7 +9,7 @@ type Student = {
   id: string;
   name: string;
   roll_no: number;
-  class: number;
+  class: string;
   iemis_code?: string;
   student_id_string?: string;
   gender?: string;
@@ -30,6 +30,7 @@ export default function ManageStudents() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedClass, setSelectedClass] = useState("All Classes");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -72,7 +73,7 @@ export default function ManageStudents() {
         const newStudents = data.map((row: any) => ({
           name: row["FullName"] || row["Full Name"] || "Unknown",
           roll_no: row["S.N"] || row["Roll No"] || Math.floor(Math.random() * 1000), // Fallback
-          class: parseInt(row["CurrentClass"] || row["Class"] || "1"),
+          class: String(row["CurrentClass"] || row["Class"] || "1"),
           iemis_code: row["IEMIS Code"] ? String(row["IEMIS Code"]) : null,
           student_id_string: row["Student Id"] ? String(row["Student Id"]) : null,
           gender: row["Gender"] || null,
@@ -146,10 +147,13 @@ export default function ManageStudents() {
   };
 
   const filteredStudents = students.filter(
-    (s) =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      (s.student_id_string && s.student_id_string.toLowerCase().includes(search.toLowerCase())) ||
-      (s.iemis_code && s.iemis_code.toLowerCase().includes(search.toLowerCase()))
+    (s) => {
+      const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||
+        (s.student_id_string && s.student_id_string.toLowerCase().includes(search.toLowerCase())) ||
+        (s.iemis_code && s.iemis_code.toLowerCase().includes(search.toLowerCase()));
+      const matchesClass = selectedClass === "All Classes" || String(s.class) === selectedClass;
+      return matchesSearch && matchesClass;
+    }
   );
 
   return (
@@ -175,6 +179,25 @@ export default function ManageStudents() {
               className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm"
             />
           </div>
+
+          <select
+            value={selectedClass}
+            onChange={(e) => setSelectedClass(e.target.value)}
+            className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm text-slate-700 bg-white"
+          >
+            <option value="All Classes">All Classes</option>
+            <option value="Nursery">Nursery</option>
+            <option value="ECD">ECD</option>
+            <option value="KG">KG</option>
+            <option value="1">Class 1</option>
+            <option value="2">Class 2</option>
+            <option value="3">Class 3</option>
+            <option value="4">Class 4</option>
+            <option value="5">Class 5</option>
+            <option value="6">Class 6</option>
+            <option value="7">Class 7</option>
+            <option value="8">Class 8</option>
+          </select>
           
           <button 
             onClick={fetchStudents}
@@ -262,7 +285,7 @@ export default function ManageStudents() {
                   <td className="px-4 py-3 text-slate-600">{student.gender || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{student.father_name || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{student.mother_name || "-"}</td>
-                  <td className="px-4 py-3 text-slate-600">Class {student.class}</td>
+                  <td className="px-4 py-3 text-slate-600">{student.class}</td>
                   <td className="px-4 py-3 text-slate-600">{student.section || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{student.permanent_address || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{student.temporary_address || "-"}</td>
