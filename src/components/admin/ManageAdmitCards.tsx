@@ -193,19 +193,19 @@ export default function ManageAdmitCards() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between mb-4 text-sm font-bold">
-                    <div className="flex w-48">
-                      <div className="border border-black px-2 py-1 flex items-center">ROLL NO.</div>
-                      <div className="border border-black px-2 py-1 flex-1 flex items-center justify-center bg-white">HSE{student.roll_no.toString().padStart(3, '0')}</div>
+                  <div className="flex justify-between mb-2 text-xs font-bold items-start">
+                    <div className="flex w-32 h-8">
+                      <div className="border border-black px-1 flex items-center justify-center text-center w-12 leading-tight">ROLL NO.</div>
+                      <div className="border border-black border-l-0 px-1 flex-1 flex items-center justify-center bg-white">HSE{student.roll_no.toString().padStart(3, '0')}</div>
                     </div>
-                    <div className="w-48 flex flex-col">
-                      <div className="flex border-t border-l border-r border-black">
-                        <div className="w-16 px-2 py-1 border-r border-black flex items-center">SHIFT :</div>
-                        <div className="flex-1 px-2 py-1 bg-white">{routines[0]?.shift || "MORNING"}</div>
+                    <div className="w-40 flex flex-col">
+                      <div className="flex border-t border-l border-r border-black h-4">
+                        <div className="w-12 px-1 border-r border-black flex items-center">SHIFT :</div>
+                        <div className="flex-1 px-1 flex items-center bg-white">{routines[0]?.shift || "MORNING"}</div>
                       </div>
-                      <div className="flex border border-black">
-                        <div className="w-16 px-2 py-1 border-r border-black flex items-center">TIME :</div>
-                        <div className="flex-1 px-2 py-1 bg-white">{routines[0]?.exam_time || "10:10-12:10"}</div>
+                      <div className="flex border border-black h-4">
+                        <div className="w-12 px-1 border-r border-black flex items-center">TIME :</div>
+                        <div className="flex-1 px-1 flex items-center bg-white">{routines[0]?.exam_time || "10:10-12:10"}</div>
                       </div>
                     </div>
                   </div>
