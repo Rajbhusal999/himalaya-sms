@@ -8,6 +8,7 @@ import ManageTeachers from "@/components/admin/ManageTeachers";
 import ManageSubjects from "@/components/admin/ManageSubjects";
 import ManageAttendance from "@/components/admin/ManageAttendance";
 import ManageAdmitCards from "@/components/admin/ManageAdmitCards";
+import CreateRoutine from "@/components/admin/CreateRoutine";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -105,6 +106,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "attendance") {
       return <ManageAttendance />;
+    }
+
+    if (activeTab === "routine") {
+      return <CreateRoutine onRoutineSaved={() => setActiveTab("admit-card")} />;
     }
 
     if (activeTab === "admit-card") {

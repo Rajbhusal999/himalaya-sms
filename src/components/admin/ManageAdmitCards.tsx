@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { Printer, CalendarPlus, X, Search, Check, Save } from "lucide-react";
+import { Printer } from "lucide-react";
 
 type Student = {
   id: string;
@@ -33,10 +33,6 @@ export default function ManageAdmitCards() {
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(false);
   
-  const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(false);
-  const [routineForm, setRoutineForm] = useState<Routine[]>([{ class: "1", exam_term: EXAM_TERMS[0], subject: "", exam_date: "", shift: "Morning", exam_time: "10:00-12:00" }]);
-  const [savingRoutine, setSavingRoutine] = useState(false);
-
   const fetchStudentsAndRoutine = async () => {
     setLoading(true);
     try {
@@ -61,12 +57,6 @@ export default function ManageAdmitCards() {
       if (routineError) throw routineError;
       setRoutines(routineData || []);
       
-      if (routineData && routineData.length > 0) {
-        setRoutineForm(routineData);
-      } else {
-        setRoutineForm([{ class: selectedClass, exam_term: selectedTerm, subject: "", exam_date: "", shift: "Morning", exam_time: "10:10-12:10" }]);
-      }
-
     } catch (err: any) {
       alert("Error loading data: " + err.message);
     } finally {
@@ -77,40 +67,6 @@ export default function ManageAdmitCards() {
   useEffect(() => {
     fetchStudentsAndRoutine();
   }, [selectedClass, selectedTerm]);
-
-  const handleSaveRoutine = async () => {
-    setSavingRoutine(true);
-    try {
-      // First, delete existing routine for this class and term
-      await supabase
-        .from("exam_routines")
-        .delete()
-        .eq("class", selectedClass)
-        .eq("exam_term", selectedTerm);
-
-      const validRoutines = routineForm.filter(r => r.subject && r.exam_date).map(r => ({
-        class: selectedClass,
-        exam_term: selectedTerm,
-        subject: r.subject,
-        exam_date: r.exam_date,
-        shift: r.shift,
-        exam_time: r.exam_time
-      }));
-
-      if (validRoutines.length > 0) {
-        const { error } = await supabase.from("exam_routines").insert(validRoutines);
-        if (error) throw error;
-      }
-      
-      setIsRoutineModalOpen(false);
-      fetchStudentsAndRoutine();
-      alert("Routine saved successfully!");
-    } catch (err: any) {
-      alert("Error saving routine: " + err.message);
-    } finally {
-      setSavingRoutine(false);
-    }
-  };
 
   const handlePrint = () => {
     window.print();
@@ -135,7 +91,7 @@ export default function ManageAdmitCards() {
               <Printer className="w-6 h-6 mr-2 text-brand-600" />
               Admit Cards
             </h2>
-            <p className="text-sm text-slate-500 mt-1">Set routine and print admit cards.</p>
+            <p className="text-sm text-slate-500 mt-1">Preview and print admit cards.</p>
           </div>
           
           <div className="flex flex-wrap items-center gap-4">
@@ -175,14 +131,6 @@ export default function ManageAdmitCards() {
 
             <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0 border-l border-slate-200 pl-4">
               <button
-                onClick={() => setIsRoutineModalOpen(true)}
-                className="flex items-center px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 transition-colors"
-              >
-                <CalendarPlus className="w-4 h-4 mr-2" />
-                Set Routine
-              </button>
-              
-              <button
                 onClick={handlePrint}
                 disabled={routines.length === 0 || filteredStudents.length === 0}
                 className="flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 transition-colors"
@@ -196,141 +144,10 @@ export default function ManageAdmitCards() {
         
         {routines.length === 0 && !loading && (
           <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm border border-yellow-200">
-            ⚠️ No routine found for this class and term. Please <b>Set Routine</b> before printing admit cards.
+            ⚠️ No routine found for this class and term. Please use the <b>Create Routine</b> menu to set it up first.
           </div>
         )}
       </div>
-
-      {/* Routine Modal */}
-      {isRoutineModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-slate-900/75 backdrop-blur-sm"></div>
-            </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="flex justify-between items-center mb-5 border-b border-slate-100 pb-4">
-                  <h3 className="text-xl leading-6 font-bold text-slate-900 flex items-center">
-                    <CalendarPlus className="w-6 h-6 mr-2 text-brand-600" />
-                    Set Routine for Class {selectedClass} - {selectedTerm}
-                  </h3>
-                  <button onClick={() => setIsRoutineModalOpen(false)} className="text-slate-400 hover:text-slate-500 p-2 rounded-full hover:bg-slate-100">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="grid grid-cols-12 gap-3 text-sm font-semibold text-slate-700 uppercase tracking-wider mb-2 px-2">
-                    <div className="col-span-3">Date</div>
-                    <div className="col-span-3">Subject</div>
-                    <div className="col-span-3">Shift</div>
-                    <div className="col-span-2">Time</div>
-                    <div className="col-span-1 text-center">Act</div>
-                  </div>
-                  
-                  {routineForm.map((item, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-2 rounded-lg border border-slate-200">
-                      <div className="col-span-3">
-                        <input
-                          type="text"
-                          placeholder="YYYY-MM-DD"
-                          value={item.exam_date}
-                          onChange={(e) => {
-                            const newForm = [...routineForm];
-                            newForm[index].exam_date = e.target.value;
-                            setRoutineForm(newForm);
-                          }}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <input
-                          type="text"
-                          placeholder="Subject"
-                          value={item.subject}
-                          onChange={(e) => {
-                            const newForm = [...routineForm];
-                            newForm[index].subject = e.target.value;
-                            setRoutineForm(newForm);
-                          }}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <input
-                          type="text"
-                          placeholder="Morning"
-                          value={item.shift}
-                          onChange={(e) => {
-                            const newForm = [...routineForm];
-                            newForm[index].shift = e.target.value;
-                            setRoutineForm(newForm);
-                          }}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <input
-                          type="text"
-                          placeholder="10:00-12:00"
-                          value={item.exam_time}
-                          onChange={(e) => {
-                            const newForm = [...routineForm];
-                            newForm[index].exam_time = e.target.value;
-                            setRoutineForm(newForm);
-                          }}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm"
-                        />
-                      </div>
-                      <div className="col-span-1 text-center">
-                        <button
-                          onClick={() => {
-                            const newForm = [...routineForm];
-                            newForm.splice(index, 1);
-                            setRoutineForm(newForm);
-                          }}
-                          className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-md"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <button
-                    onClick={() => {
-                      const lastItem = routineForm[routineForm.length - 1] || { shift: "Morning", exam_time: "10:10-12:10" };
-                      setRoutineForm([...routineForm, { class: selectedClass, exam_term: selectedTerm, subject: "", exam_date: "", shift: lastItem.shift, exam_time: lastItem.exam_time }]);
-                    }}
-                    className="mt-2 text-brand-600 font-medium text-sm hover:text-brand-700 flex items-center"
-                  >
-                    + Add Row
-                  </button>
-                </div>
-              </div>
-              <div className="bg-slate-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={handleSaveRoutine}
-                  disabled={savingRoutine}
-                  className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-brand-600 text-base font-medium text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:ml-3 sm:w-auto sm:text-sm"
-                >
-                  {savingRoutine ? "Saving..." : "Save Routine"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsRoutineModalOpen(false)}
-                  className="mt-3 w-full inline-flex justify-center rounded-lg border border-slate-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Printable Area */}
       {routines.length > 0 && filteredStudents.length > 0 && (
