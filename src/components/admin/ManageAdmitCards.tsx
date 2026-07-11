@@ -202,7 +202,7 @@ export default function ManageAdmitCards() {
                       <div className="border border-black px-1 flex items-center justify-center text-center w-12 leading-none">ROLL NO.</div>
                       <div className="border border-black border-l-0 px-1 py-1 flex-1 flex items-center justify-center bg-white text-xs leading-none">HSE{student.roll_no.toString().padStart(3, '0')}</div>
                     </div>
-                    <div className="w-40 flex flex-col">
+                    <div className="w-40 flex flex-col text-[8px]">
                       <div className="flex-1 flex border-t border-l border-r border-black">
                         <div className="w-12 px-1 border-r border-black flex items-center leading-none">SHIFT :</div>
                         <div className="flex-1 px-1 flex items-center bg-white leading-none">{routines[0]?.shift || "MORNING"}</div>
