@@ -83,9 +83,9 @@ export default function ManageAdmitCards() {
 
   return (
     <div className="space-y-6">
-      {/* Control Panel (Hidden on Print) */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 print:hidden">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      {/* Control Panel */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8 print:hidden">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 p-6">
           <div>
             <h2 className="text-xl font-bold text-slate-800 flex items-center">
               <Printer className="w-6 h-6 mr-2 text-brand-600" />
@@ -143,7 +143,7 @@ export default function ManageAdmitCards() {
         </div>
 
         {routines.length === 0 && !loading && (
-          <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm border border-yellow-200">
+          <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm border border-yellow-200 print:hidden">
             ⚠️ No routine found for this class and term. Please use the <b>Create Routine</b> menu to set it up first.
           </div>
         )}

@@ -229,9 +229,9 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-slate-50 flex print:block print:bg-white">
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-brand-950 text-white shadow-xl flex-shrink-0 hidden md:flex md:flex-col">
+      <aside className="w-64 bg-brand-950 text-white shadow-xl flex-shrink-0 hidden md:flex md:flex-col print:hidden">
         <div className="h-16 flex items-center px-6 bg-brand-900 border-b border-white/10">
           <span className="font-bold text-xl tracking-tight">Admin Portal</span>
         </div>
@@ -392,9 +392,9 @@ export default function AdminDashboard() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden print:overflow-visible">
         {/* Header */}
-        <header className="h-16 bg-white shadow-sm border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <header className="h-16 bg-white shadow-sm border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 print:hidden">
           <div className="flex md:hidden items-center">
             <span className="font-bold text-lg text-slate-800">Admin Portal</span>
           </div>
@@ -415,7 +415,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Scrollable Main Area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 print:overflow-visible print:p-0 print:m-0">
           {renderContent()}
         </div>
       </main>
