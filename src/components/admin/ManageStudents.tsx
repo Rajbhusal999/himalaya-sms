@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Upload, Download, Plus, Users, Search, RefreshCw, Trash2, Edit } from "lucide-react";
 import * as XLSX from "xlsx";
+import StudentModal from "./StudentModal";
 
 type Student = {
   id: string;
@@ -32,6 +33,8 @@ export default function ManageStudents() {
   const [search, setSearch] = useState("");
   const [selectedClass, setSelectedClass] = useState("All Classes");
   const [isUploading, setIsUploading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchStudents = async () => {
@@ -208,7 +211,10 @@ export default function ManageStudents() {
           </button>
 
           <button
-            onClick={() => alert("Add Student Form Coming Soon")}
+            onClick={() => {
+              setEditingStudent(null);
+              setIsModalOpen(true);
+            }}
             className="flex items-center px-4 py-2 bg-brand-100 text-brand-700 border border-brand-200 rounded-lg hover:bg-brand-200 transition-colors text-sm font-medium"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -296,7 +302,10 @@ export default function ManageStudents() {
                   <td className="px-4 py-3 text-slate-600">{student.guardian_contact_number || "-"}</td>
                   <td className="px-4 py-3 text-right">
                     <button
-                      onClick={() => alert("Edit Student functionality coming soon")}
+                      onClick={() => {
+                        setEditingStudent(student);
+                        setIsModalOpen(true);
+                      }}
                       className="text-blue-500 hover:text-blue-700 p-1 rounded-md hover:bg-blue-50 transition-colors mr-2"
                       title="Edit"
                     >
@@ -322,6 +331,13 @@ export default function ManageStudents() {
           </tbody>
         </table>
       </div>
+
+      <StudentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        student={editingStudent}
+        onSuccess={fetchStudents}
+      />
     </div>
   );
 }
