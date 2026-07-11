@@ -109,7 +109,7 @@ export default function CreateRoutine({ onRoutineSaved }: CreateRoutineProps) {
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
-                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50"
+                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900"
               >
                 {CLASSES.map(cls => <option key={cls} value={cls}>Class {cls}</option>)}
               </select>
@@ -120,7 +120,7 @@ export default function CreateRoutine({ onRoutineSaved }: CreateRoutineProps) {
               <select
                 value={selectedTerm}
                 onChange={(e) => setSelectedTerm(e.target.value)}
-                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50"
+                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900"
               >
                 {EXAM_TERMS.map(term => <option key={term} value={term}>{term}</option>)}
               </select>
@@ -174,7 +174,7 @@ export default function CreateRoutine({ onRoutineSaved }: CreateRoutineProps) {
                       newForm[index].exam_date = e.target.value;
                       setRoutineForm(newForm);
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm text-slate-900"
                   />
                 </div>
                 <div className="col-span-3">
@@ -187,7 +187,7 @@ export default function CreateRoutine({ onRoutineSaved }: CreateRoutineProps) {
                       newForm[index].subject = e.target.value;
                       setRoutineForm(newForm);
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm text-slate-900"
                   />
                 </div>
                 <div className="col-span-3">
@@ -200,7 +200,7 @@ export default function CreateRoutine({ onRoutineSaved }: CreateRoutineProps) {
                       newForm[index].shift = e.target.value;
                       setRoutineForm(newForm);
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm text-slate-900"
                   />
                 </div>
                 <div className="col-span-2">
@@ -213,7 +213,7 @@ export default function CreateRoutine({ onRoutineSaved }: CreateRoutineProps) {
                       newForm[index].exam_time = e.target.value;
                       setRoutineForm(newForm);
                     }}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-brand-500 focus:border-brand-500 sm:text-sm text-slate-900"
                   />
                 </div>
                 <div className="col-span-1 text-center">

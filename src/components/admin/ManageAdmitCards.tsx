@@ -100,7 +100,7 @@ export default function ManageAdmitCards() {
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
-                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50"
+                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900"
               >
                 {CLASSES.map(cls => <option key={cls} value={cls}>Class {cls}</option>)}
               </select>
@@ -111,7 +111,7 @@ export default function ManageAdmitCards() {
               <select
                 value={selectedTerm}
                 onChange={(e) => setSelectedTerm(e.target.value)}
-                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50"
+                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900"
               >
                 {EXAM_TERMS.map(term => <option key={term} value={term}>{term}</option>)}
               </select>
@@ -122,7 +122,7 @@ export default function ManageAdmitCards() {
               <select
                 value={selectedRollNo}
                 onChange={(e) => setSelectedRollNo(e.target.value)}
-                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50"
+                className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900"
               >
                 <option value="All">All Students</option>
                 {students.map(s => <option key={s.id} value={s.roll_no}>{s.roll_no}</option>)}
