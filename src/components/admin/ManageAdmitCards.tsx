@@ -176,7 +176,7 @@ export default function ManageAdmitCards() {
                     </div>
 
                     {/* School Logo Right */}
-                    <div className="w-24 h-24 border border-black flex items-center justify-center bg-white rounded-full overflow-hidden p-1">
+                    <div className="w-24 h-24 border border-black flex items-center justify-center bg-white overflow-hidden p-1">
                       <img src="/logo.png" alt="School Logo" className="w-full h-full object-contain" />
                     </div>
                   </div>
