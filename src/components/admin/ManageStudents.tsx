@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { Upload, Download, Plus, Users, Search, RefreshCw, Trash2 } from "lucide-react";
+import { Upload, Download, Plus, Users, Search, RefreshCw, Trash2, Edit } from "lucide-react";
 import * as XLSX from "xlsx";
 
 type Student = {
@@ -272,6 +272,13 @@ export default function ManageStudents() {
                   <td className="px-4 py-3 text-slate-600">{student.guardian_name || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{student.guardian_contact_number || "-"}</td>
                   <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => alert("Edit Student functionality coming soon")}
+                      className="text-blue-500 hover:text-blue-700 p-1 rounded-md hover:bg-blue-50 transition-colors mr-2"
+                      title="Edit"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
                     <button 
                       onClick={() => handleDelete(student.id)}
                       className="text-red-500 hover:text-red-700 p-1 rounded-md hover:bg-red-50 transition-colors"
