@@ -28,11 +28,11 @@ export default function ManageAdmitCards() {
   const [selectedClass, setSelectedClass] = useState<string>("1");
   const [selectedTerm, setSelectedTerm] = useState<string>(EXAM_TERMS[0]);
   const [selectedRollNo, setSelectedRollNo] = useState<string>("All");
-  
+
   const [students, setStudents] = useState<Student[]>([]);
   const [routines, setRoutines] = useState<Routine[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   const fetchStudentsAndRoutine = async () => {
     setLoading(true);
     try {
@@ -56,7 +56,7 @@ export default function ManageAdmitCards() {
 
       if (routineError) throw routineError;
       setRoutines(routineData || []);
-      
+
     } catch (err: any) {
       alert("Error loading data: " + err.message);
     } finally {
@@ -72,8 +72,8 @@ export default function ManageAdmitCards() {
     window.print();
   };
 
-  const filteredStudents = selectedRollNo === "All" 
-    ? students 
+  const filteredStudents = selectedRollNo === "All"
+    ? students
     : students.filter(s => s.roll_no.toString() === selectedRollNo);
 
   // Split routine into two halves for the 2-column layout
@@ -93,7 +93,7 @@ export default function ManageAdmitCards() {
             </h2>
             <p className="text-sm text-slate-500 mt-1">Preview and print admit cards.</p>
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-slate-700">Class:</label>
@@ -141,7 +141,7 @@ export default function ManageAdmitCards() {
             </div>
           </div>
         </div>
-        
+
         {routines.length === 0 && !loading && (
           <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm border border-yellow-200">
             ⚠️ No routine found for this class and term. Please use the <b>Create Routine</b> menu to set it up first.
@@ -155,17 +155,17 @@ export default function ManageAdmitCards() {
           {/* We chunk students by 2 to fit exactly 2 per page */}
           {Array.from({ length: Math.ceil(filteredStudents.length / 2) }).map((_, pageIndex) => (
             <div key={pageIndex} className="page-break-after-always print:h-[297mm] print:w-[210mm] print:box-border print:p-[10mm] flex flex-col justify-between gap-8 bg-slate-100 p-8 my-8 print:bg-white print:my-0 shadow-lg print:shadow-none mx-auto max-w-[210mm]">
-              
+
               {filteredStudents.slice(pageIndex * 2, pageIndex * 2 + 2).map((student, cardIndex) => (
                 <div key={student.id} className="admit-card-container border-2 border-black bg-[#ffebe0] p-4 relative h-[130mm] flex flex-col font-serif" style={{ color: 'black' }}>
-                  
+
                   {/* Header */}
                   <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-3">
                     {/* Saraswati Image Left */}
                     <div className="w-24 h-24 border border-black flex items-center justify-center bg-white rounded-full overflow-hidden p-1">
                       <img src="/saraswati.png" alt="Saraswati" className="w-full h-full object-contain" />
                     </div>
-                    
+
                     <div className="text-center flex-1">
                       <h1 className="text-2xl font-bold tracking-wider mb-1">SHREE HIMALAYA BASIC SCHOOL</h1>
                       <h2 className="text-sm font-semibold mb-1">BHARATPUR-11, JAGRITICHOWK</h2>
@@ -174,7 +174,7 @@ export default function ManageAdmitCards() {
                         ADMIT CARD
                       </div>
                     </div>
-                    
+
                     {/* School Logo Right */}
                     <div className="w-24 h-24 border border-black flex items-center justify-center bg-white rounded-full overflow-hidden p-1">
                       <img src="/logo.png" alt="School Logo" className="w-full h-full object-contain" />
@@ -220,7 +220,7 @@ export default function ManageAdmitCards() {
                       <div className="w-[20%] py-1 border-r border-black">SUBJECT</div>
                       <div className="w-[15%] py-1">INVIGILATOR SIGN</div>
                     </div>
-                    
+
                     {Array.from({ length: Math.max(leftRoutine.length, rightRoutine.length) }).map((_, i) => (
                       <div key={i} className="flex border-b border-black last:border-b-0 text-center flex-1 items-center">
                         <div className="w-[15%] py-1 border-r border-black h-full flex items-center justify-center">{leftRoutine[i]?.exam_date || ""}</div>
