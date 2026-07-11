@@ -9,6 +9,7 @@ type Student = {
   name: string;
   roll_no: number;
   class: string;
+  displayRollNo?: string;
 };
 
 type Routine = {
@@ -41,10 +42,24 @@ export default function ManageAdmitCards() {
         .from("students")
         .select("id, name, roll_no, class")
         .eq("class", selectedClass)
-        .order("roll_no");
+        .order("name");
 
       if (studentsError) throw studentsError;
-      setStudents(studentsData || []);
+
+      const classPrefixMap: Record<string, string> = {
+        "1": "ON", "2": "TW", "3": "TH", "4": "FO", "5": "FI",
+        "6": "SI", "7": "SE", "8": "EI", "Nursery": "NU", "KG": "KG", "ECD": "EC"
+      };
+
+      const formattedStudents = (studentsData || []).map((s: any, index: number) => {
+        const classPrefix = classPrefixMap[s.class] || s.class.substring(0, 2).toUpperCase();
+        return {
+          ...s,
+          displayRollNo: `H${classPrefix}${(index + 1).toString().padStart(3, '0')}`
+        };
+      });
+
+      setStudents(formattedStudents);
 
       // Fetch routine
       const { data: routineData, error: routineError } = await supabase
@@ -74,7 +89,7 @@ export default function ManageAdmitCards() {
 
   const filteredStudents = selectedRollNo === "All"
     ? students
-    : students.filter(s => s.roll_no.toString() === selectedRollNo);
+    : students.filter(s => (s.displayRollNo || s.roll_no.toString()) === selectedRollNo);
 
   // Split routine into two halves for the 2-column layout
   const halfLength = Math.ceil(routines.length / 2);
@@ -125,7 +140,7 @@ export default function ManageAdmitCards() {
                 className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900"
               >
                 <option value="All">All Students</option>
-                {students.map(s => <option key={s.id} value={s.roll_no}>{s.roll_no}</option>)}
+                {students.map(s => <option key={s.id} value={s.displayRollNo || s.roll_no}>{s.displayRollNo || s.roll_no}</option>)}
               </select>
             </div>
 
@@ -200,7 +215,7 @@ export default function ManageAdmitCards() {
                   <div className="flex justify-between mb-2 text-[10px] font-bold items-stretch">
                     <div className="flex w-32">
                       <div className="border border-black px-1 flex items-center justify-center text-center w-12 leading-none">ROLL NO.</div>
-                      <div className="border border-black border-l-0 px-1 py-1 flex-1 flex items-center justify-center bg-white text-xs leading-none">HSE{student.roll_no.toString().padStart(3, '0')}</div>
+                      <div className="border border-black border-l-0 px-1 py-1 flex-1 flex items-center justify-center bg-white text-xs leading-none">{student.displayRollNo || `HSE${student.roll_no.toString().padStart(3, '0')}`}</div>
                     </div>
                     <div className="w-40 flex flex-col text-[8px]">
                       <div className="flex-1 flex border-t border-l border-r border-black">
