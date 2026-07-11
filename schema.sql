@@ -118,3 +118,23 @@ create policy "Enable read access for anon users" on public.attendance for selec
 create policy "Enable insert for anon users" on public.attendance for insert to anon with check (true);
 create policy "Enable update for anon users" on public.attendance for update to anon using (true);
 create policy "Enable delete for anon users" on public.attendance for delete to anon using (true);
+
+-- Create Exam Routines Table
+create table public.exam_routines (
+    id uuid default uuid_generate_v4() primary key,
+    class text not null,
+    exam_term text not null,
+    subject text not null,
+    exam_date text not null,
+    shift text,
+    exam_time text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    unique(class, exam_term, subject)
+);
+
+-- RLS for Exam Routines
+alter table public.exam_routines enable row level security;
+create policy "Enable read access for anon users" on public.exam_routines for select to anon using (true);
+create policy "Enable insert for anon users" on public.exam_routines for insert to anon with check (true);
+create policy "Enable update for anon users" on public.exam_routines for update to anon using (true);
+create policy "Enable delete for anon users" on public.exam_routines for delete to anon using (true);
