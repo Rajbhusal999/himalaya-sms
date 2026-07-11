@@ -9,6 +9,7 @@ import ManageSubjects from "@/components/admin/ManageSubjects";
 import ManageAttendance from "@/components/admin/ManageAttendance";
 import ManageAdmitCards from "@/components/admin/ManageAdmitCards";
 import CreateRoutine from "@/components/admin/CreateRoutine";
+import MarkEntry from "@/components/admin/MarkEntry";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -114,6 +115,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "admit-card") {
       return <ManageAdmitCards />;
+    }
+
+    if (activeTab === "mark-entry") {
+      return <MarkEntry />;
     }
 
     return (
