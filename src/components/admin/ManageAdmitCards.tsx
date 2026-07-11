@@ -157,7 +157,7 @@ export default function ManageAdmitCards() {
             <div key={pageIndex} className="page-break-after-always print:h-[297mm] print:w-[210mm] print:box-border print:p-[10mm] flex flex-col justify-between gap-8 bg-slate-100 p-8 my-8 print:bg-white print:my-0 shadow-lg print:shadow-none mx-auto max-w-[210mm]">
               
               {filteredStudents.slice(pageIndex * 2, pageIndex * 2 + 2).map((student, cardIndex) => (
-                <div key={student.id} className="admit-card-container border-2 border-black bg-[#ffebe0] p-4 relative h-[130mm] flex flex-col font-serif">
+                <div key={student.id} className="admit-card-container border-2 border-black bg-[#ffebe0] text-black p-4 relative h-[130mm] flex flex-col font-serif">
                   
                   {/* Header */}
                   <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-3">
