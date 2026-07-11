@@ -10,6 +10,8 @@ type Subject = {
   subject_code: string;
   class: string | null;
   credit_hour: number | null;
+  has_written?: boolean;
+  has_oral?: boolean;
 };
 
 const CLASSES = ["Nursery", "KG", "ECD", "1", "2", "3", "4", "5", "6", "7", "8"];
@@ -22,7 +24,9 @@ export default function ManageSubjects() {
   const [newSubject, setNewSubject] = useState({
     subject_name: "",
     subject_code: "",
-    credit_hour: ""
+    credit_hour: "",
+    has_written: true,
+    has_oral: true
   });
   const [isAdding, setIsAdding] = useState(false);
 
@@ -57,14 +61,16 @@ export default function ManageSubjects() {
         subject_name: newSubject.subject_name,
         subject_code: newSubject.subject_code,
         class: selectedClass,
-        credit_hour: newSubject.credit_hour ? parseFloat(newSubject.credit_hour) : null
+        credit_hour: newSubject.credit_hour ? parseFloat(newSubject.credit_hour) : null,
+        has_written: newSubject.has_written,
+        has_oral: newSubject.has_oral
       };
 
       const { error } = await supabase.from("subjects").insert([payload]);
       
       if (error) throw error;
       
-      setNewSubject({ subject_name: "", subject_code: "", credit_hour: "" });
+      setNewSubject({ subject_name: "", subject_code: "", credit_hour: "", has_written: true, has_oral: true });
       fetchSubjects(selectedClass);
     } catch (err: any) {
       alert("Error adding subject: " + err.message);
@@ -157,6 +163,27 @@ export default function ManageSubjects() {
                   placeholder="e.g. 4.0"
                 />
               </div>
+
+              <div className="flex items-center gap-4 py-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newSubject.has_written}
+                    onChange={(e) => setNewSubject({...newSubject, has_written: e.target.checked})}
+                    className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-300 rounded"
+                  />
+                  <span className="text-sm font-medium text-slate-700">Written Exam</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newSubject.has_oral}
+                    onChange={(e) => setNewSubject({...newSubject, has_oral: e.target.checked})}
+                    className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-300 rounded"
+                  />
+                  <span className="text-sm font-medium text-slate-700">Oral Exam</span>
+                </label>
+              </div>
               
               <button
                 type="submit"
@@ -187,6 +214,7 @@ export default function ManageSubjects() {
                     <th className="px-6 py-3 font-medium">Subject Name</th>
                     <th className="px-6 py-3 font-medium">Code</th>
                     <th className="px-6 py-3 font-medium">Credit Hour</th>
+                    <th className="px-6 py-3 font-medium text-center">Format</th>
                     <th className="px-6 py-3 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
@@ -209,6 +237,12 @@ export default function ManageSubjects() {
                         </td>
                         <td className="px-6 py-4 text-slate-600 font-medium">
                           {subject.credit_hour ? subject.credit_hour : "-"}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex gap-1 justify-center">
+                            {subject.has_written && <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold">W</span>}
+                            {subject.has_oral && <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold">O</span>}
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button 
