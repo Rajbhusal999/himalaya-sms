@@ -101,3 +101,20 @@ create policy "Enable read access for anon users" on public.teachers for select 
 create policy "Enable insert for anon users" on public.teachers for insert to anon with check (true);
 create policy "Enable update for anon users" on public.teachers for update to anon using (true);
 create policy "Enable delete for anon users" on public.teachers for delete to anon using (true);
+
+-- Create Attendance Table
+create table public.attendance (
+    id uuid default uuid_generate_v4() primary key,
+    student_id uuid references public.students(id) on delete cascade not null,
+    exam_term text not null,
+    attendance_days text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    unique(student_id, exam_term)
+);
+
+-- RLS for Attendance
+alter table public.attendance enable row level security;
+create policy "Enable read access for anon users" on public.attendance for select to anon using (true);
+create policy "Enable insert for anon users" on public.attendance for insert to anon with check (true);
+create policy "Enable update for anon users" on public.attendance for update to anon using (true);
+create policy "Enable delete for anon users" on public.attendance for delete to anon using (true);

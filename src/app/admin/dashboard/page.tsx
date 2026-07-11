@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import ManageStudents from "@/components/admin/ManageStudents";
 import ManageTeachers from "@/components/admin/ManageTeachers";
 import ManageSubjects from "@/components/admin/ManageSubjects";
+import ManageAttendance from "@/components/admin/ManageAttendance";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -99,6 +100,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "subjects") {
       return <ManageSubjects />;
+    }
+
+    if (activeTab === "attendance") {
+      return <ManageAttendance />;
     }
 
     return (
