@@ -28,7 +28,9 @@ create table public.students (
 create table public.subjects (
     id uuid default uuid_generate_v4() primary key,
     subject_name text not null,
-    subject_code text not null unique
+    subject_code text not null,
+    class text,
+    credit_hour numeric(4, 2)
 );
 
 -- Create Marks Table
