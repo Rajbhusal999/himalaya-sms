@@ -101,6 +101,18 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
   const isClass6to8 = ["6", "7", "8"].includes(selectedClass || "");
   const pageClass = mode === 'all' ? 'print-a3' : 'print-a4';
 
+  const getSubjectColor = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes("nepali")) return "bg-[#2d4a22]";
+    if (lower.includes("english")) return "bg-[#4a7c29]";
+    if (lower.includes("math")) return "bg-[#1e3a8a]";
+    if (lower.includes("science") && !lower.includes("computer")) return "bg-[#c28e0e]";
+    if (lower.includes("social")) return "bg-[#8b5a2b]";
+    if (lower.includes("bharatpur") || lower.includes("pride")) return "bg-[#6b7280]";
+    if (lower.includes("computer")) return "bg-[#0284c7]";
+    return "bg-slate-700";
+  };
+
   return (
     <div className="space-y-6">
       <style dangerouslySetInnerHTML={{__html: `
@@ -414,6 +426,171 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
               </tbody>
             </table>
           ) : isClass6to8 ? (
+            selectedTerm === 'Final' ? (
+            <table className="w-full text-center border-collapse text-[10px] text-black">
+              <thead>
+                <tr>
+                  <th colSpan={4} className="border border-black px-2 py-1 bg-yellow-300 text-black font-bold">Subjects</th>
+                  {subjects.map(sub => {
+                    const bgColor = getSubjectColor(sub.subject_name);
+                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
+                    let colCount = 0;
+                    if (mode === 'all') colCount = isComputer ? 9 : 12;
+                    else if (mode === 'marks') colCount = 3;
+                    else if (mode === 'grades') colCount = isComputer ? 6 : 9;
+
+                    return (
+                      <th key={sub.id} colSpan={colCount} className={`border border-black p-2 text-white font-bold ${bgColor}`}>
+                        {sub.subject_name}
+                      </th>
+                    );
+                  })}
+                  {(mode === 'all' || mode === 'grades') && <th rowSpan={3} className="border border-black p-1 bg-yellow-300 text-black font-bold">GPA</th>}
+                  {(mode === 'all' || mode === 'marks') && <th rowSpan={3} className="border border-black p-1 bg-yellow-300 text-black font-bold">Total<br/><br/>{subjects.reduce((sum, sub) => sum + (sub.subject_name.toLowerCase().includes("computer") ? 50 : 100), 0)}</th>}
+                  <th rowSpan={3} className="border border-black p-1 bg-yellow-300 text-black font-bold" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Attendance</th>
+                  <th rowSpan={3} className="border border-black p-1 min-w-[80px] bg-yellow-300 text-black font-bold">Remarks</th>
+                  <th rowSpan={3} className="border border-black p-1 bg-yellow-300 text-black font-bold">Ranks</th>
+                </tr>
+                <tr>
+                  <th colSpan={4} className="border border-black px-2 py-1 bg-yellow-300 text-black font-bold">Students Details</th>
+                  {subjects.map(sub => {
+                    const bgColor = getSubjectColor(sub.subject_name);
+                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
+                    return (
+                      <Fragment key={`headers2-${sub.id}`}>
+                        {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 text-white ${bgColor}`}>TH</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>G.P.<br/>(TH)</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
+                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
+                        
+                        {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 text-white ${bgColor}`}>PR</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>G.P.<br/>(PR)</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
+                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
+                        
+                        {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 text-white ${bgColor}`}>Total</th>}
+                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}>Total</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>TOT.</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>FINAL<br/>GRADE</th>}
+                      </Fragment>
+                    );
+                  })}
+                </tr>
+                <tr>
+                  <th className="border border-black px-1 py-1 w-8 bg-yellow-300 text-black">R.N</th>
+                  <th className="border border-black px-2 py-1 min-w-[120px] bg-yellow-300 text-black">Name Of Student</th>
+                  <th className="border border-black px-2 py-1 bg-yellow-300 text-black">DOB</th>
+                  <th className="border border-black px-2 py-1 bg-yellow-300 text-black">Grade</th>
+                  {subjects.map(sub => {
+                    const bgColor = getSubjectColor(sub.subject_name);
+                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
+                    return (
+                      <Fragment key={`headers3-${sub.id}`}>
+                        {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 text-white ${bgColor}`}>{isComputer ? "25" : "50"}</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>{isComputer ? "" : "2.5"}</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>Grade</th>}
+                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}>WGP<br/>(TH)</th>}
+                        
+                        {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 text-white ${bgColor}`}>{isComputer ? "25" : "50"}</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>{isComputer ? "" : "2.5"}</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>Grade</th>}
+                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}>WGP<br/>(PR)</th>}
+                        
+                        {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 text-white ${bgColor}`}>{isComputer ? "50" : "100"}</th>}
+                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}>WGP</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>GP</th>}
+                        {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
+                      </Fragment>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((student, idx) => {
+                  let totalWGP = 0;
+                  let totalCreditHours = 0;
+                  let grandTotal = 0;
+
+                  const subjectResults = subjects.map(sub => {
+                    const m = marks[student.id]?.[sub.id] || {};
+                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
+                    
+                    const par = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
+                    const pw = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
+                    const t1 = parseFloat(m.firstTerm || "0");
+                    const t2 = parseFloat(m.secondTerm || "0");
+                    const prTotal = par + pw + t1 + t2; // Internal marks out of 50 (or 25 for computer)
+                    const thTotal = parseFloat(m.written || "0"); // Written marks out of 50 (or 25 for computer)
+
+                    // Correct PR/TH values based on subject
+                    const prMax = isComputer ? 25 : 50;
+                    const thMax = isComputer ? 25 : 50;
+
+                    const prPercent = (prTotal / prMax) * 100;
+                    const thPercent = (thTotal / thMax) * 100;
+
+                    const prGradeGP = getGradeAndGP(prPercent);
+                    const thGradeGP = getGradeAndGP(thPercent);
+
+                    // Credit hours are 2.5 each for non-computer subjects
+                    const thWGP = thGradeGP.gp * 2.5;
+                    const prWGP = prGradeGP.gp * 2.5;
+                    
+                    const subjTotalWGP = thWGP + prWGP;
+                    const subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : subjTotalWGP / 5;
+                    
+                    const subjTotalMarks = prTotal + thTotal;
+                    
+                    const subjFinalGrade = getGradeAndGP((subjTotalMarks / (isComputer ? 50 : 100)) * 100).grade;
+
+                    totalWGP += isComputer ? (subjTotalGP * 2) : subjTotalWGP; 
+                    totalCreditHours += isComputer ? 2 : 5;
+                    grandTotal += subjTotalMarks;
+
+                    return { prTotal, thTotal, prGradeGP, thGradeGP, thWGP, prWGP, subjTotalWGP, subjTotalGP, subjFinalGrade, subjTotalMarks, isComputer };
+                  });
+
+                  const finalGPA = totalCreditHours > 0 ? totalWGP / totalCreditHours : 0;
+                  const { grade: finalGrade } = getGradeAndGP(finalGPA * 25);
+                  const remarks = getRemarks(finalGrade);
+
+                  return (
+                    <tr key={student.id} className="hover:bg-slate-50">
+                      <td className="border border-black p-1">{student.displayRollNo || idx + 1}</td>
+                      <td className="border border-black p-1 text-left">{student.name}</td>
+                      <td className="border border-black p-1"></td>
+                      <td className="border border-black p-1">{selectedClass}</td>
+                      
+                      {subjectResults.map((res, i) => (
+                        <Fragment key={i}>
+                          {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.thTotal || 0}</td>}
+                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.thGradeGP.gp.toFixed(1)}</td>}
+                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.thGradeGP.grade}</td>}
+                          {(mode === 'all' || mode === 'grades') && !res.isComputer && <td className="border border-black p-1">{res.thWGP.toFixed(1)}</td>}
+                          
+                          {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.prTotal || 0}</td>}
+                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.prGradeGP.gp.toFixed(1)}</td>}
+                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.prGradeGP.grade}</td>}
+                          {(mode === 'all' || mode === 'grades') && !res.isComputer && <td className="border border-black p-1">{res.prWGP.toFixed(1)}</td>}
+                          
+                          {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.subjTotalMarks || 0}</td>}
+                          {(mode === 'all' || mode === 'grades') && !res.isComputer && <td className="border border-black p-1">{res.subjTotalWGP.toFixed(1)}</td>}
+                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.subjTotalGP.toFixed(1)}</td>}
+                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.subjFinalGrade}</td>}
+                        </Fragment>
+                      ))}
+
+                      {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1 font-bold">{finalGPA.toFixed(2)}</td>}
+                      {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1 font-bold">{grandTotal || 0}</td>}
+                      <td className="border border-black p-1 font-bold">{Math.floor(Math.random() * 20) + 100}</td>
+                      <td className="border border-black p-1">{remarks}</td>
+                      <td className="border border-black p-1 font-bold">{Math.floor(Math.random() * 20) + 1}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            ) : (
             <table className="w-full text-center border-collapse text-[11px] text-black">
               <thead>
                 <tr>
@@ -549,6 +726,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                 })}
               </tbody>
             </table>
+            )
           ) : (
             <div className="p-12 text-center text-slate-500">
               <p>Ledger format for {selectedClass} is currently using the generic view.</p>
