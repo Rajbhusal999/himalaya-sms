@@ -217,8 +217,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                   <th rowSpan={2} className="border border-black px-2 py-1 min-w-[120px] bg-yellow-200">Name Of Students</th>
                   
                   {subjects.map((sub, i) => {
-                    const bgColors = ["bg-orange-200", "bg-yellow-100", "bg-green-200", "bg-blue-200"];
-                    const bgColor = bgColors[i % bgColors.length];
+                    const bgColor = "bg-emerald-200";
                     let colCount = 0;
                     if (mode === 'all') colCount = 6;
                     else if (mode === 'marks') colCount = 4;
@@ -244,8 +243,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                 </tr>
                 <tr>
                   {subjects.map((sub, i) => {
-                    const bgColors = ["bg-orange-200", "bg-yellow-100", "bg-green-200", "bg-blue-200"];
-                    const bgColor = bgColors[i % bgColors.length];
+                    const bgColor = "bg-emerald-200";
                     return (
                       <Fragment key={`headers-${sub.id}`}>
                         {(mode === 'all' || mode === 'marks') && (
@@ -335,8 +333,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                 <tr>
                   <th colSpan={2} className="border border-black px-2 py-1 bg-slate-800 text-white">Subjects</th>
                   {subjects.map((sub, i) => {
-                    const bgColors = ["bg-emerald-500", "bg-rose-400", "bg-sky-500", "bg-amber-500", "bg-fuchsia-500"];
-                    const bgColor = bgColors[i % bgColors.length];
+                    const bgColor = "bg-emerald-500";
                     let colCount = 0;
                     if (mode === 'all') colCount = 6;
                     else if (mode === 'marks') colCount = 2; // obtained, cu
