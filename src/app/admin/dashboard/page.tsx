@@ -10,6 +10,9 @@ import ManageAttendance from "@/components/admin/ManageAttendance";
 import ManageAdmitCards from "@/components/admin/ManageAdmitCards";
 import CreateRoutine from "@/components/admin/CreateRoutine";
 import MarkEntry from "@/components/admin/MarkEntry";
+import MarkLedger from "@/components/admin/MarkLedger";
+import Ledger from "@/components/admin/Ledger";
+import GradeLedger from "@/components/admin/GradeLedger";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -119,6 +122,18 @@ export default function AdminDashboard() {
 
     if (activeTab === "mark-entry") {
       return <MarkEntry />;
+    }
+
+    if (activeTab === "ledger") {
+      return <Ledger />;
+    }
+
+    if (activeTab === "mark-ledger") {
+      return <MarkLedger />;
+    }
+
+    if (activeTab === "grade-ledger") {
+      return <GradeLedger />;
     }
 
     return (
@@ -315,6 +330,17 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab("ledger")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "ledger" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <BookOpen className="w-5 h-5 mr-3" />
+              Ledger
+            </button>
+            <button
+              onClick={() => setActiveTab("mark-ledger")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "mark-ledger" 
                   ? "bg-brand-800 text-white" 
                   : "text-brand-200 hover:bg-brand-900 hover:text-white"
               }`}
