@@ -21,7 +21,7 @@ export default function MarkEntry() {
 
   const [students, setStudents] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
-  const [marks, setMarks] = useState<Record<string, Record<string, { written: string; oral: string }>>>({});
+  const [marks, setMarks] = useState<Record<string, Record<string, { written: string; oral: string; cu?: string; total?: string }>>>({});
   const [loading, setLoading] = useState(false);
 
   // Helper to generate display roll number
@@ -80,17 +80,36 @@ export default function MarkEntry() {
     }
   }, [selectedClass, selectedTerm]);
 
-  const handleMarkChange = (studentId: string, subjectId: string, field: 'written' | 'oral', value: string) => {
+  const handleMarkChange = (studentId: string, subjectId: string, field: 'written' | 'oral' | 'cu' | 'total', value: string) => {
     setMarks(prev => ({
       ...prev,
       [studentId]: {
         ...(prev[studentId] || {}),
         [subjectId]: {
-          ...(prev[studentId]?.[subjectId] || { written: "", oral: "" }),
+          ...(prev[studentId]?.[subjectId] || { written: "", oral: "", cu: "", total: "" }),
           [field]: value
         }
       }
     }));
+  };
+
+  const handleCuChange = (subjectId: string, value: string) => {
+    setMarks(prev => {
+      const newMarks = { ...prev };
+      students.forEach(student => {
+        if (!newMarks[student.id]) {
+          newMarks[student.id] = {};
+        }
+        newMarks[student.id] = {
+          ...newMarks[student.id],
+          [subjectId]: {
+            ...(newMarks[student.id][subjectId] || { written: "", oral: "", cu: "", total: "" }),
+            cu: value
+          }
+        };
+      });
+      return newMarks;
+    });
   };
 
   const calculateTotal = (studentId: string) => {
@@ -98,8 +117,13 @@ export default function MarkEntry() {
     if (!studentMarks) return 0;
 
     let total = 0;
+    const isClass1to3 = ["1", "2", "3"].includes(selectedClass || "");
     Object.values(studentMarks).forEach((m: any) => {
-      total += parseFloat(m.written || "0") + parseFloat(m.oral || "0");
+      if (isClass1to3) {
+        total += parseFloat(m.total || "0");
+      } else {
+        total += parseFloat(m.written || "0") + parseFloat(m.oral || "0");
+      }
     });
     return total;
   };
@@ -211,14 +235,20 @@ export default function MarkEntry() {
                   <tr>
                     <th rowSpan={2} className="border border-black px-2 py-2 w-24">Symbol No.</th>
                     <th rowSpan={2} className="border border-black px-4 py-2 min-w-[150px]">Student Name</th>
-                    <th colSpan={subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)} className="border border-black px-4 py-1">Subject</th>
+                    <th colSpan={["1", "2", "3"].includes(selectedClass || "") ? subjects.length * 2 : subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)} className="border border-black px-4 py-1">Subject</th>
                     <th rowSpan={2} className="border border-black px-4 py-2 w-20">Total</th>
                   </tr>
                   <tr>
                     {subjects.map(sub => {
                       const columns = [];
-                      if (sub.has_written) columns.push(<th key={`${sub.id}-w`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">Written</th>);
-                      if (sub.has_oral) columns.push(<th key={`${sub.id}-o`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">Oral</th>);
+                      const isClass1to3 = ["1", "2", "3"].includes(selectedClass || "");
+                      if (isClass1to3) {
+                        columns.push(<th key={`${sub.id}-cu`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">मुल्यांकन गरिएका सि.उ.</th>);
+                        columns.push(<th key={`${sub.id}-total`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">जम्मा अंक</th>);
+                      } else {
+                        if (sub.has_written) columns.push(<th key={`${sub.id}-w`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">Written</th>);
+                        if (sub.has_oral) columns.push(<th key={`${sub.id}-o`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">Oral</th>);
+                      }
                       return (
                         <th key={sub.id} colSpan={columns.length} className="border border-black p-0">
                           <div className="border-b border-black py-1 font-bold">{sub.subject_name}</div>
@@ -239,30 +269,56 @@ export default function MarkEntry() {
                       <td className="border border-black px-2 py-1 text-left font-medium whitespace-nowrap">{student.name}</td>
                       
                       {subjects.map(sub => {
+                        const isClass1to3 = ["1", "2", "3"].includes(selectedClass || "");
                         return (
-                          <td key={sub.id} colSpan={((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0))} className="border border-black p-0">
+                          <td key={sub.id} colSpan={isClass1to3 ? 2 : ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0))} className="border border-black p-0">
                             <div className="flex h-full">
-                              {sub.has_written && (
-                                <div className="flex-1 border-r border-black last:border-r-0">
-                                  <input 
-                                    type="number"
-                                    min="0"
-                                    value={marks[student.id]?.[sub.id]?.written || ""}
-                                    onChange={(e) => handleMarkChange(student.id, sub.id, 'written', e.target.value)}
-                                    className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
-                                  />
-                                </div>
-                              )}
-                              {sub.has_oral && (
-                                <div className="flex-1 last:border-r-0">
-                                  <input 
-                                    type="number"
-                                    min="0"
-                                    value={marks[student.id]?.[sub.id]?.oral || ""}
-                                    onChange={(e) => handleMarkChange(student.id, sub.id, 'oral', e.target.value)}
-                                    className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
-                                  />
-                                </div>
+                              {isClass1to3 ? (
+                                <>
+                                  <div className="flex-1 border-r border-black last:border-r-0">
+                                    <input 
+                                      type="number"
+                                      min="0"
+                                      value={marks[student.id]?.[sub.id]?.cu || ""}
+                                      onChange={(e) => handleCuChange(sub.id, e.target.value)}
+                                      className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
+                                    />
+                                  </div>
+                                  <div className="flex-1 last:border-r-0">
+                                    <input 
+                                      type="number"
+                                      min="0"
+                                      value={marks[student.id]?.[sub.id]?.total || ""}
+                                      onChange={(e) => handleMarkChange(student.id, sub.id, 'total', e.target.value)}
+                                      className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
+                                    />
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  {sub.has_written && (
+                                    <div className="flex-1 border-r border-black last:border-r-0">
+                                      <input 
+                                        type="number"
+                                        min="0"
+                                        value={marks[student.id]?.[sub.id]?.written || ""}
+                                        onChange={(e) => handleMarkChange(student.id, sub.id, 'written', e.target.value)}
+                                        className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
+                                      />
+                                    </div>
+                                  )}
+                                  {sub.has_oral && (
+                                    <div className="flex-1 last:border-r-0">
+                                      <input 
+                                        type="number"
+                                        min="0"
+                                        value={marks[student.id]?.[sub.id]?.oral || ""}
+                                        onChange={(e) => handleMarkChange(student.id, sub.id, 'oral', e.target.value)}
+                                        className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
+                                      />
+                                    </div>
+                                  )}
+                                </>
                               )}
                             </div>
                           </td>
@@ -276,7 +332,7 @@ export default function MarkEntry() {
                   ))}
                   {students.length === 0 && (
                     <tr>
-                      <td colSpan={subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0) + 3} className="border border-black px-4 py-8 text-center text-slate-500">
+                      <td colSpan={(["1", "2", "3"].includes(selectedClass || "") ? subjects.length * 2 : subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)) + 3} className="border border-black px-4 py-8 text-center text-slate-500">
                         No students found in this class.
                       </td>
                     </tr>
