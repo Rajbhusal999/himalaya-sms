@@ -142,7 +142,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
           <select
             value={selectedClass || ""}
             onChange={(e) => setSelectedClass(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500"
+            className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 bg-white text-slate-900"
           >
             <option value="" disabled>Select Class</option>
             {CATEGORIES.flatMap(c => c.classes).map(cls => (
@@ -153,7 +153,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
           <select
             value={selectedTerm}
             onChange={(e) => setSelectedTerm(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500"
+            className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 bg-white text-slate-900"
           >
             {EXAM_TERMS.map(term => <option key={term} value={term}>{term.toUpperCase()} EXAMINATION</option>)}
           </select>
