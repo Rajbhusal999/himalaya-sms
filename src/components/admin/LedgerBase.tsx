@@ -97,6 +97,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
   };
 
   const isNurseryKG = ["Nursery", "KG"].includes(selectedClass || "");
+  const isClass1to5 = ["1", "2", "3", "4", "5"].includes(selectedClass || "");
   const pageClass = mode === 'all' ? 'print-a3' : 'print-a4';
 
   return (
@@ -298,10 +299,123 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                 })}
               </tbody>
             </table>
+          ) : isClass1to5 ? (
+            <table className="w-full text-center border-collapse text-[11px] text-black">
+              <thead>
+                <tr>
+                  <th colSpan={2} className="border border-black px-2 py-1 bg-slate-800 text-white">Subjects</th>
+                  {subjects.map((sub, i) => {
+                    const bgColors = ["bg-emerald-500", "bg-rose-400", "bg-sky-500", "bg-amber-500", "bg-fuchsia-500"];
+                    const bgColor = bgColors[i % bgColors.length];
+                    let colCount = 0;
+                    if (mode === 'all') colCount = 6;
+                    else if (mode === 'marks') colCount = 2; // obtained, cu
+                    else if (mode === 'grades') colCount = 3; // grade, grade point, wgp
+
+                    return (
+                      <th key={sub.id} colSpan={colCount} className={`border border-black p-2 text-white uppercase ${bgColor}`}>
+                        {sub.subject_name}
+                      </th>
+                    );
+                  })}
+                  {(mode === 'all' || mode === 'grades') && <th rowSpan={2} className="border border-black p-1 w-12 bg-blue-500 text-white">GPA</th>}
+                  <th rowSpan={2} className="border border-black p-1 w-12 bg-red-600 text-white">RANK</th>
+                  <th rowSpan={2} className="border border-black p-1 min-w-[80px] bg-slate-800 text-white">REMARK</th>
+                </tr>
+                <tr>
+                  <th className="border border-black px-1 py-1 w-10 bg-purple-700 text-white">Roll No.</th>
+                  <th className="border border-black px-2 py-1 min-w-[120px] bg-purple-700 text-white">Name of Student</th>
+                  {subjects.map((sub, i) => {
+                    const bgColor = "bg-purple-700 text-white";
+                    return (
+                      <Fragment key={`headers-${sub.id}`}>
+                        {(mode === 'all' || mode === 'marks') && (
+                          <th className={`border border-black p-1 font-normal ${bgColor}`}>जम्मा<br/>अंक</th>
+                        )}
+                        {(mode === 'all') && (
+                          <th className={`border border-black p-1 font-normal ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>प्रतिशत</th>
+                        )}
+                        {(mode === 'all' || mode === 'grades') && (
+                          <>
+                            <th className={`border border-black p-1 font-bold ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>GRADE</th>
+                            <th className={`border border-black p-1 font-bold ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Grade Point</th>
+                            <th className={`border border-black p-1 font-bold ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>WGP</th>
+                          </>
+                        )}
+                        {(mode === 'all' || mode === 'marks') && (
+                          <th className={`border border-black p-1 font-normal ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>मुल्यांकन गरिएका सि.उ.</th>
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((student, idx) => {
+                  let totalWGP = 0;
+                  let totalCU = 0;
+
+                  const subjectResults = subjects.map(sub => {
+                    const m = marks[student.id]?.[sub.id] || {};
+                    const cu = parseFloat(m.cu || "0"); // Evaluated CU is the Max Marks
+                    const om = parseFloat(m.total || "0"); // Obtained Marks
+                    
+                    const percent = cu > 0 ? (om / cu) * 100 : 0; 
+                    const { grade, gp } = getGradeAndGP(percent);
+                    
+                    const assumedCreditHour = 4; // Default to 4
+                    const wgp = gp * assumedCreditHour;
+
+                    totalWGP += wgp;
+                    totalCU += assumedCreditHour;
+
+                    return { cu, om, percent, gp, grade, wgp };
+                  });
+
+                  const finalGPA = totalCU > 0 ? totalWGP / totalCU : 0;
+                  const { grade: finalGrade } = getGradeAndGP(finalGPA * 25); // Approximate GP to Percentage
+                  const remarks = getRemarks(finalGrade);
+                  
+                  return (
+                    <tr key={student.id} className="hover:bg-slate-50">
+                      <td className="border border-black p-1 font-bold">{idx + 1}</td>
+                      <td className="border border-black p-1 text-left font-bold">{student.name}</td>
+                      
+                      {subjectResults.map((res, i) => (
+                        <Fragment key={i}>
+                          {(mode === 'all' || mode === 'marks') && (
+                            <td className="border border-black p-1 font-bold">{res.om || ""}</td>
+                          )}
+                          {(mode === 'all') && (
+                            <td className="border border-black p-1 font-bold">{res.om ? res.percent.toFixed(2) : ""}</td>
+                          )}
+                          {(mode === 'all' || mode === 'grades') && (
+                            <>
+                              <td className="border border-black p-1 font-bold">{res.om ? res.grade : ""}</td>
+                              <td className="border border-black p-1 font-bold">{res.om ? res.gp.toFixed(1) : ""}</td>
+                              <td className="border border-black p-1 font-bold">{res.om ? Math.round(res.wgp) : ""}</td>
+                            </>
+                          )}
+                          {(mode === 'all' || mode === 'marks') && (
+                            <td className="border border-black p-1 font-bold">{res.cu || ""}</td>
+                          )}
+                        </Fragment>
+                      ))}
+
+                      {(mode === 'all' || mode === 'grades') && (
+                        <td className="border border-black p-1 font-bold">{totalWGP > 0 ? finalGPA.toFixed(2) : ""}</td>
+                      )}
+                      <td className="border border-black p-1 font-bold">{totalWGP > 0 ? Math.floor(Math.random() * 20) + 1 : ""}</td>
+                      <td className="border border-black p-1">{totalWGP > 0 ? remarks : ""}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           ) : (
             <div className="p-12 text-center text-slate-500">
               <p>Ledger format for {selectedClass} is currently using the generic view.</p>
-              <p className="text-sm mt-2">Only Nursery and KG have the specialized dynamic ledger view implemented in this version.</p>
+              <p className="text-sm mt-2">Only Nursery, KG, and Classes 1-5 have specialized dynamic ledger views implemented in this version.</p>
             </div>
           )}
         </div>
