@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { getGradeAndGP, getRemarks } from "@/lib/grading";
 import * as XLSX from "xlsx";
@@ -165,7 +165,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
       ) : students.length > 0 ? (
         <div className={`print-area ${pageClass} bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto`} ref={printRef}>
           {/* Header for Print */}
-          <div className="p-4 text-center border-b border-black">
+          <div className="p-4 text-center border-b border-black text-black">
             <h1 className="text-2xl font-bold uppercase">Shree Himalaya Basic School (1-8)</h1>
             <h2 className="text-lg font-medium">Bharatpur-11, Chitwan</h2>
             <h3 className="text-md font-medium">ESTD: 2040 B.S</h3>
@@ -214,7 +214,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     const bgColors = ["bg-orange-200", "bg-yellow-100", "bg-green-200", "bg-blue-200"];
                     const bgColor = bgColors[i % bgColors.length];
                     return (
-                      <optgroup key={`headers-${sub.id}`} className="contents">
+                      <Fragment key={`headers-${sub.id}`}>
                         {(mode === 'all' || mode === 'marks') && (
                           <>
                             <th className={`border border-black p-1 font-normal ${bgColor}`}>RW<br/><b>50</b></th>
@@ -229,7 +229,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                             <th className={`border border-black p-1 font-bold ${bgColor}`}>Grade</th>
                           </>
                         )}
-                      </optgroup>
+                      </Fragment>
                     );
                   })}
                 </tr>
@@ -259,7 +259,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                       <td className="border border-black p-1 text-left">{student.name}</td>
                       
                       {subjectResults.map((res, i) => (
-                        <optgroup key={i} className="contents">
+                        <Fragment key={i}>
                           {(mode === 'all' || mode === 'marks') && (
                             <>
                               <td className="border border-black p-1">{res.rw}</td>
@@ -274,7 +274,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                               <td className="border border-black p-1 font-bold">{res.grade}</td>
                             </>
                           )}
-                        </optgroup>
+                        </Fragment>
                       ))}
 
                       {(mode === 'all' || mode === 'marks') && (
