@@ -17,11 +17,12 @@ const EXAM_TERMS = ["First Term", "Second Term", "Final"];
 export default function MarkEntry() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<string>(EXAM_TERMS[0]);
 
   const [students, setStudents] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
-  const [marks, setMarks] = useState<Record<string, Record<string, { written: string; oral: string; cu?: string; total?: string }>>>({});
+  const [marks, setMarks] = useState<Record<string, Record<string, { written?: string; oral?: string; cu?: string; total?: string; attendance?: string; activity?: string; project16?: string; project20?: string; termExam?: string; firstTerm?: string; secondTerm?: string; writtenFinal?: string; }>>>({});
   const [loading, setLoading] = useState(false);
 
   // Helper to generate display roll number
@@ -60,8 +61,13 @@ export default function MarkEntry() {
         .eq("class", selectedClass)
         .order("subject_name");
 
-      if (subjectsError) throw subjectsError;
-      setSubjects(subjectsData || []);
+      const subjectsList = subjectsData || [];
+      setSubjects(subjectsList);
+      if (["6", "7", "8"].includes(selectedClass) && subjectsList.length > 0) {
+        setSelectedSubject(subjectsList[0].id);
+      } else {
+        setSelectedSubject(null);
+      }
 
       // In a real application, you would also fetch existing marks for this term and class to populate state.
       // For now we just reset the local state.
@@ -80,7 +86,7 @@ export default function MarkEntry() {
     }
   }, [selectedClass, selectedTerm]);
 
-  const handleMarkChange = (studentId: string, subjectId: string, field: 'written' | 'oral' | 'cu' | 'total', value: string) => {
+  const handleMarkChange = (studentId: string, subjectId: string, field: string, value: string) => {
     setMarks(prev => ({
       ...prev,
       [studentId]: {
@@ -204,6 +210,16 @@ export default function MarkEntry() {
             </div>
             
             <div className="flex items-center gap-4">
+              {["6", "7", "8"].includes(selectedClass || "") && (
+                <select
+                  value={selectedSubject || ""}
+                  onChange={(e) => setSelectedSubject(e.target.value)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900 font-medium"
+                >
+                  <option value="" disabled>Select Subject</option>
+                  {subjects.map(s => <option key={s.id} value={s.id}>{s.subject_name}</option>)}
+                </select>
+              )}
               <select
                 value={selectedTerm}
                 onChange={(e) => setSelectedTerm(e.target.value)}
@@ -228,6 +244,117 @@ export default function MarkEntry() {
             <div className="flex justify-center items-center h-48">
               <RefreshCw className="w-8 h-8 text-brand-600 animate-spin" />
             </div>
+          ) : ["6", "7", "8"].includes(selectedClass || "") ? (
+            (() => {
+              const activeSubject = subjects.find(s => s.id === selectedSubject);
+              if (!activeSubject) return <div className="text-center py-8">Please select a subject.</div>;
+              
+              const isFinal = selectedTerm === "Final";
+              
+              return (
+                <div className="overflow-x-auto border border-black max-w-full">
+                  <div className="font-bold text-center border-b border-black py-2 bg-slate-50">विषय : {activeSubject.subject_name}</div>
+                  <table className="w-full text-center border-collapse text-sm text-black">
+                    <thead>
+                      <tr>
+                        <th rowSpan={2} className="border border-black px-2 py-2 w-16">क्र.सं.</th>
+                        <th rowSpan={2} className="border border-black px-4 py-2 min-w-[200px]">विद्यार्थीको नाम</th>
+                        <th colSpan={3} className="border border-black px-2 py-1">सहभागिता</th>
+                        <th colSpan={3} className="border border-black px-2 py-1">परियोजना / प्रयोगात्मक</th>
+                        {isFinal ? (
+                          <>
+                            <th colSpan={2} className="border border-black px-2 py-1">त्रैमासिक परीक्षा</th>
+                            <th rowSpan={2} className="border border-black px-2 py-1 w-16">जम्मा ५०</th>
+                            <th rowSpan={2} className="border border-black px-2 py-1 w-16">लिखित ५०</th>
+                          </>
+                        ) : (
+                          <>
+                            <th rowSpan={2} className="border border-black px-2 py-1 w-24">त्रैमासिक परीक्षा (१०)</th>
+                            <th rowSpan={2} className="border border-black px-2 py-1 w-16">जम्मा ५०</th>
+                          </>
+                        )}
+                      </tr>
+                      <tr>
+                        <th className="border border-black px-2 py-1 font-normal text-xs w-16">हाजिरी (२)</th>
+                        <th className="border border-black px-2 py-1 font-normal text-xs w-16">सक्रियता (२)</th>
+                        <th className="border border-black px-2 py-1 font-normal text-xs w-16">जम्मा (४)</th>
+                        <th className="border border-black px-2 py-1 font-normal text-xs w-16">१६</th>
+                        <th className="border border-black px-2 py-1 font-normal text-xs w-16">२०</th>
+                        <th className="border border-black px-2 py-1 font-normal text-xs w-16">जम्मा (३६)</th>
+                        {isFinal && (
+                          <>
+                            <th className="border border-black px-2 py-1 font-normal text-xs w-16">प्र. त्रै (५)</th>
+                            <th className="border border-black px-2 py-1 font-normal text-xs w-16">द्वि. त्रै. (५)</th>
+                          </>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {students.map((student, idx) => {
+                        const m = marks[student.id]?.[activeSubject.id] || {};
+                        const pTotalNum = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
+                        const projTotalNum = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
+                        const pTotal = pTotalNum || "";
+                        const projTotal = projTotalNum || "";
+                        const subTotal50 = isFinal 
+                          ? ((pTotalNum + projTotalNum + parseFloat(m.firstTerm || "0") + parseFloat(m.secondTerm || "0")) || "")
+                          : ((pTotalNum + projTotalNum + parseFloat(m.termExam || "0")) || "");
+                          
+                        return (
+                          <tr key={student.id} className="hover:bg-slate-50">
+                            <td className="border border-black px-2 py-1">{idx + 1}</td>
+                            <td className="border border-black px-2 py-1 text-left font-medium">{student.name}</td>
+                            
+                            <td className="border border-black p-0">
+                              <input type="number" min="0" max="2" value={m.attendance || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'attendance', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
+                            </td>
+                            <td className="border border-black p-0">
+                              <input type="number" min="0" max="2" value={m.activity || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'activity', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
+                            </td>
+                            <td className="border border-black p-1 bg-slate-50 font-medium">{pTotal}</td>
+                            
+                            <td className="border border-black p-0">
+                              <input type="number" min="0" max="16" value={m.project16 || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'project16', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
+                            </td>
+                            <td className="border border-black p-0">
+                              <input type="number" min="0" max="20" value={m.project20 || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'project20', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
+                            </td>
+                            <td className="border border-black p-1 bg-slate-50 font-medium">{projTotal}</td>
+                            
+                            {isFinal ? (
+                              <>
+                                <td className="border border-black p-0">
+                                  <input type="number" min="0" max="5" value={m.firstTerm || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'firstTerm', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
+                                </td>
+                                <td className="border border-black p-0">
+                                  <input type="number" min="0" max="5" value={m.secondTerm || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'secondTerm', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
+                                </td>
+                                <td className="border border-black p-1 bg-slate-50 font-bold">{subTotal50}</td>
+                                <td className="border border-black p-0">
+                                  <input type="number" min="0" max="50" value={m.writtenFinal || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'writtenFinal', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none font-bold text-brand-700" />
+                                </td>
+                              </>
+                            ) : (
+                              <>
+                                <td className="border border-black p-0">
+                                  <input type="number" min="0" max="10" value={m.termExam || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'termExam', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
+                                </td>
+                                <td className="border border-black p-1 bg-slate-50 font-bold text-brand-700">{subTotal50}</td>
+                              </>
+                            )}
+                          </tr>
+                        );
+                      })}
+                      {students.length === 0 && (
+                        <tr>
+                          <td colSpan={12} className="border border-black px-4 py-8 text-center text-slate-500">No students found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()
           ) : (
             <div className="overflow-x-auto border border-black max-w-full">
               <table className="w-full text-center border-collapse text-sm text-black">
