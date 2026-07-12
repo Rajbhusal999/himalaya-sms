@@ -67,19 +67,11 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
       if (subjectsError) throw subjectsError;
       setSubjects(subjectsData || []);
 
-      // Mock Marks Data for Nursery/KG based on standard pattern
-      // In a real app, this comes from Supabase marks table.
-      const mockMarks: any = {};
-      formattedStudents.forEach(student => {
-        mockMarks[student.id] = {};
-        (subjectsData || []).forEach(sub => {
-          // Generate random high marks for demo
-          const rw = Math.floor(Math.random() * 20) + 30; // 30-50
-          const ls = Math.floor(Math.random() * 20) + 30; // 30-50
-          mockMarks[student.id][sub.id] = { written: rw.toString(), oral: ls.toString() };
-        });
-      });
-      setMarks(mockMarks);
+      // Load real marks from localStorage (saved via MarkEntry)
+      // In a production app, this would be fetched from Supabase marks table.
+      const key = `marks_${selectedClass}_${selectedTerm}_${selectedYear}`;
+      const savedMarks = JSON.parse(localStorage.getItem(key) || "{}");
+      setMarks(savedMarks);
 
     } catch (err: any) {
       alert("Error loading data: " + err.message);

@@ -85,6 +85,13 @@ export default function MarkEntry() {
   useEffect(() => {
     if (selectedClass) {
       loadData();
+      const key = `marks_${selectedClass}_${selectedTerm}_${selectedYear}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        setMarks(JSON.parse(saved));
+      } else {
+        setMarks({});
+      }
     }
   }, [selectedClass, selectedTerm, selectedYear]);
 
@@ -137,8 +144,14 @@ export default function MarkEntry() {
   };
 
   const handleSaveMarks = async () => {
-    // Here you would normally push the marks dictionary to Supabase.
-    alert("Marks would be saved to database!");
+    try {
+      const key = `marks_${selectedClass}_${selectedTerm}_${selectedYear}`;
+      localStorage.setItem(key, JSON.stringify(marks));
+      alert("Marks saved successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save marks.");
+    }
   };
 
   return (
