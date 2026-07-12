@@ -164,26 +164,28 @@ export default function ManageSubjects() {
                 />
               </div>
 
-              <div className="flex items-center gap-4 py-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={newSubject.has_written}
-                    onChange={(e) => setNewSubject({...newSubject, has_written: e.target.checked})}
-                    className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-300 rounded"
-                  />
-                  <span className="text-sm font-medium text-slate-700">Written Exam</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={newSubject.has_oral}
-                    onChange={(e) => setNewSubject({...newSubject, has_oral: e.target.checked})}
-                    className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-300 rounded"
-                  />
-                  <span className="text-sm font-medium text-slate-700">Oral Exam</span>
-                </label>
-              </div>
+              {["Nursery", "KG"].includes(selectedClass) && (
+                <div className="flex items-center gap-4 py-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newSubject.has_written}
+                      onChange={(e) => setNewSubject({...newSubject, has_written: e.target.checked})}
+                      className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-300 rounded"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Written Exam</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newSubject.has_oral}
+                      onChange={(e) => setNewSubject({...newSubject, has_oral: e.target.checked})}
+                      className="w-4 h-4 text-brand-600 focus:ring-brand-500 border-slate-300 rounded"
+                    />
+                    <span className="text-sm font-medium text-slate-700">Oral Exam</span>
+                  </label>
+                </div>
+              )}
               
               <button
                 type="submit"
@@ -214,14 +216,14 @@ export default function ManageSubjects() {
                     <th className="px-6 py-3 font-medium">Subject Name</th>
                     <th className="px-6 py-3 font-medium">Code</th>
                     <th className="px-6 py-3 font-medium">Credit Hour</th>
-                    <th className="px-6 py-3 font-medium text-center">Format</th>
+                    {["Nursery", "KG"].includes(selectedClass) && <th className="px-6 py-3 font-medium text-center">Format</th>}
                     <th className="px-6 py-3 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {loading ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center">
+                      <td colSpan={["Nursery", "KG"].includes(selectedClass) ? 5 : 4} className="px-6 py-12 text-center">
                         <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-600"></div>
                         <p className="mt-2 text-slate-500">Loading subjects...</p>
                       </td>
@@ -238,12 +240,14 @@ export default function ManageSubjects() {
                         <td className="px-6 py-4 text-slate-600 font-medium">
                           {subject.credit_hour ? subject.credit_hour : "-"}
                         </td>
-                        <td className="px-6 py-4 text-center">
-                          <div className="flex gap-1 justify-center">
-                            {subject.has_written && <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold">W</span>}
-                            {subject.has_oral && <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold">O</span>}
-                          </div>
-                        </td>
+                        {["Nursery", "KG"].includes(selectedClass) && (
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex gap-1 justify-center">
+                              {subject.has_written && <span className="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold">W</span>}
+                              {subject.has_oral && <span className="bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full font-bold">O</span>}
+                            </div>
+                          </td>
+                        )}
                         <td className="px-6 py-4 text-right">
                           <button 
                             onClick={() => handleDelete(subject.id)}
@@ -257,7 +261,7 @@ export default function ManageSubjects() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                      <td colSpan={["Nursery", "KG"].includes(selectedClass) ? 5 : 4} className="px-6 py-12 text-center text-slate-500">
                         No subjects found for Class {selectedClass}. 
                         <br />Use the form to add some.
                       </td>
