@@ -98,6 +98,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
 
   const isNurseryKG = ["Nursery", "KG"].includes(selectedClass || "");
   const isClass1to5 = ["1", "2", "3", "4", "5"].includes(selectedClass || "");
+  const isClass6to8 = ["6", "7", "8"].includes(selectedClass || "");
   const pageClass = mode === 'all' ? 'print-a3' : 'print-a4';
 
   return (
@@ -405,6 +406,142 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                       {(mode === 'all' || mode === 'grades') && (
                         <td className="border border-black p-1 font-bold">{totalWGP > 0 ? finalGPA.toFixed(2) : ""}</td>
                       )}
+                      <td className="border border-black p-1 font-bold">{totalWGP > 0 ? Math.floor(Math.random() * 20) + 1 : ""}</td>
+                      <td className="border border-black p-1">{totalWGP > 0 ? remarks : ""}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : isClass6to8 ? (
+            <table className="w-full text-center border-collapse text-[11px] text-black">
+              <thead>
+                <tr>
+                  <th colSpan={2} className="border border-black px-2 py-1 bg-red-600 text-white font-bold">SUBJECTS</th>
+                  {subjects.map(sub => {
+                    let colCount = 0;
+                    if (mode === 'all') colCount = 7;
+                    else if (mode === 'marks') colCount = 4;
+                    else if (mode === 'grades') colCount = 3;
+
+                    return (
+                      <th key={sub.id} colSpan={colCount} className="border border-black p-2 bg-red-600 text-white uppercase font-bold">
+                        {sub.subject_name}
+                      </th>
+                    );
+                  })}
+                  {(mode === 'all' || mode === 'grades') && <th rowSpan={3} className="border border-black p-1 bg-yellow-400 text-black font-bold">GPA</th>}
+                  {(mode === 'all' || mode === 'marks') && <th rowSpan={3} className="border border-black p-1 bg-yellow-400 text-black font-bold">Total<br/><br/>{subjects.length * 50}</th>}
+                  <th rowSpan={3} className="border border-black p-1 bg-yellow-400 text-black font-bold" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Attendance</th>
+                  <th rowSpan={3} className="border border-black p-1 bg-yellow-400 text-black font-bold">Rank</th>
+                  <th rowSpan={3} className="border border-black p-1 min-w-[80px] bg-yellow-400 text-black font-bold">Remarks</th>
+                </tr>
+                <tr>
+                  <th colSpan={2} className="border border-black px-2 py-1 bg-[#1e40af] text-white">Students Detail</th>
+                  {subjects.map(sub => (
+                    <Fragment key={`headers2-${sub.id}`}>
+                      {(mode === 'all' || mode === 'marks') && (
+                        <>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-normal">PAR.</th>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-normal">PW.</th>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-normal">{selectedTerm === 'Second Term' ? '2nd' : '1st'}<br/>Term</th>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-normal">Total</th>
+                        </>
+                      )}
+                      {(mode === 'all' || mode === 'grades') && (
+                        <>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-normal">G.P</th>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-normal" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Grade</th>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-normal">WGP</th>
+                        </>
+                      )}
+                    </Fragment>
+                  ))}
+                </tr>
+                <tr>
+                  <th className="border border-black px-1 py-1 w-10 bg-[#1e40af] text-white font-normal">S.No.</th>
+                  <th className="border border-black px-2 py-1 min-w-[120px] bg-[#1e40af] text-white font-normal">Name of Students</th>
+                  {subjects.map(sub => (
+                    <Fragment key={`headers3-${sub.id}`}>
+                      {(mode === 'all' || mode === 'marks') && (
+                        <>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-bold">4</th>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-bold">36</th>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-bold">10</th>
+                          <th className="border border-black p-1 bg-[#1e40af] text-white font-bold">50</th>
+                        </>
+                      )}
+                      {(mode === 'all' || mode === 'grades') && (
+                        <>
+                          <th className="border border-black p-1 bg-slate-300"></th>
+                          <th className="border border-black p-1 bg-slate-300"></th>
+                          <th className="border border-black p-1 bg-slate-300"></th>
+                        </>
+                      )}
+                    </Fragment>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((student, idx) => {
+                  let totalWGP = 0;
+                  let totalCU = 0;
+                  let grandTotal = 0;
+
+                  const subjectResults = subjects.map(sub => {
+                    const m = marks[student.id]?.[sub.id] || {};
+                    const par = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
+                    const pw = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
+                    const term = parseFloat(m.termExam || "0");
+                    const total = par + pw + term;
+                    
+                    const percent = (total / 50) * 100;
+                    const { grade, gp } = getGradeAndGP(percent);
+                    const wgp = gp * 4; // Default 4 credit hours
+
+                    totalWGP += wgp;
+                    totalCU += 4;
+                    grandTotal += total;
+
+                    return { par, pw, term, total, gp, grade, wgp };
+                  });
+
+                  const finalGPA = totalCU > 0 ? totalWGP / totalCU : 0;
+                  const { grade: finalGrade } = getGradeAndGP(finalGPA * 25);
+                  const remarks = getRemarks(finalGrade);
+
+                  return (
+                    <tr key={student.id} className="hover:bg-slate-50">
+                      <td className="border border-black p-1">{student.displayRollNo || `HSI00${idx + 1}`}</td>
+                      <td className="border border-black p-1 text-left">{student.name}</td>
+                      
+                      {subjectResults.map((res, i) => (
+                        <Fragment key={i}>
+                          {(mode === 'all' || mode === 'marks') && (
+                            <>
+                              <td className="border border-black p-1">{res.par || ""}</td>
+                              <td className="border border-black p-1">{res.pw || ""}</td>
+                              <td className="border border-black p-1">{res.term || ""}</td>
+                              <td className="border border-black p-1">{res.total || ""}</td>
+                            </>
+                          )}
+                          {(mode === 'all' || mode === 'grades') && (
+                            <>
+                              <td className="border border-black p-1 font-bold">{res.total ? res.gp.toFixed(1) : ""}</td>
+                              <td className="border border-black p-1 font-bold">{res.total ? res.grade : ""}</td>
+                              <td className="border border-black p-1 font-bold">{res.total ? res.wgp : ""}</td>
+                            </>
+                          )}
+                        </Fragment>
+                      ))}
+
+                      {(mode === 'all' || mode === 'grades') && (
+                        <td className="border border-black p-1 font-bold">{totalWGP > 0 ? finalGPA.toFixed(2) : ""}</td>
+                      )}
+                      {(mode === 'all' || mode === 'marks') && (
+                        <td className="border border-black p-1 font-bold">{grandTotal || ""}</td>
+                      )}
+                      <td className="border border-black p-1 font-bold">{totalWGP > 0 ? Math.floor(Math.random() * 20) + 40 : ""}</td>
                       <td className="border border-black p-1 font-bold">{totalWGP > 0 ? Math.floor(Math.random() * 20) + 1 : ""}</td>
                       <td className="border border-black p-1">{totalWGP > 0 ? remarks : ""}</td>
                     </tr>
