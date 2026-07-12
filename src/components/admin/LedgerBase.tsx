@@ -232,7 +232,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                   
                   {(mode === 'all' || mode === 'marks') && (
                     <th rowSpan={2} className="border border-black p-1 w-12 bg-purple-700 text-white">
-                      Total<br/>{subjects.length * 100}
+                      Total<br/>{subjects.reduce((sum, sub) => sum + (sub.subject_name.toLowerCase().includes("computer") ? 0 : 100), 0)}
                     </th>
                   )}
                   {(mode === 'all' || mode === 'marks') && <th rowSpan={2} className="border border-black p-1 w-12 bg-purple-700 text-white">Percentag</th>}
@@ -268,18 +268,23 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
               <tbody>
                 {students.map((student, idx) => {
                   let totalOM = 0;
+                  let validSubjectCount = 0;
                   const subjectResults = subjects.map(sub => {
+                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
                     const m = marks[student.id]?.[sub.id] || {};
                     const rw = parseFloat(m.written || "0");
                     const ls = parseFloat(m.oral || "0");
                     const om = rw + ls;
-                    totalOM += om;
+                    if (!isComputer) {
+                      totalOM += om;
+                      validSubjectCount++;
+                    }
                     const percent = om; // out of 100
                     const { grade, gp } = getGradeAndGP(percent);
                     return { rw, ls, om, percent, gp, grade };
                   });
 
-                  const grandTotalMax = subjects.length * 100;
+                  const grandTotalMax = validSubjectCount * 100;
                   const finalPercentage = grandTotalMax > 0 ? (totalOM / grandTotalMax) * 100 : 0;
                   const { grade: finalGrade, gp: finalGPA } = getGradeAndGP(finalPercentage);
                   const remarks = getRemarks(finalGrade);
@@ -383,6 +388,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                   let totalCU = 0;
 
                   const subjectResults = subjects.map(sub => {
+                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
                     const m = marks[student.id]?.[sub.id] || {};
                     const cu = parseFloat(m.cu || "0"); // Evaluated CU is the Max Marks
                     const om = parseFloat(m.total || "0"); // Obtained Marks
@@ -393,8 +399,10 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     const assumedCreditHour = 4; // Default to 4
                     const wgp = gp * assumedCreditHour;
 
-                    totalWGP += wgp;
-                    totalCU += assumedCreditHour;
+                    if (!isComputer) {
+                      totalWGP += wgp;
+                      totalCU += assumedCreditHour;
+                    }
 
                     return { cu, om, percent, gp, grade, wgp };
                   });
@@ -460,7 +468,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     );
                   })}
                   {(mode === 'all' || mode === 'grades') && <th rowSpan={3} className="border border-black p-1 bg-blue-500 text-white font-bold">GPA</th>}
-                  {(mode === 'all' || mode === 'marks') && <th rowSpan={3} className="border border-black p-1 bg-purple-700 text-white font-bold">Total<br/><br/>{subjects.reduce((sum, sub) => sum + (sub.subject_name.toLowerCase().includes("computer") ? 50 : 100), 0)}</th>}
+                  {(mode === 'all' || mode === 'marks') && <th rowSpan={3} className="border border-black p-1 bg-purple-700 text-white font-bold">Total<br/><br/>{subjects.reduce((sum, sub) => sum + (sub.subject_name.toLowerCase().includes("computer") ? 0 : 100), 0)}</th>}
                   <th rowSpan={3} className="border border-black p-1 bg-purple-700 text-white font-bold" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Attendance</th>
                   <th rowSpan={3} className="border border-black p-1 min-w-[80px] bg-slate-800 text-white font-bold">Remarks</th>
                   <th rowSpan={3} className="border border-black p-1 bg-red-600 text-white font-bold">Ranks</th>
@@ -557,9 +565,11 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     
                     const subjFinalGrade = getGradeAndGP((subjTotalMarks / (isComputer ? 50 : 100)) * 100).grade;
 
-                    totalWGP += isComputer ? (subjTotalGP * 2) : subjTotalWGP; 
-                    totalCreditHours += isComputer ? 2 : 5;
-                    grandTotal += subjTotalMarks;
+                    if (!isComputer) {
+                      totalWGP += subjTotalWGP; 
+                      totalCreditHours += 5;
+                      grandTotal += subjTotalMarks;
+                    }
 
                     return { prTotal, thTotal, prGradeGP, thGradeGP, thWGP, prWGP, subjTotalWGP, subjTotalGP, subjFinalGrade, subjTotalMarks, isComputer };
                   });
@@ -622,7 +632,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     );
                   })}
                   {(mode === 'all' || mode === 'grades') && <th rowSpan={3} className="border border-black p-1 bg-blue-500 text-white font-bold">GPA</th>}
-                  {(mode === 'all' || mode === 'marks') && <th rowSpan={3} className="border border-black p-1 bg-purple-700 text-white font-bold">Total<br/><br/>{subjects.length * 50}</th>}
+                  {(mode === 'all' || mode === 'marks') && <th rowSpan={3} className="border border-black p-1 bg-purple-700 text-white font-bold">Total<br/><br/>{subjects.reduce((sum, sub) => sum + (sub.subject_name.toLowerCase().includes("computer") ? 0 : 50), 0)}</th>}
                   <th rowSpan={3} className="border border-black p-1 bg-purple-700 text-white font-bold" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Attendance</th>
                   <th rowSpan={3} className="border border-black p-1 bg-red-600 text-white font-bold">Rank</th>
                   <th rowSpan={3} className="border border-black p-1 min-w-[80px] bg-slate-800 text-white font-bold">Remarks</th>
@@ -680,6 +690,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                   let grandTotal = 0;
 
                   const subjectResults = subjects.map(sub => {
+                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
                     const m = marks[student.id]?.[sub.id] || {};
                     const par = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
                     const pw = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
@@ -690,9 +701,11 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     const { grade, gp } = getGradeAndGP(percent);
                     const wgp = gp * 4; // Default 4 credit hours
 
-                    totalWGP += wgp;
-                    totalCU += 4;
-                    grandTotal += total;
+                    if (!isComputer) {
+                      totalWGP += wgp;
+                      totalCU += 4;
+                      grandTotal += total;
+                    }
 
                     return { par, pw, term, total, gp, grade, wgp };
                   });
