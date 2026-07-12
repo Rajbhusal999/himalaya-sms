@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { supabase } from "@/lib/supabase/client";
-import { BookOpen, LogOut, ClipboardEdit, User, FileText, TrendingUp } from "lucide-react";
+import { BookOpen, LogOut, User } from "lucide-react";
+import MarkEntry from "@/components/admin/MarkEntry";
 
 export default function TeacherDashboard() {
   const router = useRouter();
@@ -12,26 +11,22 @@ export default function TeacherDashboard() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        // In a real app we'd redirect to login, but since auth is complex to setup on the fly
-        // we'll allow mock viewing if there's no session, for demonstration purposes.
-        setUserEmail("mock_teacher@gmail.com");
-        // router.push("/teacher/login");
-      } else {
-        setUserEmail(session.user.email ?? "");
-      }
+    // We check for the teacherId stored during login
+    const teacherId = localStorage.getItem("teacherId");
+    const teacherName = localStorage.getItem("teacherName");
+
+    if (!teacherId) {
+      router.push("/teacher/login");
+    } else {
+      setUserEmail(teacherName || "Teacher");
       setLoading(false);
-    };
-    
-    checkUser();
+    }
   }, [router]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
+  const handleLogout = () => {
+    localStorage.removeItem("teacherId");
+    localStorage.removeItem("teacherName");
+    router.push("/teacher/login");
   };
 
   if (loading) {
@@ -70,57 +65,15 @@ export default function TeacherDashboard() {
         </div>
       </nav>
 
+      {/* Main Content restricted to Mark Entry only */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">Teacher Dashboard</h1>
-          <p className="text-slate-500 mt-1">Manage classes and enter student marks</p>
+          <h1 className="text-3xl font-bold text-slate-900">Teacher Portal</h1>
+          <p className="text-slate-500 mt-1">Manage and enter student marks for your classes.</p>
         </div>
 
-        {/* Primary Action Button */}
-        <div className="mb-12">
-          <div className="bg-gradient-to-r from-brand-600 to-brand-800 rounded-2xl shadow-xl overflow-hidden relative group">
-            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-48 h-48 rounded-full bg-white opacity-10 blur-2xl group-hover:scale-110 transition-transform duration-700"></div>
-            
-            <div className="px-8 py-12 md:py-16 flex flex-col md:flex-row items-center justify-between relative z-10">
-              <div className="mb-6 md:mb-0 text-center md:text-left text-white">
-                <h2 className="text-3xl md:text-4xl font-bold mb-2">Examination Period</h2>
-                <p className="text-brand-100 text-lg max-w-xl">
-                  It is time to enter the final marks for this term. Please ensure all entries are double-checked before submission.
-                </p>
-              </div>
-              
-              <Link 
-                href="/teacher/entry-marks"
-                className="inline-flex items-center px-8 py-4 bg-white text-brand-700 hover:bg-brand-50 hover:text-brand-800 rounded-xl font-bold text-lg shadow-lg transform transition-all hover:scale-105 active:scale-95 group"
-              >
-                <ClipboardEdit className="w-6 h-6 mr-3 group-hover:rotate-12 transition-transform" />
-                Entry Exam Marks
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Stats / Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-start">
-            <div className="p-3 bg-blue-100 text-brand-600 rounded-lg mr-4">
-              <FileText className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-900 text-lg mb-1">Recent Entries</h3>
-              <p className="text-slate-500 text-sm">View and edit marks you have entered recently. (Coming soon)</p>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-start">
-            <div className="p-3 bg-green-100 text-green-600 rounded-lg mr-4">
-              <TrendingUp className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-900 text-lg mb-1">Class Performance</h3>
-              <p className="text-slate-500 text-sm">View statistical analysis of your classes. (Coming soon)</p>
-            </div>
-          </div>
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <MarkEntry />
         </div>
       </main>
     </div>
