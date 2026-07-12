@@ -117,9 +117,9 @@ export default function MarkEntry() {
     if (!studentMarks) return 0;
 
     let total = 0;
-    const isClass1to3 = ["1", "2", "3"].includes(selectedClass || "");
+    const isClass1to5 = ["1", "2", "3", "4", "5"].includes(selectedClass || "");
     Object.values(studentMarks).forEach((m: any) => {
-      if (isClass1to3) {
+      if (isClass1to5) {
         total += parseFloat(m.total || "0");
       } else {
         total += parseFloat(m.written || "0") + parseFloat(m.oral || "0");
@@ -235,14 +235,14 @@ export default function MarkEntry() {
                   <tr>
                     <th rowSpan={2} className="border border-black px-2 py-2 w-24">Symbol No.</th>
                     <th rowSpan={2} className="border border-black px-4 py-2 min-w-[150px]">Student Name</th>
-                    <th colSpan={["1", "2", "3"].includes(selectedClass || "") ? subjects.length * 2 : subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)} className="border border-black px-4 py-1">Subject</th>
+                    <th colSpan={["1", "2", "3", "4", "5"].includes(selectedClass || "") ? subjects.length * 2 : subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)} className="border border-black px-4 py-1">Subject</th>
                     <th rowSpan={2} className="border border-black px-4 py-2 w-20">Total</th>
                   </tr>
                   <tr>
                     {subjects.map(sub => {
                       const columns = [];
-                      const isClass1to3 = ["1", "2", "3"].includes(selectedClass || "");
-                      if (isClass1to3) {
+                      const isClass1to5 = ["1", "2", "3", "4", "5"].includes(selectedClass || "");
+                      if (isClass1to5) {
                         columns.push(<th key={`${sub.id}-cu`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">मुल्यांकन गरिएका सि.उ.</th>);
                         columns.push(<th key={`${sub.id}-total`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">जम्मा अंक</th>);
                       } else {
@@ -269,11 +269,11 @@ export default function MarkEntry() {
                       <td className="border border-black px-2 py-1 text-left font-medium whitespace-nowrap">{student.name}</td>
                       
                       {subjects.map(sub => {
-                        const isClass1to3 = ["1", "2", "3"].includes(selectedClass || "");
+                        const isClass1to5 = ["1", "2", "3", "4", "5"].includes(selectedClass || "");
                         return (
-                          <td key={sub.id} colSpan={isClass1to3 ? 2 : ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0))} className="border border-black p-0">
+                          <td key={sub.id} colSpan={isClass1to5 ? 2 : ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0))} className="border border-black p-0">
                             <div className="flex h-full">
-                              {isClass1to3 ? (
+                              {isClass1to5 ? (
                                 <>
                                   <div className="flex-1 border-r border-black last:border-r-0">
                                     <input 
@@ -332,7 +332,7 @@ export default function MarkEntry() {
                   ))}
                   {students.length === 0 && (
                     <tr>
-                      <td colSpan={(["1", "2", "3"].includes(selectedClass || "") ? subjects.length * 2 : subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)) + 3} className="border border-black px-4 py-8 text-center text-slate-500">
+                      <td colSpan={(["1", "2", "3", "4", "5"].includes(selectedClass || "") ? subjects.length * 2 : subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)) + 3} className="border border-black px-4 py-8 text-center text-slate-500">
                         No students found in this class.
                       </td>
                     </tr>
