@@ -13,12 +13,14 @@ const CATEGORIES = [
 ];
 
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
+const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2082 + i).toString());
 
 export default function MarkEntry() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<string>(EXAM_TERMS[0]);
+  const [selectedYear, setSelectedYear] = useState<string>(ACADEMIC_YEARS[0]);
 
   const [students, setStudents] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -84,7 +86,7 @@ export default function MarkEntry() {
     if (selectedClass) {
       loadData();
     }
-  }, [selectedClass, selectedTerm]);
+  }, [selectedClass, selectedTerm, selectedYear]);
 
   const handleMarkChange = (studentId: string, subjectId: string, field: string, value: string) => {
     setMarks(prev => ({
@@ -225,7 +227,14 @@ export default function MarkEntry() {
                 onChange={(e) => setSelectedTerm(e.target.value)}
                 className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900 font-medium"
               >
-                {EXAM_TERMS.map(term => <option key={term} value={term}>{term}</option>)}
+                {EXAM_TERMS.map(term => <option key={term} value={term}>{term.toUpperCase()} EXAMINATION</option>)}
+              </select>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 bg-white text-slate-900"
+              >
+                {ACADEMIC_YEARS.map(year => <option key={year} value={year}>{year}</option>)}
               </select>
 
               <button 

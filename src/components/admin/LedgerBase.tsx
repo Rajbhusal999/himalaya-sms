@@ -22,10 +22,12 @@ const CATEGORIES = [
 ];
 
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
+const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2082 + i).toString());
 
 export default function LedgerBase({ mode, title }: LedgerBaseProps) {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<string>(EXAM_TERMS[0]);
+  const [selectedYear, setSelectedYear] = useState<string>(ACADEMIC_YEARS[0]);
   
   const [students, setStudents] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -90,7 +92,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
     if (selectedClass) {
       loadData();
     }
-  }, [selectedClass, selectedTerm]);
+  }, [selectedClass, selectedTerm, selectedYear]);
 
   const handlePrint = () => {
     window.print();
@@ -157,6 +159,14 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
           >
             {EXAM_TERMS.map(term => <option key={term} value={term}>{term.toUpperCase()} EXAMINATION</option>)}
           </select>
+
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 bg-white text-slate-900"
+          >
+            {ACADEMIC_YEARS.map(year => <option key={year} value={year}>{year}</option>)}
+          </select>
         </div>
       </div>
 
@@ -171,7 +181,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
             <h3 className="text-md font-medium">ESTD: 2040 B.S</h3>
             <div className="flex justify-between items-end mt-4 px-4 font-bold text-lg">
               <div>Class : {selectedClass}</div>
-              <div className="uppercase">{selectedTerm} 2082</div>
+              <div className="uppercase">{selectedTerm} {selectedYear}</div>
               <div>{title}</div>
             </div>
           </div>
