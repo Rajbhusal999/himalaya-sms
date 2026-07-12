@@ -330,6 +330,9 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     return (
                       <Fragment key={`headers-${sub.id}`}>
                         {(mode === 'all' || mode === 'marks') && (
+                          <th className={`border border-black p-1 font-normal ${bgColor}`}>मुल्यांकन गरिएका<br/>सि.उ.</th>
+                        )}
+                        {(mode === 'all' || mode === 'marks') && (
                           <th className={`border border-black p-1 font-normal ${bgColor}`}>जम्मा<br/>अंक</th>
                         )}
                         {(mode === 'all') && (
@@ -337,13 +340,10 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         )}
                         {(mode === 'all' || mode === 'grades') && (
                           <>
-                            <th className={`border border-black p-1 font-bold ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>GRADE</th>
+                            <th className="border border-black p-1 font-bold bg-[#1e293b] text-white" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>GRADE</th>
                             <th className={`border border-black p-1 font-bold ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Grade Point</th>
                             <th className={`border border-black p-1 font-bold ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>WGP</th>
                           </>
-                        )}
-                        {(mode === 'all' || mode === 'marks') && (
-                          <th className={`border border-black p-1 font-normal ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>मुल्यांकन गरिएका सि.उ.</th>
                         )}
                       </Fragment>
                     );
@@ -384,6 +384,9 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                       {subjectResults.map((res, i) => (
                         <Fragment key={i}>
                           {(mode === 'all' || mode === 'marks') && (
+                            <td className="border border-black p-1 font-bold">{res.cu || ""}</td>
+                          )}
+                          {(mode === 'all' || mode === 'marks') && (
                             <td className="border border-black p-1 font-bold">{res.om || ""}</td>
                           )}
                           {(mode === 'all') && (
@@ -395,9 +398,6 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                               <td className="border border-black p-1 font-bold">{res.om ? res.gp.toFixed(1) : ""}</td>
                               <td className="border border-black p-1 font-bold">{res.om ? Math.round(res.wgp) : ""}</td>
                             </>
-                          )}
-                          {(mode === 'all' || mode === 'marks') && (
-                            <td className="border border-black p-1 font-bold">{res.cu || ""}</td>
                           )}
                         </Fragment>
                       ))}
