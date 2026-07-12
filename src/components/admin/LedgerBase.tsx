@@ -113,6 +113,23 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
     return "bg-slate-700";
   };
 
+  const getFormattedTerm = () => {
+    let baseTerm = selectedTerm;
+    if (baseTerm === 'First Term') baseTerm = 'FIRST';
+    else if (baseTerm === 'Second Term') baseTerm = 'SECOND';
+    else if (baseTerm === 'Final') baseTerm = 'FINAL';
+
+    if (isClass1to5 || isNurseryKG) {
+      return `${baseTerm} PERIODICAL CAS ASSESSMENT - ${selectedYear}`;
+    } else if (isClass6to8) {
+      if (baseTerm === 'FINAL') {
+         return `FINAL EXAMINATION - ${selectedYear}`;
+      }
+      return `${baseTerm} TERMINAL EXAMINATION - ${selectedYear}`;
+    }
+    return `${selectedTerm.toUpperCase()} ${selectedYear}`;
+  };
+
   return (
     <div className="space-y-6">
       <style dangerouslySetInnerHTML={{__html: `
@@ -187,7 +204,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
             <h3 className="text-md font-medium">ESTD: 2040 B.S</h3>
             <div className="flex justify-between items-end mt-4 px-4 font-bold text-lg">
               <div>Class : {selectedClass}</div>
-              <div className="uppercase">{selectedTerm} {selectedYear}</div>
+              <div className="uppercase">{getFormattedTerm()}</div>
               <div>{title}</div>
             </div>
           </div>
