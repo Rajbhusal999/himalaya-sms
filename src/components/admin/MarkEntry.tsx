@@ -65,15 +65,19 @@ export default function MarkEntry() {
 
       let subjectsList = subjectsData || [];
       if (["1", "2", "3"].includes(selectedClass)) {
-        const order = ["nepali", "english", "mathematics", "hamro serofero", "local", "computer"];
+        const getSubjectRank = (name: string) => {
+          const lower = name.toLowerCase();
+          if (lower === "nepali" || lower.includes("nepali")) return 1;
+          if (lower === "english" || (lower.includes("english") && !lower.includes("opt"))) return 2;
+          if (lower.includes("math")) return 3;
+          if (lower.includes("hamro")) return 4;
+          if (lower.includes("local") || lower.includes("bharatpur") || lower.includes("pride")) return 5;
+          if (lower.includes("opt") && lower.includes("english")) return 6;
+          if (lower.includes("computer")) return 7;
+          return 999;
+        };
         subjectsList = subjectsList.sort((a, b) => {
-          const aName = a.subject_name.toLowerCase();
-          const bName = b.subject_name.toLowerCase();
-          let aIndex = order.findIndex(o => aName.includes(o));
-          let bIndex = order.findIndex(o => bName.includes(o));
-          if (aIndex === -1) aIndex = 999;
-          if (bIndex === -1) bIndex = 999;
-          return aIndex - bIndex;
+          return getSubjectRank(a.subject_name) - getSubjectRank(b.subject_name);
         });
       }
       setSubjects(subjectsList);
