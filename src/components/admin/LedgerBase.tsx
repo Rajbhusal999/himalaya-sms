@@ -32,6 +32,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
   const [students, setStudents] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [marks, setMarks] = useState<any>({});
+  const [studentAttendance, setStudentAttendance] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   const printRef = useRef<HTMLDivElement>(null);
@@ -107,6 +108,23 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
       const key = `marks_${selectedClass}_${selectedTerm}_${selectedYear}`;
       const savedMarks = JSON.parse(localStorage.getItem(key) || "{}");
       setMarks(savedMarks);
+
+      // Load attendance
+      const { data: attendanceData, error: attendanceError } = await supabase
+        .from("attendance")
+        .select("*")
+        .eq("class", selectedClass)
+        .eq("term", selectedTerm);
+      
+      if (attendanceError) {
+        console.error("Failed to load attendance", attendanceError);
+      } else {
+        const attendanceMap: Record<string, string> = {};
+        attendanceData?.forEach(record => {
+          attendanceMap[record.student_id] = record.attendance_days || "";
+        });
+        setStudentAttendance(attendanceMap);
+      }
 
     } catch (err: any) {
       alert("Error loading data: " + err.message);
@@ -358,7 +376,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         <td className="border border-black p-1 font-bold">{finalGPA.toFixed(1)}</td>
                       )}
                       {(mode === 'all' || mode === 'marks') && (
-                        <td className="border border-black p-1">58</td> /* Mock Att */
+                        <td className="border border-black p-1 font-bold">{studentAttendance[student.id] || ""}</td>
                       )}
                       <td className="border border-black p-1">{Math.floor(Math.random() * 20) + 1}</td>
                       <td className="border border-black p-1">{remarks}</td>
@@ -388,6 +406,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                   {(mode === 'all' || mode === 'marks') && <th rowSpan={2} className="border border-black p-1 w-16 bg-purple-700 text-white">Total<br/>Number</th>}
                   {(mode === 'all' || mode === 'marks') && <th rowSpan={2} className="border border-black p-1 w-16 bg-purple-700 text-white">Total<br/>Percent</th>}
                   {(mode === 'all' || mode === 'grades') && <th rowSpan={2} className="border border-black p-1 w-12 bg-blue-500 text-white">GPA</th>}
+                  <th rowSpan={2} className="border border-black p-1 w-12 bg-purple-700 text-white" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Attendance</th>
                   <th rowSpan={2} className="border border-black p-1 w-12 bg-red-600 text-white">RANK</th>
                   <th rowSpan={2} className="border border-black p-1 min-w-[80px] bg-slate-800 text-white">REMARK</th>
                 </tr>
@@ -510,6 +529,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         {(mode === 'all' || mode === 'grades') && (
                           <td className="border border-black p-1 font-bold">{totalWGP > 0 ? finalGPA.toFixed(2) : ""}</td>
                         )}
+                        <td className="border border-black p-1 font-bold">{totalWGP > 0 ? (studentAttendance[student.id] || "") : ""}</td>
                         <td className="border border-black p-1 font-bold">{rank}</td>
                         <td className="border border-black p-1">{totalWGP > 0 ? remarks : ""}</td>
                       </tr>
@@ -688,7 +708,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
 
                       {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1 font-bold">{finalGPA.toFixed(2)}</td>}
                       {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1 font-bold">{grandTotal || 0}</td>}
-                      <td className="border border-black p-1 font-bold">{Math.floor(Math.random() * 20) + 100}</td>
+                      <td className="border border-black p-1 font-bold">{studentAttendance[student.id] || ""}</td>
                       <td className="border border-black p-1">{remarks}</td>
                       <td className="border border-black p-1 font-bold">{Math.floor(Math.random() * 20) + 1}</td>
                     </tr>
@@ -839,7 +859,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                       {(mode === 'all' || mode === 'marks') && (
                         <td className="border border-black p-1 font-bold">{grandTotal || ""}</td>
                       )}
-                      <td className="border border-black p-1 font-bold">{totalWGP > 0 ? Math.floor(Math.random() * 20) + 40 : ""}</td>
+                      <td className="border border-black p-1 font-bold">{totalWGP > 0 ? (studentAttendance[student.id] || "") : ""}</td>
                       <td className="border border-black p-1 font-bold">{totalWGP > 0 ? Math.floor(Math.random() * 20) + 1 : ""}</td>
                       <td className="border border-black p-1">{totalWGP > 0 ? remarks : ""}</td>
                     </tr>
