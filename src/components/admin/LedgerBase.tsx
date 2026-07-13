@@ -361,7 +361,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     let colCount = 0;
                     if (mode === 'all') colCount = 6;
                     else if (mode === 'marks') colCount = 3; // obtained, cu, percent
-                    else if (mode === 'grades') colCount = 3; // grade, grade point, wgp
+                    else if (mode === 'grades') colCount = 2; // grade, grade point
 
                     return (
                       <th key={sub.id} colSpan={colCount} className={`border border-black p-2 text-white uppercase ${bgColor}`}>
@@ -395,7 +395,9 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                           <>
                             <th className="border border-black p-1 font-bold bg-[#1e293b] text-white" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>GRADE</th>
                             <th className={`border border-black p-1 font-bold ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Grade Point</th>
-                            <th className={`border border-black p-1 font-bold ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>WGP</th>
+                            {mode === 'all' && (
+                              <th className={`border border-black p-1 font-bold ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>WGP</th>
+                            )}
                           </>
                         )}
                       </Fragment>
@@ -475,7 +477,9 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                               <>
                                 <td className="border border-black p-1 font-bold">{res.om ? res.grade : ""}</td>
                                 <td className="border border-black p-1 font-bold">{res.om ? res.gp.toFixed(1) : ""}</td>
-                                <td className="border border-black p-1 font-bold">{res.om ? Math.round(res.wgp) : ""}</td>
+                                {mode === 'all' && (
+                                  <td className="border border-black p-1 font-bold">{res.om ? Math.round(res.wgp) : ""}</td>
+                                )}
                               </>
                             )}
                           </Fragment>
@@ -510,7 +514,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     let colCount = 0;
                     if (mode === 'all') colCount = isComputer ? 9 : 12;
                     else if (mode === 'marks') colCount = 3;
-                    else if (mode === 'grades') colCount = isComputer ? 6 : 9;
+                    else if (mode === 'grades') colCount = 6;
 
                     return (
                       <th key={sub.id} colSpan={colCount} className={`border border-black p-2 font-bold ${bgColor}`}>
@@ -534,15 +538,15 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 text-white ${bgColor}`}>TH</th>}
                         {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>G.P.<br/>(TH)</th>}
                         {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
-                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
+                        {mode === 'all' && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
                         
                         {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 text-white ${bgColor}`}>PR</th>}
                         {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>G.P.<br/>(PR)</th>}
                         {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
-                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
+                        {mode === 'all' && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}></th>}
                         
                         {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 text-white ${bgColor}`}>Total</th>}
-                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}>Total</th>}
+                        {mode === 'all' && !isComputer && <th className={`border border-black p-1 text-white ${bgColor}`}>Total</th>}
                         {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>TOT.</th>}
                         {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 text-white ${bgColor}`}>FINAL<br/>GRADE</th>}
                       </Fragment>
@@ -562,15 +566,15 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 ${bgColor}`}>{isComputer ? "25" : "50"}</th>}
                         {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 ${bgColor}`}>{isComputer ? "" : "2.5"}</th>}
                         {(mode === 'all' || mode === 'grades') && <th className="border border-black p-1 bg-[#1e293b] text-white">Grade</th>}
-                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 ${bgColor}`}>WGP<br/>(TH)</th>}
+                        {mode === 'all' && !isComputer && <th className={`border border-black p-1 ${bgColor}`}>WGP<br/>(TH)</th>}
                         
                         {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 ${bgColor}`}>{isComputer ? "25" : "50"}</th>}
                         {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 ${bgColor}`}>{isComputer ? "" : "2.5"}</th>}
                         {(mode === 'all' || mode === 'grades') && <th className="border border-black p-1 bg-[#1e293b] text-white">Grade</th>}
-                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 ${bgColor}`}>WGP<br/>(PR)</th>}
+                        {mode === 'all' && !isComputer && <th className={`border border-black p-1 ${bgColor}`}>WGP<br/>(PR)</th>}
                         
                         {(mode === 'all' || mode === 'marks') && <th className={`border border-black p-1 ${bgColor}`}>{isComputer ? "50" : "100"}</th>}
-                        {(mode === 'all' || mode === 'grades') && !isComputer && <th className={`border border-black p-1 ${bgColor}`}>WGP</th>}
+                        {mode === 'all' && !isComputer && <th className={`border border-black p-1 ${bgColor}`}>WGP</th>}
                         {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 ${bgColor}`}>GP</th>}
                         {(mode === 'all' || mode === 'grades') && <th className={`border border-black p-1 ${bgColor}`}></th>}
                       </Fragment>
@@ -641,15 +645,15 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                           {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.thTotal || 0}</td>}
                           {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.thGradeGP.gp.toFixed(1)}</td>}
                           {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.thGradeGP.grade}</td>}
-                          {(mode === 'all' || mode === 'grades') && !res.isComputer && <td className="border border-black p-1">{res.thWGP.toFixed(1)}</td>}
+                          {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.thWGP.toFixed(1)}</td>}
                           
                           {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.prTotal || 0}</td>}
                           {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.prGradeGP.gp.toFixed(1)}</td>}
                           {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.prGradeGP.grade}</td>}
-                          {(mode === 'all' || mode === 'grades') && !res.isComputer && <td className="border border-black p-1">{res.prWGP.toFixed(1)}</td>}
+                          {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.prWGP.toFixed(1)}</td>}
                           
                           {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.subjTotalMarks || 0}</td>}
-                          {(mode === 'all' || mode === 'grades') && !res.isComputer && <td className="border border-black p-1">{res.subjTotalWGP.toFixed(1)}</td>}
+                          {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.subjTotalWGP.toFixed(1)}</td>}
                           {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.subjTotalGP.toFixed(1)}</td>}
                           {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.subjFinalGrade}</td>}
                         </Fragment>
@@ -674,7 +678,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     let colCount = 0;
                     if (mode === 'all') colCount = 7;
                     else if (mode === 'marks') colCount = 4;
-                    else if (mode === 'grades') colCount = 3;
+                    else if (mode === 'grades') colCount = 2;
 
                     return (
                       <th key={sub.id} colSpan={colCount} className="border border-black p-2 bg-emerald-500 text-white uppercase font-bold">
@@ -704,7 +708,9 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         <>
                           <th className="border border-black p-1 bg-purple-700 text-white font-normal">G.P</th>
                           <th className="border border-black p-1 bg-[#1e293b] text-white font-bold" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Grade</th>
-                          <th className="border border-black p-1 bg-purple-700 text-white font-normal">WGP</th>
+                          {mode === 'all' && (
+                            <th className="border border-black p-1 bg-purple-700 text-white font-normal">WGP</th>
+                          )}
                         </>
                       )}
                     </Fragment>
@@ -727,7 +733,9 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         <>
                           <th className="border border-black p-1 bg-purple-700 text-white font-normal"></th>
                           <th className="border border-black p-1 bg-[#1e293b] text-white font-bold"></th>
-                          <th className="border border-black p-1 bg-purple-700 text-white font-normal"></th>
+                          {mode === 'all' && (
+                            <th className="border border-black p-1 bg-purple-700 text-white font-normal"></th>
+                          )}
                         </>
                       )}
                     </Fragment>
@@ -784,7 +792,9 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                             <>
                               <td className="border border-black p-1 font-bold">{res.total ? res.gp.toFixed(1) : ""}</td>
                               <td className="border border-black p-1 font-bold">{res.total ? res.grade : ""}</td>
-                              <td className="border border-black p-1 font-bold">{res.total ? res.wgp : ""}</td>
+                              {mode === 'all' && (
+                                <td className="border border-black p-1 font-bold">{res.total ? res.wgp : ""}</td>
+                              )}
                             </>
                           )}
                         </Fragment>
