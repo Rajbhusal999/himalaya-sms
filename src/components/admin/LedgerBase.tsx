@@ -113,8 +113,8 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
       const { data: attendanceData, error: attendanceError } = await supabase
         .from("attendance")
         .select("*")
-        .eq("class", selectedClass)
-        .eq("exam_term", `${selectedTerm} - ${selectedYear}`);
+        .eq("exam_term", `${selectedTerm} - ${selectedYear}`)
+        .in("student_id", formattedStudents.map((s: any) => s.id));
       
       if (attendanceError) {
         console.error("Failed to load attendance", attendanceError);
