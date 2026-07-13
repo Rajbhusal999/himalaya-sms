@@ -88,7 +88,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
           if (lower === "nepali" || lower.includes("nepali")) return 1;
           if (lower === "english" || (lower.includes("english") && !lower.includes("opt"))) return 2;
           if (lower.includes("math")) return 3;
-          if (lower.includes("science") || lower.includes("sci")) return 4;
+          if ((lower.includes("science") || lower.includes("sci")) && !lower.includes("computer")) return 4;
           if (lower.includes("social") || lower.includes("soc")) return 5;
           if (lower.includes("hpc") || lower.includes("health")) return 6;
           if (lower.includes("local") || lower.includes("bharatpur") || lower.includes("pride")) return 7;
