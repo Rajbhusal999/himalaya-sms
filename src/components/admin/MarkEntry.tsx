@@ -63,7 +63,19 @@ export default function MarkEntry() {
         .eq("class", selectedClass)
         .order("subject_name");
 
-      const subjectsList = subjectsData || [];
+      let subjectsList = subjectsData || [];
+      if (["1", "2", "3"].includes(selectedClass)) {
+        const order = ["nepali", "english", "mathematics", "hamro serofero", "local", "computer"];
+        subjectsList = subjectsList.sort((a, b) => {
+          const aName = a.subject_name.toLowerCase();
+          const bName = b.subject_name.toLowerCase();
+          let aIndex = order.findIndex(o => aName.includes(o));
+          let bIndex = order.findIndex(o => bName.includes(o));
+          if (aIndex === -1) aIndex = 999;
+          if (bIndex === -1) bIndex = 999;
+          return aIndex - bIndex;
+        });
+      }
       setSubjects(subjectsList);
       if (["6", "7", "8"].includes(selectedClass) && subjectsList.length > 0) {
         setSelectedSubject(subjectsList[0].id);

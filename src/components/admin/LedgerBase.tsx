@@ -65,7 +65,22 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
         .order("subject_name");
 
       if (subjectsError) throw subjectsError;
-      setSubjects(subjectsData || []);
+
+      let fetchedSubjects = subjectsData || [];
+      if (["1", "2", "3"].includes(selectedClass)) {
+        const order = ["nepali", "english", "mathematics", "hamro serofero", "local", "computer"];
+        fetchedSubjects = fetchedSubjects.sort((a, b) => {
+          const aName = a.subject_name.toLowerCase();
+          const bName = b.subject_name.toLowerCase();
+          let aIndex = order.findIndex(o => aName.includes(o));
+          let bIndex = order.findIndex(o => bName.includes(o));
+          if (aIndex === -1) aIndex = 999;
+          if (bIndex === -1) bIndex = 999;
+          return aIndex - bIndex;
+        });
+      }
+
+      setSubjects(fetchedSubjects);
 
       // Load real marks from localStorage (saved via MarkEntry)
       // In a production app, this would be fetched from Supabase marks table.
