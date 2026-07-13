@@ -406,6 +406,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                   const processedStudents = students.map((student, idx) => {
                     let totalWGP = 0;
                     let totalCU = 0;
+                    let hasNG = false;
 
                     const subjectResults = subjects.map(sub => {
                       const isComputer = sub.subject_name.toLowerCase().includes("computer");
@@ -415,6 +416,10 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                       
                       const percent = cu > 0 ? (om / cu) * 100 : 0; 
                       const { grade, gp } = getGradeAndGP(percent);
+                      
+                      if (grade === "NG") {
+                        hasNG = true;
+                      }
                       
                       const assumedCreditHour = 4; // Default to 4
                       const wgp = gp * assumedCreditHour;
@@ -427,18 +432,22 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                       return { cu, om, percent, gp, grade, wgp };
                     });
 
-                    const finalGPA = totalCU > 0 ? totalWGP / totalCU : 0;
+                    let finalGPA = totalCU > 0 ? totalWGP / totalCU : 0;
+                    if (hasNG) {
+                      finalGPA = 0;
+                    }
+                    
                     const { grade: finalGrade } = getGradeAndGP(finalGPA * 25); // Approximate GP to Percentage
                     const remarks = getRemarks(finalGrade);
                     
-                    return { student, idx, subjectResults, totalWGP, finalGPA, remarks };
+                    return { student, idx, subjectResults, totalWGP, finalGPA, remarks, hasNG };
                   });
 
-                  // Calculate Ranks for GPA > 0
-                  const sortedGPAs = [...new Set(processedStudents.filter(s => s.totalWGP > 0).map(s => s.finalGPA))].sort((a, b) => b - a);
+                  // Calculate Ranks for valid GPAs
+                  const sortedGPAs = [...new Set(processedStudents.filter(s => !s.hasNG && s.totalWGP > 0).map(s => s.finalGPA))].sort((a, b) => b - a);
                   
-                  return processedStudents.map(({ student, idx, subjectResults, totalWGP, finalGPA, remarks }) => {
-                    const rank = totalWGP > 0 ? sortedGPAs.indexOf(finalGPA) + 1 : "";
+                  return processedStudents.map(({ student, idx, subjectResults, totalWGP, finalGPA, remarks, hasNG }) => {
+                    const rank = (!hasNG && totalWGP > 0) ? sortedGPAs.indexOf(finalGPA) + 1 : "-";
                     return (
                       <tr key={student.id} className="hover:bg-slate-50">
                         <td className="border border-black p-1 font-bold">{idx + 1}</td>
