@@ -398,68 +398,78 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                 </tr>
               </thead>
               <tbody>
-                {students.map((student, idx) => {
-                  let totalWGP = 0;
-                  let totalCU = 0;
+                {(() => {
+                  const processedStudents = students.map((student, idx) => {
+                    let totalWGP = 0;
+                    let totalCU = 0;
 
-                  const subjectResults = subjects.map(sub => {
-                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
-                    const m = marks[student.id]?.[sub.id] || {};
-                    const cu = parseFloat(m.cu || "0"); // Evaluated CU is the Max Marks
-                    const om = parseFloat(m.total || "0"); // Obtained Marks
+                    const subjectResults = subjects.map(sub => {
+                      const isComputer = sub.subject_name.toLowerCase().includes("computer");
+                      const m = marks[student.id]?.[sub.id] || {};
+                      const cu = parseFloat(m.cu || "0"); // Evaluated CU is the Max Marks
+                      const om = parseFloat(m.total || "0"); // Obtained Marks
+                      
+                      const percent = cu > 0 ? (om / cu) * 100 : 0; 
+                      const { grade, gp } = getGradeAndGP(percent);
+                      
+                      const assumedCreditHour = 4; // Default to 4
+                      const wgp = gp * assumedCreditHour;
+
+                      if (!isComputer) {
+                        totalWGP += wgp;
+                        totalCU += assumedCreditHour;
+                      }
+
+                      return { cu, om, percent, gp, grade, wgp };
+                    });
+
+                    const finalGPA = totalCU > 0 ? totalWGP / totalCU : 0;
+                    const { grade: finalGrade } = getGradeAndGP(finalGPA * 25); // Approximate GP to Percentage
+                    const remarks = getRemarks(finalGrade);
                     
-                    const percent = cu > 0 ? (om / cu) * 100 : 0; 
-                    const { grade, gp } = getGradeAndGP(percent);
-                    
-                    const assumedCreditHour = 4; // Default to 4
-                    const wgp = gp * assumedCreditHour;
-
-                    if (!isComputer) {
-                      totalWGP += wgp;
-                      totalCU += assumedCreditHour;
-                    }
-
-                    return { cu, om, percent, gp, grade, wgp };
+                    return { student, idx, subjectResults, totalWGP, finalGPA, remarks };
                   });
 
-                  const finalGPA = totalCU > 0 ? totalWGP / totalCU : 0;
-                  const { grade: finalGrade } = getGradeAndGP(finalGPA * 25); // Approximate GP to Percentage
-                  const remarks = getRemarks(finalGrade);
+                  // Calculate Ranks for GPA > 0
+                  const sortedGPAs = [...new Set(processedStudents.filter(s => s.totalWGP > 0).map(s => s.finalGPA))].sort((a, b) => b - a);
                   
-                  return (
-                    <tr key={student.id} className="hover:bg-slate-50">
-                      <td className="border border-black p-1 font-bold">{idx + 1}</td>
-                      <td className="border border-black p-1 text-left font-bold">{student.name}</td>
-                      
-                      {subjectResults.map((res, i) => (
-                        <Fragment key={i}>
-                          {(mode === 'all' || mode === 'marks') && (
-                            <td className="border border-black p-1 font-bold">{res.cu || ""}</td>
-                          )}
-                          {(mode === 'all' || mode === 'marks') && (
-                            <td className="border border-black p-1 font-bold">{res.om || ""}</td>
-                          )}
-                          {(mode === 'all') && (
-                            <td className="border border-black p-1 font-bold">{res.om ? res.percent.toFixed(2) : ""}</td>
-                          )}
-                          {(mode === 'all' || mode === 'grades') && (
-                            <>
-                              <td className="border border-black p-1 font-bold">{res.om ? res.grade : ""}</td>
-                              <td className="border border-black p-1 font-bold">{res.om ? res.gp.toFixed(1) : ""}</td>
-                              <td className="border border-black p-1 font-bold">{res.om ? Math.round(res.wgp) : ""}</td>
-                            </>
-                          )}
-                        </Fragment>
-                      ))}
+                  return processedStudents.map(({ student, idx, subjectResults, totalWGP, finalGPA, remarks }) => {
+                    const rank = totalWGP > 0 ? sortedGPAs.indexOf(finalGPA) + 1 : "";
+                    return (
+                      <tr key={student.id} className="hover:bg-slate-50">
+                        <td className="border border-black p-1 font-bold">{idx + 1}</td>
+                        <td className="border border-black p-1 text-left font-bold">{student.name}</td>
+                        
+                        {subjectResults.map((res, i) => (
+                          <Fragment key={i}>
+                            {(mode === 'all' || mode === 'marks') && (
+                              <td className="border border-black p-1 font-bold">{res.cu || ""}</td>
+                            )}
+                            {(mode === 'all' || mode === 'marks') && (
+                              <td className="border border-black p-1 font-bold">{res.om || ""}</td>
+                            )}
+                            {(mode === 'all') && (
+                              <td className="border border-black p-1 font-bold">{res.om ? res.percent.toFixed(2) : ""}</td>
+                            )}
+                            {(mode === 'all' || mode === 'grades') && (
+                              <>
+                                <td className="border border-black p-1 font-bold">{res.om ? res.grade : ""}</td>
+                                <td className="border border-black p-1 font-bold">{res.om ? res.gp.toFixed(1) : ""}</td>
+                                <td className="border border-black p-1 font-bold">{res.om ? Math.round(res.wgp) : ""}</td>
+                              </>
+                            )}
+                          </Fragment>
+                        ))}
 
-                      {(mode === 'all' || mode === 'grades') && (
-                        <td className="border border-black p-1 font-bold">{totalWGP > 0 ? finalGPA.toFixed(2) : ""}</td>
-                      )}
-                      <td className="border border-black p-1 font-bold">{totalWGP > 0 ? Math.floor(Math.random() * 20) + 1 : ""}</td>
-                      <td className="border border-black p-1">{totalWGP > 0 ? remarks : ""}</td>
-                    </tr>
-                  );
-                })}
+                        {(mode === 'all' || mode === 'grades') && (
+                          <td className="border border-black p-1 font-bold">{totalWGP > 0 ? finalGPA.toFixed(2) : ""}</td>
+                        )}
+                        <td className="border border-black p-1 font-bold">{rank}</td>
+                        <td className="border border-black p-1">{totalWGP > 0 ? remarks : ""}</td>
+                      </tr>
+                    );
+                  });
+                })()}
               </tbody>
             </table>
           ) : isClass6to8 ? (
