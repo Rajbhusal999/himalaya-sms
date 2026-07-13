@@ -360,7 +360,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     const bgColor = "bg-emerald-500";
                     let colCount = 0;
                     if (mode === 'all') colCount = 6;
-                    else if (mode === 'marks') colCount = 2; // obtained, cu
+                    else if (mode === 'marks') colCount = 3; // obtained, cu, percent
                     else if (mode === 'grades') colCount = 3; // grade, grade point, wgp
 
                     return (
@@ -388,7 +388,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         {(mode === 'all' || mode === 'marks') && (
                           <th className={`border border-black p-1 font-normal ${bgColor}`}>जम्मा<br/>अंक</th>
                         )}
-                        {(mode === 'all') && (
+                        {(mode === 'all' || mode === 'marks') && (
                           <th className={`border border-black p-1 font-normal ${bgColor}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>प्रतिशत</th>
                         )}
                         {(mode === 'all' || mode === 'grades') && (
@@ -468,7 +468,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                             {(mode === 'all' || mode === 'marks') && (
                               <td className="border border-black p-1 font-bold">{res.om || ""}</td>
                             )}
-                            {(mode === 'all') && (
+                            {(mode === 'all' || mode === 'marks') && (
                               <td className="border border-black p-1 font-bold">{res.om ? res.percent.toFixed(2) : ""}</td>
                             )}
                             {(mode === 'all' || mode === 'grades') && (
