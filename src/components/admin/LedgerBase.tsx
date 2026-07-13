@@ -109,11 +109,16 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
       const savedMarks = JSON.parse(localStorage.getItem(key) || "{}");
       setMarks(savedMarks);
 
-      // Load attendance
+      // Map LedgerBase term names to ManageAttendance term names
+      let mappedTerm = selectedTerm;
+      if (selectedTerm === "First Term") mappedTerm = "First terminal exam";
+      else if (selectedTerm === "Second Term") mappedTerm = "Second terminal Examination";
+      else if (selectedTerm === "Final") mappedTerm = "Final Examination";
+
       const { data: attendanceData, error: attendanceError } = await supabase
         .from("attendance")
         .select("*")
-        .eq("exam_term", `${selectedTerm} - ${selectedYear}`)
+        .in("exam_term", [`${mappedTerm} - ${selectedYear}`, mappedTerm])
         .in("student_id", formattedStudents.map((s: any) => s.id));
       
       if (attendanceError) {
