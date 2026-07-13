@@ -369,6 +369,8 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                       </th>
                     );
                   })}
+                  {(mode === 'all' || mode === 'marks') && <th rowSpan={2} className="border border-black p-1 w-16 bg-purple-700 text-white">Total<br/>Number</th>}
+                  {(mode === 'all' || mode === 'marks') && <th rowSpan={2} className="border border-black p-1 w-16 bg-purple-700 text-white">Total<br/>Percent</th>}
                   {(mode === 'all' || mode === 'grades') && <th rowSpan={2} className="border border-black p-1 w-12 bg-blue-500 text-white">GPA</th>}
                   <th rowSpan={2} className="border border-black p-1 w-12 bg-red-600 text-white">RANK</th>
                   <th rowSpan={2} className="border border-black p-1 min-w-[80px] bg-slate-800 text-white">REMARK</th>
@@ -407,6 +409,8 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     let totalWGP = 0;
                     let totalCU = 0;
                     let hasNG = false;
+                    let grandTotalOM = 0;
+                    let grandTotalCU = 0;
 
                     const subjectResults = subjects.map(sub => {
                       const isComputer = sub.subject_name.toLowerCase().includes("computer");
@@ -427,6 +431,8 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                       if (!isComputer) {
                         totalWGP += wgp;
                         totalCU += assumedCreditHour;
+                        grandTotalOM += om;
+                        grandTotalCU += cu;
                       }
 
                       return { cu, om, percent, gp, grade, wgp };
@@ -439,14 +445,15 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     
                     const { grade: finalGrade } = getGradeAndGP(finalGPA * 25); // Approximate GP to Percentage
                     const remarks = getRemarks(finalGrade);
+                    const overallPercent = grandTotalCU > 0 ? (grandTotalOM / grandTotalCU) * 100 : 0;
                     
-                    return { student, idx, subjectResults, totalWGP, finalGPA, remarks, hasNG };
+                    return { student, idx, subjectResults, totalWGP, finalGPA, remarks, hasNG, grandTotalOM, overallPercent };
                   });
 
                   // Calculate Ranks for valid GPAs
                   const sortedGPAs = [...new Set(processedStudents.filter(s => !s.hasNG && s.totalWGP > 0).map(s => s.finalGPA))].sort((a, b) => b - a);
                   
-                  return processedStudents.map(({ student, idx, subjectResults, totalWGP, finalGPA, remarks, hasNG }) => {
+                  return processedStudents.map(({ student, idx, subjectResults, totalWGP, finalGPA, remarks, hasNG, grandTotalOM, overallPercent }) => {
                     const rank = (!hasNG && totalWGP > 0) ? sortedGPAs.indexOf(finalGPA) + 1 : "-";
                     return (
                       <tr key={student.id} className="hover:bg-slate-50">
@@ -474,6 +481,12 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                           </Fragment>
                         ))}
 
+                        {(mode === 'all' || mode === 'marks') && (
+                          <td className="border border-black p-1 font-bold bg-slate-100">{totalWGP > 0 ? grandTotalOM : ""}</td>
+                        )}
+                        {(mode === 'all' || mode === 'marks') && (
+                          <td className="border border-black p-1 font-bold bg-slate-100">{totalWGP > 0 ? overallPercent.toFixed(2) + "%" : ""}</td>
+                        )}
                         {(mode === 'all' || mode === 'grades') && (
                           <td className="border border-black p-1 font-bold">{totalWGP > 0 ? finalGPA.toFixed(2) : ""}</td>
                         )}
