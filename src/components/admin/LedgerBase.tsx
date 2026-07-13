@@ -114,7 +114,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
         .from("attendance")
         .select("*")
         .eq("class", selectedClass)
-        .eq("term", selectedTerm);
+        .eq("exam_term", `${selectedTerm} - ${selectedYear}`);
       
       if (attendanceError) {
         console.error("Failed to load attendance", attendanceError);

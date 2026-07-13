@@ -19,10 +19,12 @@ type AttendanceRecord = {
 
 const CLASSES = ["Nursery", "KG", "ECD", "1", "2", "3", "4", "5", "6", "7", "8"];
 const EXAM_TERMS = ["First terminal exam", "Second terminal Examination", "Final Examination"];
+const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2082 + i).toString());
 
 export default function ManageAttendance() {
   const [selectedClass, setSelectedClass] = useState<string>("1");
   const [selectedTerm, setSelectedTerm] = useState<string>(EXAM_TERMS[0]);
+  const [selectedYear, setSelectedYear] = useState<string>(ACADEMIC_YEARS[0]);
   const [students, setStudents] = useState<Student[]>([]);
   const [attendanceData, setAttendanceData] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -44,11 +46,11 @@ export default function ManageAttendance() {
 
       setStudents(studentsData || []);
 
-      // Fetch existing attendance for these students and the selected term
+      // Fetch existing attendance for these students and the selected term and year
       const { data: attendanceRecords, error: attendanceError } = await supabase
         .from("attendance")
         .select("*")
-        .eq("exam_term", selectedTerm)
+        .eq("exam_term", `${selectedTerm} - ${selectedYear}`)
         .in("student_id", studentsData?.map(s => s.id) || []);
 
       if (attendanceError) throw attendanceError;
@@ -80,7 +82,7 @@ export default function ManageAttendance() {
     try {
       const recordsToUpsert = students.map(student => ({
         student_id: student.id,
-        exam_term: selectedTerm,
+        exam_term: `${selectedTerm} - ${selectedYear}`,
         attendance_days: attendanceData[student.id] || ""
       }));
 
@@ -145,6 +147,22 @@ export default function ManageAttendance() {
               </select>
             </div>
 
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <label className="text-sm font-medium text-slate-700 whitespace-nowrap">Year:</label>
+              <select
+                value={selectedYear}
+                onChange={(e) => {
+                  setSelectedYear(e.target.value);
+                  setDataLoaded(false);
+                }}
+                className="w-full sm:w-auto px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900 font-medium"
+              >
+                {ACADEMIC_YEARS.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
+
             <button
               onClick={handleLoad}
               disabled={loading}
@@ -170,7 +188,7 @@ export default function ManageAttendance() {
                 Attendance List
               </h3>
               <p className="text-sm text-slate-500">
-                Class {selectedClass} • {selectedTerm}
+                Class {selectedClass} • {selectedTerm} • {selectedYear}
               </p>
             </div>
             <button
