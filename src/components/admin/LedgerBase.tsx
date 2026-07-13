@@ -603,6 +603,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                   let totalWGP = 0;
                   let totalCreditHours = 0;
                   let grandTotal = 0;
+                  let hasNG = false;
 
                   const subjectResults = subjects.map(sub => {
                     const m = marks[student.id]?.[sub.id] || {};
@@ -629,12 +630,21 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     const thWGP = thGradeGP.gp * 2.5;
                     const prWGP = prGradeGP.gp * 2.5;
                     
-                    const subjTotalWGP = thWGP + prWGP;
-                    const subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : subjTotalWGP / 5;
+                    let subjTotalWGP = thWGP + prWGP;
+                    let subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : subjTotalWGP / 5;
                     
                     const subjTotalMarks = prTotal + thTotal;
                     
-                    const subjFinalGrade = getGradeAndGP((subjTotalMarks / (isComputer ? 50 : 100)) * 100).grade;
+                    let subjFinalGrade = getGradeAndGP((subjTotalMarks / (isComputer ? 50 : 100)) * 100).grade;
+
+                    if (t1 < 2 || t2 < 2 || thGradeGP.grade === "NG" || prGradeGP.grade === "NG") {
+                      subjTotalGP = 0;
+                      subjFinalGrade = "NG";
+                    }
+
+                    if (subjTotalGP === 0 || subjFinalGrade === "NG") {
+                      hasNG = true;
+                    }
 
                     if (!isComputer) {
                       totalWGP += subjTotalWGP; 
@@ -645,7 +655,8 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     return { prTotal, thTotal, prGradeGP, thGradeGP, thWGP, prWGP, subjTotalWGP, subjTotalGP, subjFinalGrade, subjTotalMarks, isComputer };
                   });
 
-                  const finalGPA = totalCreditHours > 0 ? totalWGP / totalCreditHours : 0;
+                  let finalGPA = totalCreditHours > 0 ? totalWGP / totalCreditHours : 0;
+                  if (hasNG) finalGPA = 0;
                   const { grade: finalGrade } = getGradeAndGP(finalGPA * 25);
                   const remarks = getRemarks(finalGrade);
 
@@ -763,6 +774,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                   let totalWGP = 0;
                   let totalCU = 0;
                   let grandTotal = 0;
+                  let hasNG = false;
 
                   const subjectResults = subjects.map(sub => {
                     const isComputer = sub.subject_name.toLowerCase().includes("computer");
@@ -776,6 +788,10 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     const { grade, gp } = getGradeAndGP(percent);
                     const wgp = gp * 4; // Default 4 credit hours
 
+                    if (gp === 0 || grade === "NG") {
+                      hasNG = true;
+                    }
+
                     if (!isComputer) {
                       totalWGP += wgp;
                       totalCU += 4;
@@ -785,7 +801,8 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     return { par, pw, term, total, gp, grade, wgp };
                   });
 
-                  const finalGPA = totalCU > 0 ? totalWGP / totalCU : 0;
+                  let finalGPA = totalCU > 0 ? totalWGP / totalCU : 0;
+                  if (hasNG) finalGPA = 0;
                   const { grade: finalGrade } = getGradeAndGP(finalGPA * 25);
                   const remarks = getRemarks(finalGrade);
 
