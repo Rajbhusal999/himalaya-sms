@@ -17,6 +17,7 @@ import GradeSheet from "@/components/admin/GradeSheet";
 import ReportsDashboard from "@/components/admin/ReportsDashboard";
 import ManageNews from "@/components/admin/ManageNews";
 import ManageAdmissions from "@/components/admin/ManageAdmissions";
+import ManageSettings from "@/components/admin/ManageSettings";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -49,6 +50,7 @@ type Stat = {
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [stats, setStats] = useState({
     students: 0,
     teachers: 0,
@@ -180,6 +182,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "admissions") {
       return <ManageAdmissions />;
+    }
+
+    if (activeTab === "settings") {
+      return <ManageSettings />;
     }
 
     return (
@@ -573,10 +579,60 @@ export default function AdminDashboard() {
             <h1 className="text-xl font-semibold text-slate-800 capitalize">{activeTab}</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <button className="p-2 text-slate-400 hover:text-slate-500 transition-colors">
-              <Bell className="w-5 h-5" />
-            </button>
-            <button className="p-2 text-slate-400 hover:text-slate-500 transition-colors">
+            <div className="relative">
+              <button 
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className={`p-2 transition-colors rounded-full ${isNotificationsOpen ? 'bg-brand-100 text-brand-600' : 'text-slate-400 hover:text-slate-500 hover:bg-slate-100'}`}
+              >
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              </button>
+              
+              {isNotificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
+                  <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <h3 className="font-semibold text-slate-800">Notifications</h3>
+                    <span className="text-xs text-brand-600 cursor-pointer hover:underline">Mark all as read</span>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    <div className="px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer">
+                      <div className="flex gap-3">
+                        <div className="w-2 h-2 bg-brand-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <div>
+                          <p className="text-sm text-slate-800">New admission application received for Class 5.</p>
+                          <p className="text-xs text-slate-500 mt-1">10 minutes ago</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer">
+                      <div className="flex gap-3">
+                        <div className="w-2 h-2 bg-transparent rounded-full mt-2 flex-shrink-0"></div>
+                        <div>
+                          <p className="text-sm text-slate-800">System backup completed successfully.</p>
+                          <p className="text-xs text-slate-500 mt-1">2 hours ago</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-4 py-3 hover:bg-slate-50 transition-colors cursor-pointer">
+                      <div className="flex gap-3">
+                        <div className="w-2 h-2 bg-transparent rounded-full mt-2 flex-shrink-0"></div>
+                        <div>
+                          <p className="text-sm text-slate-800">New notice published: "Upcoming Final Examinations".</p>
+                          <p className="text-xs text-slate-500 mt-1">Yesterday</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-4 py-2 border-t border-slate-100 text-center">
+                    <button className="text-sm font-medium text-brand-600 hover:text-brand-700">View all notifications</button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <button 
+              onClick={() => handleTabClick("settings")}
+              className={`p-2 transition-colors rounded-full ${activeTab === 'settings' ? 'bg-brand-100 text-brand-600' : 'text-slate-400 hover:text-slate-500 hover:bg-slate-100'}`}
+            >
               <Settings className="w-5 h-5" />
             </button>
             <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">
