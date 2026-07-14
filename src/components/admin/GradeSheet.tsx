@@ -349,7 +349,7 @@ export default function GradeSheet() {
 
   return (
     <div className="space-y-6">
-      <style dangerouslySetInnerHTML={{__html: \`
+      <style dangerouslySetInnerHTML={{__html: `
         @media print {
           html, body {
             height: auto !important;
@@ -384,7 +384,7 @@ export default function GradeSheet() {
           }
           @page { size: A4 landscape; margin: 0.25in; }
         }
-      \`}} />
+      `}} />
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 print:hidden">
         <div className="flex justify-between items-center">
