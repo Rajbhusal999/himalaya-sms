@@ -330,7 +330,7 @@ export default function ReportsDashboard() {
           <select 
             value={selectedYear} 
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="border-slate-300 rounded-md text-sm shadow-sm py-1.5 focus:border-brand-500 focus:ring-brand-500"
+            className="border-slate-300 rounded-md text-sm shadow-sm py-1.5 focus:border-brand-500 focus:ring-brand-500 text-black"
           >
             {ACADEMIC_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
@@ -341,7 +341,7 @@ export default function ReportsDashboard() {
           <select 
             value={selectedTerm} 
             onChange={(e) => setSelectedTerm(e.target.value)}
-            className="border-slate-300 rounded-md text-sm shadow-sm py-1.5 focus:border-brand-500 focus:ring-brand-500"
+            className="border-slate-300 rounded-md text-sm shadow-sm py-1.5 focus:border-brand-500 focus:ring-brand-500 text-black"
           >
             {EXAM_TERMS.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
@@ -353,7 +353,7 @@ export default function ReportsDashboard() {
             <select 
               value={selectedClass} 
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="border-slate-300 rounded-md text-sm shadow-sm py-1.5 focus:border-brand-500 focus:ring-brand-500"
+              className="border-slate-300 rounded-md text-sm shadow-sm py-1.5 focus:border-brand-500 focus:ring-brand-500 text-black"
             >
               {CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
