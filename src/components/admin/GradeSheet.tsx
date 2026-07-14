@@ -162,7 +162,11 @@ export default function GradeSheet() {
       
       let creditHour = 4;
       if (isClass6to8) {
-        creditHour = isComputer ? 2 : 2.5 + 2.5; // TH + PR = 5
+        if (selectedTerm === "Final") {
+          creditHour = isComputer ? 2 : 5; // TH + PR = 5
+        } else {
+          creditHour = isComputer ? 0 : 4;
+        }
       } else if (isClass1to5) {
         creditHour = 4;
       }
@@ -171,26 +175,43 @@ export default function GradeSheet() {
       let subjFinalGrade = "NG";
 
       if (isClass6to8) {
-        const par = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
-        const pw = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
-        const t1 = parseFloat(m.firstTerm || "0");
-        const t2 = parseFloat(m.secondTerm || "0");
-        const prTotal = par + pw + t1 + t2; 
-        const thTotal = parseFloat(m.written || "0"); 
-        const prMax = isComputer ? 25 : 50;
-        const thMax = isComputer ? 25 : 50;
-        const prPercent = (prTotal / prMax) * 100;
-        const thPercent = (thTotal / thMax) * 100;
-        const prGradeGP = getGradeAndGP(prPercent);
-        const thGradeGP = getGradeAndGP(thPercent);
-        
-        subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : ((thGradeGP.gp * 2.5) + (prGradeGP.gp * 2.5)) / 5;
-        const subjTotalMarks = prTotal + thTotal;
-        subjFinalGrade = getGradeAndGP((subjTotalMarks / (isComputer ? 50 : 100)) * 100).grade;
+        if (selectedTerm === "Final") {
+          const par = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
+          const pw = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
+          const t1 = parseFloat(m.firstTerm || "0");
+          const t2 = parseFloat(m.secondTerm || "0");
+          const prTotal = par + pw + t1 + t2; 
+          const thTotal = parseFloat(m.written || "0"); 
+          const prMax = isComputer ? 25 : 50;
+          const thMax = isComputer ? 25 : 50;
+          const prPercent = (prTotal / prMax) * 100;
+          const thPercent = (thTotal / thMax) * 100;
+          const prGradeGP = getGradeAndGP(prPercent);
+          const thGradeGP = getGradeAndGP(thPercent);
+          
+          subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : ((thGradeGP.gp * 2.5) + (prGradeGP.gp * 2.5)) / 5;
+          const subjTotalMarks = prTotal + thTotal;
+          subjFinalGrade = getGradeAndGP((subjTotalMarks / (isComputer ? 50 : 100)) * 100).grade;
 
-        if (t1 < 2 || t2 < 2 || thGradeGP.grade === "NG" || prGradeGP.grade === "NG") {
-          subjTotalGP = 0;
-          subjFinalGrade = "NG";
+          if (t1 < 2 || t2 < 2 || thGradeGP.grade === "NG" || prGradeGP.grade === "NG") {
+            subjTotalGP = 0;
+            subjFinalGrade = "NG";
+          }
+        } else {
+          const par = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
+          const pw = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
+          const term = parseFloat(m.termExam || "0");
+          const total = par + pw + term;
+          
+          const percent = (total / 50) * 100;
+          const { grade, gp } = getGradeAndGP(percent);
+          subjTotalGP = gp;
+          subjFinalGrade = grade;
+
+          if (gp === 0 || grade === "NG") {
+            subjTotalGP = 0;
+            subjFinalGrade = "NG";
+          }
         }
       } else {
         const cu = parseFloat(m.cu || "0"); 
@@ -212,7 +233,7 @@ export default function GradeSheet() {
 
       return { 
         subjectName: sub.subject_name, 
-        creditHour: isClass6to8 && isComputer ? "" : creditHour.toString(), // Hide credit hour for computer if needed, or leave it
+        creditHour: (isClass6to8 && isComputer) ? "" : creditHour.toString(), 
         gp: subjTotalGP, 
         grade: subjFinalGrade,
         remarks: getRemarks(subjFinalGrade)
