@@ -414,7 +414,7 @@ export default function GradeSheet() {
             >
               <option value="" disabled>Select Class</option>
               {CATEGORIES.flatMap(c => c.classes).map(cls => (
-                <option key={cls} value={cls}>{cls.match(/^\d+$/) ? \`Class \${cls}\` : cls}</option>
+                <option key={cls} value={cls}>{cls.match(/^\d+$/) ? `Class ${cls}` : cls}</option>
               ))}
             </select>
           </div>
