@@ -51,8 +51,9 @@ export default function AdminDashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState({
     students: 0,
-    subjects: 0,
-    marksEntries: 0
+    teachers: 0,
+    admissions: 0,
+    subjects: 0
   });
   const [loading, setLoading] = useState(true);
   const [recentMarks, setRecentMarks] = useState<any[]>([]);
@@ -81,13 +82,15 @@ export default function AdminDashboard() {
       try {
         // Fetch counts
         const { count: studentCount } = await supabase.from('students').select('*', { count: 'exact', head: true });
+        const { count: teacherCount } = await supabase.from('teachers').select('*', { count: 'exact', head: true });
+        const { count: admissionCount } = await supabase.from('admissions').select('*', { count: 'exact', head: true }).eq('status', 'New');
         const { count: subjectCount } = await supabase.from('subjects').select('*', { count: 'exact', head: true });
-        const { count: marksCount } = await supabase.from('marks').select('*', { count: 'exact', head: true });
         
         setStats({
           students: studentCount || 0,
-          subjects: subjectCount || 0,
-          marksEntries: marksCount || 0
+          teachers: teacherCount || 0,
+          admissions: admissionCount || 0,
+          subjects: subjectCount || 0
         });
 
         // Fetch recent marks for ledger preview
@@ -182,27 +185,69 @@ export default function AdminDashboard() {
     return (
       <div className="space-y-6">
         {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-slate-500 font-medium">Total Students</h3>
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Users className="w-5 h-5" /></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl shadow-lg shadow-blue-500/20 p-6 text-white relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <div>
+                <p className="text-blue-100 text-sm font-medium uppercase tracking-wider mb-1">Total Students</p>
+                <h3 className="text-4xl font-bold">{stats.students}</h3>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <GraduationCap className="w-6 h-6 text-white" />
+              </div>
             </div>
-            <p className="text-3xl font-bold text-slate-800">{stats.students}</p>
+            <div className="text-sm text-blue-100 font-medium relative z-10 flex items-center gap-1 cursor-pointer hover:text-white" onClick={() => handleTabClick("students")}>
+              View details <ArrowRight className="w-4 h-4" />
+            </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-slate-500 font-medium">Subjects</h3>
-              <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><BookMarked className="w-5 h-5" /></div>
+          
+          <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl shadow-lg shadow-purple-500/20 p-6 text-white relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <div>
+                <p className="text-purple-100 text-sm font-medium uppercase tracking-wider mb-1">Total Teachers</p>
+                <h3 className="text-4xl font-bold">{stats.teachers}</h3>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <UserCog className="w-6 h-6 text-white" />
+              </div>
             </div>
-            <p className="text-3xl font-bold text-slate-800">{stats.subjects}</p>
+            <div className="text-sm text-purple-100 font-medium relative z-10 flex items-center gap-1 cursor-pointer hover:text-white" onClick={() => handleTabClick("teachers")}>
+              Manage faculty <ArrowRight className="w-4 h-4" />
+            </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-slate-500 font-medium">Marks Entries</h3>
-              <div className="p-2 bg-green-50 text-green-600 rounded-lg"><FileSpreadsheet className="w-5 h-5" /></div>
+
+          <div className="bg-gradient-to-br from-amber-500 to-amber-700 rounded-2xl shadow-lg shadow-amber-500/20 p-6 text-white relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <div>
+                <p className="text-amber-100 text-sm font-medium uppercase tracking-wider mb-1">New Admissions</p>
+                <h3 className="text-4xl font-bold">{stats.admissions}</h3>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <ClipboardCheck className="w-6 h-6 text-white" />
+              </div>
             </div>
-            <p className="text-3xl font-bold text-slate-800">{stats.marksEntries}</p>
+            <div className="text-sm text-amber-100 font-medium relative z-10 flex items-center gap-1 cursor-pointer hover:text-white" onClick={() => handleTabClick("admissions")}>
+              Review applications <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl shadow-lg shadow-emerald-500/20 p-6 text-white relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="flex justify-between items-start mb-4 relative z-10">
+              <div>
+                <p className="text-emerald-100 text-sm font-medium uppercase tracking-wider mb-1">Total Subjects</p>
+                <h3 className="text-4xl font-bold">{stats.subjects}</h3>
+              </div>
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <BookMarked className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="text-sm text-emerald-100 font-medium relative z-10 flex items-center gap-1 cursor-pointer hover:text-white" onClick={() => handleTabClick("subjects")}>
+              View curriculum <ArrowRight className="w-4 h-4" />
+            </div>
           </div>
         </div>
 
