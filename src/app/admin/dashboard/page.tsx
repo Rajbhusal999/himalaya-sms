@@ -13,6 +13,7 @@ import MarkEntry from "@/components/admin/MarkEntry";
 import MarkLedger from "@/components/admin/MarkLedger";
 import Ledger from "@/components/admin/Ledger";
 import GradeLedger from "@/components/admin/GradeLedger";
+import GradeSheet from "@/components/admin/GradeSheet";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -134,6 +135,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "grade-ledger") {
       return <GradeLedger />;
+    }
+
+    if (activeTab === "grade-sheet") {
+      return <GradeSheet />;
     }
 
     return (
