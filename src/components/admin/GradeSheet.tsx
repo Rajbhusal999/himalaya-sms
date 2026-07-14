@@ -89,9 +89,40 @@ export default function GradeSheet() {
 
       setSubjects(fetchedSubjects);
 
-      const key = `marks_${selectedClass}_${selectedTerm}_${selectedYear}`;
-      const savedMarks = JSON.parse(localStorage.getItem(key) || "{}");
-      setMarks(savedMarks);
+      // Load marks from Supabase
+      const studentIds = formattedStudents.map((s: any) => s.id);
+      if (studentIds.length > 0) {
+        const { data: marksData, error: marksError } = await supabase
+          .from("marks")
+          .select("*")
+          .in("student_id", studentIds)
+          .eq("term", selectedTerm)
+          .eq("academic_year", selectedYear);
+
+        if (marksError) throw marksError;
+
+        const marksMap: Record<string, Record<string, any>> = {};
+        (marksData || []).forEach((m: any) => {
+          if (!marksMap[m.student_id]) marksMap[m.student_id] = {};
+          marksMap[m.student_id][m.subject_id] = {
+            written: m.written?.toString() ?? "",
+            oral: m.oral?.toString() ?? "",
+            cu: m.cu?.toString() ?? "",
+            total: m.total?.toString() ?? "",
+            attendance: m.attendance?.toString() ?? "",
+            activity: m.activity?.toString() ?? "",
+            project16: m.project16?.toString() ?? "",
+            project20: m.project20?.toString() ?? "",
+            termExam: m.term_exam?.toString() ?? "",
+            firstTerm: m.first_term?.toString() ?? "",
+            secondTerm: m.second_term?.toString() ?? "",
+            writtenFinal: m.written_final?.toString() ?? "",
+          };
+        });
+        setMarks(marksMap);
+      } else {
+        setMarks({});
+      }
 
       let mappedTerm = selectedTerm;
       if (selectedTerm === "First Term") mappedTerm = "First terminal exam";

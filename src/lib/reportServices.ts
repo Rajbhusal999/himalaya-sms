@@ -27,7 +27,20 @@ export const getAggregatedReports = async (academicYear: string, selectedClass: 
   const marksMap: Record<string, Record<string, any>> = {};
   marksData?.forEach((m) => {
     if (!marksMap[m.student_id]) marksMap[m.student_id] = {};
-    marksMap[m.student_id][m.subject_id] = m;
+    marksMap[m.student_id][m.subject_id] = {
+      written: m.written?.toString() ?? "",
+      oral: m.oral?.toString() ?? "",
+      cu: m.cu?.toString() ?? "",
+      total: m.total?.toString() ?? "",
+      attendance: m.attendance?.toString() ?? "",
+      activity: m.activity?.toString() ?? "",
+      project16: m.project16?.toString() ?? "",
+      project20: m.project20?.toString() ?? "",
+      termExam: m.term_exam?.toString() ?? "",
+      firstTerm: m.first_term?.toString() ?? "",
+      secondTerm: m.second_term?.toString() ?? "",
+      writtenFinal: m.written_final?.toString() ?? "",
+    };
   });
 
   // Calculate grades for all students in the class
@@ -79,8 +92,8 @@ export const getAggregatedReports = async (academicYear: string, selectedClass: 
 
   // 3. Average GPA
   const validGPAs = studentReports.filter(sr => !sr.hasNG && sr.finalGPA > 0).map(sr => sr.finalGPA);
-  const averageGPA = validGPAs.length > 0 
-    ? (validGPAs.reduce((a, b) => a + b, 0) / validGPAs.length).toFixed(2) 
+  const averageGPA = validGPAs.length > 0
+    ? (validGPAs.reduce((a, b) => a + b, 0) / validGPAs.length).toFixed(2)
     : "0.00";
 
   // 4. Aggregated NG
@@ -91,7 +104,7 @@ export const getAggregatedReports = async (academicYear: string, selectedClass: 
   subjects?.forEach(sub => {
     subjectNGs[sub.subject_name] = [];
   });
-  
+
   studentReports.forEach(sr => {
     sr.subjectResults.forEach(res => {
       if (res.grade === "NG") {

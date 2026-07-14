@@ -103,9 +103,40 @@ export default function MarkEntry() {
         setSelectedSubject(null);
       }
 
-      // In a real application, you would also fetch existing marks for this term and class to populate state.
-      // For now we just reset the local state.
-      setMarks({});
+      // Fetch existing marks from Supabase for this class, term, and year
+      const studentIds = (studentsData || []).map((s: any) => s.id);
+      if (studentIds.length > 0) {
+        const { data: marksData, error: marksError } = await supabase
+          .from("marks")
+          .select("*")
+          .in("student_id", studentIds)
+          .eq("term", selectedTerm)
+          .eq("academic_year", selectedYear);
+
+        if (marksError) throw marksError;
+
+        const marksMap: Record<string, Record<string, any>> = {};
+        (marksData || []).forEach((m: any) => {
+          if (!marksMap[m.student_id]) marksMap[m.student_id] = {};
+          marksMap[m.student_id][m.subject_id] = {
+            written: m.written?.toString() ?? "",
+            oral: m.oral?.toString() ?? "",
+            cu: m.cu?.toString() ?? "",
+            total: m.total?.toString() ?? "",
+            attendance: m.attendance?.toString() ?? "",
+            activity: m.activity?.toString() ?? "",
+            project16: m.project16?.toString() ?? "",
+            project20: m.project20?.toString() ?? "",
+            termExam: m.term_exam?.toString() ?? "",
+            firstTerm: m.first_term?.toString() ?? "",
+            secondTerm: m.second_term?.toString() ?? "",
+            writtenFinal: m.written_final?.toString() ?? "",
+          };
+        });
+        setMarks(marksMap);
+      } else {
+        setMarks({});
+      }
 
     } catch (err: any) {
       alert("Error loading data: " + err.message);
@@ -117,13 +148,6 @@ export default function MarkEntry() {
   useEffect(() => {
     if (selectedClass) {
       loadData();
-      const key = `marks_${selectedClass}_${selectedTerm}_${selectedYear}`;
-      const saved = localStorage.getItem(key);
-      if (saved) {
-        setMarks(JSON.parse(saved));
-      } else {
-        setMarks({});
-      }
     }
   }, [selectedClass, selectedTerm, selectedYear]);
 
@@ -177,12 +201,52 @@ export default function MarkEntry() {
 
   const handleSaveMarks = async () => {
     try {
-      const key = `marks_${selectedClass}_${selectedTerm}_${selectedYear}`;
-      localStorage.setItem(key, JSON.stringify(marks));
+      const upsertRows: any[] = [];
+
+      students.forEach(student => {
+        const studentMarks = marks[student.id];
+        if (!studentMarks) return;
+
+        subjects.forEach(sub => {
+          const m = studentMarks[sub.id];
+          if (!m) return;
+
+          upsertRows.push({
+            student_id: student.id,
+            subject_id: sub.id,
+            term: selectedTerm,
+            academic_year: selectedYear,
+            written: m.written !== "" ? parseFloat(m.written) : null,
+            oral: m.oral !== "" ? parseFloat(m.oral) : null,
+            cu: m.cu !== "" ? parseFloat(m.cu) : null,
+            total: m.total !== "" ? parseFloat(m.total) : null,
+            attendance: m.attendance !== "" ? parseFloat(m.attendance) : null,
+            activity: m.activity !== "" ? parseFloat(m.activity) : null,
+            project16: m.project16 !== "" ? parseFloat(m.project16) : null,
+            project20: m.project20 !== "" ? parseFloat(m.project20) : null,
+            term_exam: m.termExam !== "" ? parseFloat(m.termExam) : null,
+            first_term: m.firstTerm !== "" ? parseFloat(m.firstTerm) : null,
+            second_term: m.secondTerm !== "" ? parseFloat(m.secondTerm) : null,
+            written_final: m.writtenFinal !== "" ? parseFloat(m.writtenFinal) : null,
+          });
+        });
+      });
+
+      if (upsertRows.length === 0) {
+        alert("No marks to save.");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("marks")
+        .upsert(upsertRows, { onConflict: "student_id,subject_id,term,academic_year" });
+
+      if (error) throw error;
+
       alert("Marks saved successfully!");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to save marks.");
+      alert("Failed to save marks: " + err.message);
     }
   };
 
