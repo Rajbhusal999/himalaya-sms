@@ -288,8 +288,8 @@ export default function GradeSheet() {
     return (
       <div className="w-1/2 p-2 border-r border-black last:border-r-0 relative">
         {/* Watermark */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden opacity-20">
-          <div className="text-4xl sm:text-5xl md:text-6xl font-extrabold whitespace-nowrap text-slate-400" style={{ transform: 'rotate(-45deg)' }}>
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden opacity-5">
+          <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold whitespace-nowrap text-slate-500" style={{ fontFamily: '"Times New Roman", Times, serif', transform: 'rotate(-45deg)' }}>
             SHREE HIMALAYA BASIC SCHOOL (1-8)
           </div>
         </div>
@@ -299,7 +299,8 @@ export default function GradeSheet() {
           <div className="w-24 border-r border-black flex items-center justify-center bg-white overflow-hidden p-1">
             <img src="/saraswati.png" alt="Saraswati" className="w-full h-full object-contain" />
           </div>
-          <div className="flex-1 flex flex-col items-center justify-center text-center px-2 py-1 overflow-hidden">
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-2 py-1 overflow-hidden relative">
+            <div className="text-[10px] font-bold w-full text-center">IEMIS CODE: 350050006</div>
             <h1 className="text-lg sm:text-xl font-bold uppercase tracking-tight leading-tight whitespace-nowrap">SHREE HIMALAYA BASIC SCHOOL (1-8)</h1>
             <h2 className="text-sm font-bold mt-1">BHARATPUR-11, JAGRITICHOWK</h2>
           </div>
