@@ -14,6 +14,7 @@ import MarkLedger from "@/components/admin/MarkLedger";
 import Ledger from "@/components/admin/Ledger";
 import GradeLedger from "@/components/admin/GradeLedger";
 import GradeSheet from "@/components/admin/GradeSheet";
+import ReportsDashboard from "@/components/admin/ReportsDashboard";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -31,7 +32,8 @@ import {
   IdCard,
   FileEdit,
   Library,
-  FileText
+  FileText,
+  BarChart3
 } from "lucide-react";
 
 type Stat = {
@@ -141,6 +143,10 @@ export default function AdminDashboard() {
       return <GradeSheet />;
     }
 
+    if (activeTab === "reports") {
+      return <ReportsDashboard />;
+    }
+
     return (
       <div className="space-y-6">
         {/* Stats Row */}
@@ -192,11 +198,11 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl shadow-md text-white p-6 relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1">
+          <div onClick={() => setActiveTab("reports")} className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl shadow-md text-white p-6 relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1">
             <div className="absolute right-0 top-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-            <FileSpreadsheet className="w-10 h-10 mb-4 text-emerald-200" />
-            <h3 className="text-xl font-bold mb-2">Tabulation Sheets</h3>
-            <p className="text-emerald-100 text-sm mb-6">Generate official report cards and tabulation sheets.</p>
+            <BarChart3 className="w-10 h-10 mb-4 text-emerald-200" />
+            <h3 className="text-xl font-bold mb-2">Reports & Analysis</h3>
+            <p className="text-emerald-100 text-sm mb-6">Generate official reports, analytics, and tabulation sheets.</p>
             <div className="flex items-center text-sm font-medium text-white">
               Open Tool <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -376,15 +382,15 @@ export default function AdminDashboard() {
               Grade Sheet
             </button>
             <button
-              onClick={() => setActiveTab("tabulation")}
+              onClick={() => setActiveTab("reports")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                activeTab === "tabulation" 
+                activeTab === "reports" 
                   ? "bg-brand-800 text-white" 
                   : "text-brand-200 hover:bg-brand-900 hover:text-white"
               }`}
             >
-              <FileSpreadsheet className="w-5 h-5 mr-3" />
-              Tabulation Sheets
+              <BarChart3 className="w-5 h-5 mr-3" />
+              Reports
             </button>
           </nav>
           
