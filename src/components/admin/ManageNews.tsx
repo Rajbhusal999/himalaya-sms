@@ -89,7 +89,7 @@ export default function ManageNews() {
             <textarea
               id="content"
               rows={3}
-              className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all resize-none"
+              className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all resize-none text-slate-900 bg-white"
               placeholder="Enter the news or announcement..."
               value={newContent}
               onChange={(e) => setNewContent(e.target.value)}
