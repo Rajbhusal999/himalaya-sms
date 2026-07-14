@@ -161,3 +161,54 @@ export const getSchoolwiseAnalysis = async (academicYear: string, term: string) 
 
   return schoolStats;
 };
+
+export const getStudentAttendanceReport = async (academicYear: string, selectedClass: string, term: string) => {
+  const { data: students, error: stdErr } = await supabase
+    .from("students")
+    .select("id, name, roll_no")
+    .eq("class", selectedClass)
+    .order("roll_no", { ascending: true });
+
+  const { data: attendanceData, error: attErr } = await supabase
+    .from("attendance")
+    .select("student_id, attendance_days")
+    .eq("exam_term", term);
+
+  if (stdErr || attErr) {
+    throw new Error("Failed to fetch attendance data");
+  }
+
+  const attendanceMap: Record<string, string> = {};
+  attendanceData?.forEach(record => {
+    attendanceMap[record.student_id] = record.attendance_days || "0";
+  });
+
+  return (students || []).map(student => ({
+    name: student.name,
+    roll: student.roll_no,
+    attendanceDays: attendanceMap[student.id] || "N/A"
+  }));
+};
+
+export const getStudentDemographicsReport = async (academicYear: string, selectedClass: string) => {
+  const { data: students, error: stdErr } = await supabase
+    .from("students")
+    .select("*")
+    .eq("class", selectedClass)
+    .order("roll_no", { ascending: true });
+
+  if (stdErr) {
+    throw new Error("Failed to fetch demographics data");
+  }
+
+  return (students || []).map(student => ({
+    name: student.name,
+    roll: student.roll_no,
+    gender: student.gender || "N/A",
+    dob: student.dob || "N/A",
+    motherTongue: student.mother_tongue || "N/A",
+    disabilityType: student.disability_type || "N/A",
+    address: student.permanent_address || "N/A",
+    guardianContact: student.guardian_contact_number || "N/A",
+  }));
+};

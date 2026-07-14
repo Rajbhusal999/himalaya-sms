@@ -11,7 +11,7 @@ import {
   Loader2,
   Download
 } from "lucide-react";
-import { getAggregatedReports, getSchoolwiseAnalysis } from "@/lib/reportServices";
+import { getAggregatedReports, getSchoolwiseAnalysis, getStudentAttendanceReport, getStudentDemographicsReport } from "@/lib/reportServices";
 
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
 const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2082 + i).toString());
@@ -56,6 +56,12 @@ export default function ReportsDashboard() {
         if (activeReport === "school-analysis") {
           const stats = await getSchoolwiseAnalysis(selectedYear, selectedTerm);
           setSchoolData(stats);
+        } else if (activeReport === "attendance") {
+          const stats = await getStudentAttendanceReport(selectedYear, selectedClass, selectedTerm);
+          setReportData(stats);
+        } else if (activeReport === "demographics") {
+          const stats = await getStudentDemographicsReport(selectedYear, selectedClass);
+          setReportData(stats);
         } else if (examReports.find(r => r.id === activeReport)) {
           const stats = await getAggregatedReports(selectedYear, selectedClass, selectedTerm);
           setReportData(stats);
@@ -239,6 +245,82 @@ export default function ReportsDashboard() {
     );
   };
 
+  const renderAttendanceReport = () => {
+    if (!reportData || !Array.isArray(reportData)) return null;
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left border-collapse">
+          <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-xs">
+            <tr>
+              <th className="border p-3 w-24">Roll No</th>
+              <th className="border p-3">Student Name</th>
+              <th className="border p-3 text-center">Attendance Days</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reportData.map((student: any, idx: number) => (
+              <tr key={idx} className="border-b hover:bg-slate-50 text-black">
+                <td className="border p-3 font-mono font-medium">{student.roll}</td>
+                <td className="border p-3 font-bold">{student.name}</td>
+                <td className="border p-3 text-center">{student.attendanceDays}</td>
+              </tr>
+            ))}
+            {reportData.length === 0 && (
+              <tr>
+                <td colSpan={3} className="p-8 text-center text-slate-500 font-medium">
+                  No students found in this class.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderDemographicsReport = () => {
+    if (!reportData || !Array.isArray(reportData)) return null;
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left border-collapse">
+          <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-xs">
+            <tr>
+              <th className="border p-3 w-20">Roll</th>
+              <th className="border p-3">Name</th>
+              <th className="border p-3">Gender</th>
+              <th className="border p-3">DOB</th>
+              <th className="border p-3">Mother Tongue</th>
+              <th className="border p-3">Disability</th>
+              <th className="border p-3">Address</th>
+              <th className="border p-3">Guardian Contact</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reportData.map((student: any, idx: number) => (
+              <tr key={idx} className="border-b hover:bg-slate-50 text-black">
+                <td className="border p-3 font-mono">{student.roll}</td>
+                <td className="border p-3 font-bold">{student.name}</td>
+                <td className="border p-3">{student.gender}</td>
+                <td className="border p-3 whitespace-nowrap">{student.dob}</td>
+                <td className="border p-3">{student.motherTongue}</td>
+                <td className="border p-3">{student.disabilityType}</td>
+                <td className="border p-3 text-xs">{student.address}</td>
+                <td className="border p-3 text-xs whitespace-nowrap font-mono">{student.guardianContact}</td>
+              </tr>
+            ))}
+            {reportData.length === 0 && (
+              <tr>
+                <td colSpan={8} className="p-8 text-center text-slate-500 font-medium">
+                  No students found in this class.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   const renderReportContent = () => {
     if (!activeReport) {
       return (
@@ -309,12 +391,8 @@ export default function ReportsDashboard() {
             {activeReport === "student-ng" && renderStudentwiseNG()}
             {activeReport === "school-analysis" && renderSchoolwiseAnalysis()}
             
-            {studentReports.find(r => r.id === activeReport) && (
-              <div className="flex flex-col items-center justify-center h-64 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
-                <p className="text-slate-500 font-medium">This report is currently under construction.</p>
-                <p className="text-sm text-slate-400 mt-2">Data visualization will be available soon.</p>
-              </div>
-            )}
+            {activeReport === "attendance" && renderAttendanceReport()}
+            {activeReport === "demographics" && renderDemographicsReport()}
           </div>
         )}
       </div>
