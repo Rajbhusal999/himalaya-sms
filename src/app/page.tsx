@@ -2,63 +2,254 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { GraduationCap, Users, ShieldCheck, ArrowRight } from "lucide-react";
+import { GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, Award, Heart, ChevronRight, Menu, X } from "lucide-react";
 
 export default function LandingPage() {
-  const [showOptions, setShowOptions] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-900 via-brand-800 to-brand-950 p-4">
-      <div className="relative w-full max-w-md">
-        {/* Decorative background blur */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-brand-400 to-brand-300 rounded-2xl blur opacity-30 animate-pulse"></div>
-        
-        <div className="relative glass-panel rounded-2xl p-8 md:p-12 text-center text-white shadow-2xl border border-white/10 transition-all duration-500">
-          <div className="flex justify-center mb-6">
-            <div className="p-4 bg-white/10 rounded-full border border-white/20">
-              <GraduationCap className="w-12 h-12 text-brand-100" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+      {/* Navigation */}
+      <nav className="fixed w-full z-50 glass-panel-light bg-white/80 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-brand-600 rounded-lg shadow-sm">
+                <GraduationCap className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="font-bold text-xl text-brand-950 tracking-tight leading-none">Shree Himalaya</h1>
+                <p className="text-xs font-bold text-brand-600 uppercase tracking-widest mt-0.5">Basic School</p>
+              </div>
             </div>
-          </div>
-          
-          <h1 className="text-3xl font-bold mb-2 tracking-tight">Exam Management System</h1>
-          <p className="text-brand-200 mb-8 font-medium">Welcome to the portal</p>
-          
-          {!showOptions ? (
-            <button
-              onClick={() => setShowOptions(true)}
-              className="w-full py-4 px-6 bg-brand-500 hover:bg-brand-600 hover-glow text-white rounded-xl font-semibold text-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3 shadow-lg"
-            >
-              Shree Himalaya Basic School
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          ) : (
-            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <Link 
-                href="/admin/login"
-                className="w-full py-4 px-6 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-3 group"
-              >
-                <ShieldCheck className="w-5 h-5 text-brand-300 group-hover:text-brand-200" />
-                School / Admin Login
-              </Link>
+            
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center space-x-8">
+              <a href="#about" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">About Us</a>
+              <a href="#academics" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Academics</a>
+              <a href="#admissions" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Admissions</a>
               
-              <Link 
-                href="/teacher/login"
-                className="w-full py-4 px-6 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-3 group"
-              >
-                <Users className="w-5 h-5 text-brand-300 group-hover:text-brand-200" />
-                Teacher Login
-              </Link>
+              <div className="h-6 w-px bg-slate-200"></div>
               
-              <button
-                onClick={() => setShowOptions(false)}
-                className="mt-6 text-sm text-brand-300 hover:text-white transition-colors"
-              >
-                ← Back
+              <Link href="/teacher/login" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Staff
+              </Link>
+              <Link href="/admin/login" className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-semibold transition-all shadow-md shadow-brand-200 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4" />
+                Portal
+              </Link>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-600 hover:text-brand-600 focus:outline-none p-2">
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
-          )}
+          </div>
         </div>
-      </div>
-    </main>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white border-b border-slate-200 shadow-xl animate-in fade-in slide-in-from-top-2">
+            <div className="px-4 pt-2 pb-6 space-y-1">
+              <a href="#about" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">About Us</a>
+              <a href="#academics" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Academics</a>
+              <a href="#admissions" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Admissions</a>
+              <div className="my-2 border-t border-slate-100"></div>
+              <Link href="/teacher/login" className="flex items-center gap-3 px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">
+                <Users className="w-5 h-5 text-slate-500" />
+                Teacher Portal
+              </Link>
+              <Link href="/admin/login" className="flex items-center gap-3 px-3 py-3 text-base font-semibold text-brand-600 bg-brand-50 rounded-md mt-2">
+                <ShieldCheck className="w-5 h-5" />
+                Admin Portal
+              </Link>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-900 via-brand-800 to-brand-950 z-0"></div>
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-brand-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-accent-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-brand-100 mb-8 backdrop-blur-md">
+            <span className="flex h-2 w-2 rounded-full bg-accent-400"></span>
+            <span className="text-sm font-semibold tracking-wide">Admissions open for 2026/2027</span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-tight">
+            Nurturing Minds, <br className="hidden md:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-200 to-white">Building Futures.</span>
+          </h1>
+          <p className="mt-4 text-xl md:text-2xl text-brand-100 max-w-3xl mx-auto font-light leading-relaxed mb-10">
+            Shree Himalaya Basic School provides a supportive, innovative, and inclusive learning environment where every child can discover their true potential.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="#admissions" className="px-8 py-4 bg-white text-brand-900 rounded-xl font-bold text-lg hover:bg-brand-50 transition-all shadow-xl shadow-white/10 flex items-center justify-center gap-2 group">
+              Apply Now
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </a>
+            <a href="#about" className="px-8 py-4 bg-brand-800/50 border border-brand-400/30 text-white rounded-xl font-bold text-lg hover:bg-brand-800 transition-all backdrop-blur-sm flex items-center justify-center gap-2">
+              Learn More
+            </a>
+          </div>
+        </div>
+        
+        {/* Wave divider at bottom */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg className="w-full h-12 md:h-24 text-slate-50 fill-current" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,120.4,188.8,107.5,233.1,97.69,277.62,77.53,321.39,56.44Z"></path>
+          </svg>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-12 bg-slate-50 relative z-20 -mt-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-8 border border-slate-100">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div>
+                <div className="text-4xl font-extrabold text-brand-600 mb-2">500+</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Students</div>
+              </div>
+              <div>
+                <div className="text-4xl font-extrabold text-brand-600 mb-2">35+</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Expert Teachers</div>
+              </div>
+              <div>
+                <div className="text-4xl font-extrabold text-brand-600 mb-2">15</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Years of Excellence</div>
+              </div>
+              <div>
+                <div className="text-4xl font-extrabold text-brand-600 mb-2">100%</div>
+                <div className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Commitment</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Section */}
+      <section id="about" className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-brand-600 font-bold tracking-widest uppercase text-sm mb-3">Why Choose Us</h2>
+            <h3 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6">A Foundation for Lifelong Success</h3>
+            <p className="text-lg text-slate-600 leading-relaxed">
+              We focus on holistic education that combines academic rigor with character development. Our students graduate prepared for the challenges of tomorrow.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-600 transition-colors duration-300">
+                <BookOpen className="w-7 h-7 text-brand-600 group-hover:text-white transition-colors duration-300" />
+              </div>
+              <h4 className="text-xl font-bold text-slate-900 mb-4">Academic Excellence</h4>
+              <p className="text-slate-600 leading-relaxed">
+                Our curriculum is designed to challenge and inspire students, fostering critical thinking, creativity, and a genuine love for learning.
+              </p>
+            </div>
+            
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-600 transition-colors duration-300">
+                <Award className="w-7 h-7 text-brand-600 group-hover:text-white transition-colors duration-300" />
+              </div>
+              <h4 className="text-xl font-bold text-slate-900 mb-4">Holistic Development</h4>
+              <p className="text-slate-600 leading-relaxed">
+                Beyond textbooks, we emphasize sports, arts, and extracurricular activities to ensure the well-rounded growth of every child.
+              </p>
+            </div>
+            
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+              <div className="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-600 transition-colors duration-300">
+                <Heart className="w-7 h-7 text-brand-600 group-hover:text-white transition-colors duration-300" />
+              </div>
+              <h4 className="text-xl font-bold text-slate-900 mb-4">Caring Community</h4>
+              <p className="text-slate-600 leading-relaxed">
+                A safe, inclusive, and supportive environment where teachers act as mentors and every student feels valued and respected.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section id="admissions" className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-brand-900"></div>
+        {/* Subtle patterned overlay could go here, omitting for simplicity */}
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-800/50 via-brand-900 to-brand-950"></div>
+        
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6">Ready to Join Our Community?</h2>
+          <p className="text-xl text-brand-100 mb-10 font-light">
+            Enrollments are now open for the upcoming academic year. Secure your child's future today.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <button className="px-8 py-4 bg-accent-500 hover:bg-accent-400 text-brand-950 rounded-xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-1">
+              Apply for Admission
+            </button>
+            <button className="px-8 py-4 bg-transparent border border-brand-300 text-white hover:bg-white/10 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 transform hover:-translate-y-1">
+              Contact Admissions
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="col-span-1 md:col-span-2">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-slate-800 rounded-lg">
+                <GraduationCap className="w-6 h-6 text-brand-400" />
+              </div>
+              <div>
+                <h2 className="font-bold text-xl text-white tracking-tight leading-none">Shree Himalaya</h2>
+                <p className="text-[10px] font-bold text-brand-400 uppercase tracking-widest mt-0.5">Basic School</p>
+              </div>
+            </div>
+            <p className="text-slate-400 text-sm max-w-md leading-relaxed">
+              Empowering the next generation through quality education, moral values, and an inspiring learning environment. Located in the heart of the community.
+            </p>
+          </div>
+          
+          <div>
+            <h4 className="text-white font-bold mb-4 uppercase tracking-wider text-sm">Quick Links</h4>
+            <ul className="space-y-3 text-sm">
+              <li><a href="#" className="hover:text-brand-400 transition-colors flex items-center gap-2 font-medium"><ChevronRight className="w-3 h-3 text-brand-500" /> Home</a></li>
+              <li><a href="#about" className="hover:text-brand-400 transition-colors flex items-center gap-2 font-medium"><ChevronRight className="w-3 h-3 text-brand-500" /> About Us</a></li>
+              <li><a href="#academics" className="hover:text-brand-400 transition-colors flex items-center gap-2 font-medium"><ChevronRight className="w-3 h-3 text-brand-500" /> Academics</a></li>
+              <li><a href="#admissions" className="hover:text-brand-400 transition-colors flex items-center gap-2 font-medium"><ChevronRight className="w-3 h-3 text-brand-500" /> Admissions</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 className="text-white font-bold mb-4 uppercase tracking-wider text-sm">Portals</h4>
+            <ul className="space-y-3 text-sm">
+              <li>
+                <Link href="/admin/login" className="hover:text-brand-400 transition-colors flex items-center gap-2 font-medium">
+                  <ShieldCheck className="w-4 h-4 text-brand-500" /> Admin Portal
+                </Link>
+              </li>
+              <li>
+                <Link href="/teacher/login" className="hover:text-brand-400 transition-colors flex items-center gap-2 font-medium">
+                  <Users className="w-4 h-4 text-brand-500" /> Teacher Portal
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-slate-800 text-sm text-center text-slate-500 font-medium">
+          &copy; {new Date().getFullYear()} Shree Himalaya Basic School. All rights reserved. | Exam Management System
+        </div>
+      </footer>
+    </div>
   );
 }
