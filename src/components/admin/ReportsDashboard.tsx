@@ -89,7 +89,7 @@ export default function ReportsDashboard() {
           </thead>
           <tbody>
             {Object.entries(reportData.subjectGrades).map(([subject, grades]: [string, any], idx) => (
-              <tr key={idx} className="border-b hover:bg-slate-50">
+              <tr key={idx} className="border-b hover:bg-slate-50 text-black">
                 <td className="border p-3 font-medium">{subject}</td>
                 {["A+", "A", "B+", "B", "C+", "C", "D", "NG"].map(g => (
                   <td key={g} className={`border p-3 text-center ${g === "NG" && grades[g] > 0 ? "text-red-600 font-bold" : ""}`}>
@@ -117,7 +117,7 @@ export default function ReportsDashboard() {
           </thead>
           <tbody>
             {Object.entries(reportData.gpaIntervals).map(([interval, count]: [string, any], idx) => (
-              <tr key={idx} className="border-b hover:bg-slate-50">
+              <tr key={idx} className="border-b hover:bg-slate-50 text-black">
                 <td className="border p-3 font-medium">{interval}</td>
                 <td className="border p-3 text-center text-lg">{count}</td>
               </tr>
@@ -133,10 +133,10 @@ export default function ReportsDashboard() {
     return (
       <div className="space-y-6">
         {Object.entries(reportData.subjectNGs).map(([subject, students]: [string, any], idx) => (
-          <div key={idx} className="border rounded-lg overflow-hidden">
+          <div key={idx} className="border rounded-lg overflow-hidden text-black">
             <div className="bg-slate-100 p-3 border-b font-bold flex justify-between">
               <span>{subject}</span>
-              <span className="text-black">{students.length} Failures</span>
+              <span>{students.length} Failures</span>
             </div>
             {students.length > 0 ? (
               <ul className="p-4 space-y-2">
@@ -217,7 +217,7 @@ export default function ReportsDashboard() {
           </thead>
           <tbody>
             {schoolData.map((cls, idx) => (
-              <tr key={idx} className="border-b hover:bg-slate-50">
+              <tr key={idx} className="border-b hover:bg-slate-50 text-black">
                 <td className="border p-3 font-bold">{cls.className}</td>
                 <td className="border p-3 text-center font-medium">{cls.totalStudents}</td>
                 <td className="border p-3 text-center text-emerald-600 font-bold">{cls.passCount}</td>
@@ -227,10 +227,10 @@ export default function ReportsDashboard() {
                     <div className="w-16 bg-slate-200 rounded-full h-2 mr-2 overflow-hidden">
                       <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${cls.passPercentage}%` }}></div>
                     </div>
-                    <span className="font-mono text-xs">{cls.passPercentage}%</span>
+                    <span className="font-mono text-xs text-black">{cls.passPercentage}%</span>
                   </div>
                 </td>
-                <td className="border p-3 text-center font-bold text-blue-600">{cls.averageGPA}</td>
+                <td className="border p-3 text-center font-bold text-black">{cls.averageGPA}</td>
               </tr>
             ))}
           </tbody>
