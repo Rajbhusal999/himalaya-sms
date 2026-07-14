@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import ManageStudents from "@/components/admin/ManageStudents";
 import ManageTeachers from "@/components/admin/ManageTeachers";
@@ -48,6 +49,7 @@ type Stat = {
 };
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -59,6 +61,14 @@ export default function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [recentMarks, setRecentMarks] = useState<any[]>([]);
+
+  // Authentication Check
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("isAdminAuthenticated");
+    if (isAuthenticated !== "true") {
+      router.push("/admin/login");
+    }
+  }, [router]);
 
   // Sync tab from URL on mount and popstate (handles back button/mobile swipe back)
   useEffect(() => {
@@ -552,13 +562,16 @@ export default function AdminDashboard() {
           </nav>
         </div>
         <div className="p-4 border-t border-white/10">
-          <Link 
-            href="/"
-            className="flex items-center px-4 py-3 text-sm font-medium text-brand-200 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full"
+          <button 
+            onClick={() => {
+              localStorage.removeItem("isAdminAuthenticated");
+              router.push("/");
+            }}
+            className="flex items-center px-4 py-3 text-sm font-medium text-brand-200 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"
           >
             <LogOut className="w-5 h-5 mr-3" />
-            Back to Home
-          </Link>
+            Logout & Home
+          </button>
         </div>
       </aside>
 

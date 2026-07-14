@@ -21,6 +21,7 @@ export default function AdminLogin() {
     if (email === "rajbhusal235@gmail.com" && password === "RajBhusal@986107") {
       // Simulate network request
       setTimeout(() => {
+        localStorage.setItem("isAdminAuthenticated", "true");
         router.push("/admin/dashboard");
       }, 800);
     } else {
