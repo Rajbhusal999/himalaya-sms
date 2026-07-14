@@ -287,6 +287,13 @@ export default function GradeSheet() {
     
     return (
       <div className="w-1/2 p-2 border-r border-black last:border-r-0 relative">
+        {/* Watermark */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden opacity-20">
+          <div className="text-4xl sm:text-5xl md:text-6xl font-extrabold whitespace-nowrap text-slate-400" style={{ transform: 'rotate(-45deg)' }}>
+            SHREE HIMALAYA BASIC SCHOOL (1-8)
+          </div>
+        </div>
+        
         {/* Header */}
         <div className="flex border-b border-black text-black mb-1">
           <div className="w-24 border-r border-black flex items-center justify-center bg-white overflow-hidden p-1">
