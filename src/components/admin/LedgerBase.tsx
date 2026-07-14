@@ -197,7 +197,17 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
             overflow: visible !important;
           }
           body * { visibility: hidden; }
-          .print-area, .print-area * { visibility: visible; }
+          .print-area, .print-area * { 
+            visibility: visible; 
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .print-area table {
+            border-collapse: collapse !important;
+          }
+          .print-area th, .print-area td {
+            border: 1px solid black !important;
+          }
           .print-area { 
             position: absolute; 
             left: 0; 
