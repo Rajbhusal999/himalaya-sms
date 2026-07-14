@@ -487,7 +487,8 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         hasNG = true;
                       }
                       
-                      const assumedCreditHour = sub.credit_hour !== null ? sub.credit_hour : 4; // Use subject credit hour or default to 4
+                      const isOptional = sub.subject_name.toLowerCase().includes("opt");
+                      const assumedCreditHour = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : 4); 
                       const wgp = gp * assumedCreditHour;
 
                       if (!isComputer) {
@@ -671,7 +672,8 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     const prGradeGP = getGradeAndGP(prPercent);
                     const thGradeGP = getGradeAndGP(thPercent);
 
-                    const subjectCredit = sub.credit_hour !== null ? sub.credit_hour : (isComputer ? 2 : 5);
+                    const isOptional = sub.subject_name.toLowerCase().includes("opt");
+                    const subjectCredit = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : (isComputer ? 2 : 5));
                     const halfCredit = subjectCredit / 2;
                     const thWGP = thGradeGP.gp * halfCredit;
                     const prWGP = prGradeGP.gp * halfCredit;
@@ -832,7 +834,8 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     
                     const percent = (total / 50) * 100;
                     const { grade, gp } = getGradeAndGP(percent);
-                    const subjectCredit = sub.credit_hour !== null ? sub.credit_hour : 4;
+                    const isOptional = sub.subject_name.toLowerCase().includes("opt");
+                    const subjectCredit = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : 4);
                     const wgp = gp * subjectCredit;
 
                     if (gp === 0 || grade === "NG") {

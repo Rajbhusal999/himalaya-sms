@@ -159,16 +159,16 @@ export default function GradeSheet() {
     const subjectResults = subjects.map(sub => {
       const isComputer = sub.subject_name.toLowerCase().includes("computer");
       const m = marks[student.id]?.[sub.id] || {};
-      
+      const isOptional = sub.subject_name.toLowerCase().includes("opt");
       let creditHour = 4;
       if (isClass6to8) {
         if (selectedTerm === "Final") {
-          creditHour = sub.credit_hour !== null ? sub.credit_hour : (isComputer ? 2 : 5);
+          creditHour = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : (isComputer ? 2 : 5));
         } else {
-          creditHour = sub.credit_hour !== null ? sub.credit_hour : (isComputer ? 0 : 4);
+          creditHour = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : (isComputer ? 0 : 4));
         }
       } else if (isClass1to5) {
-        creditHour = sub.credit_hour !== null ? sub.credit_hour : 4;
+        creditHour = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : 4);
       }
 
       let subjTotalGP = 0;
@@ -233,7 +233,7 @@ export default function GradeSheet() {
 
       return { 
         subjectName: sub.subject_name, 
-        creditHour: (isClass6to8 && isComputer) ? "" : creditHour.toString(), 
+        creditHour: (creditHour === 0 || (isClass6to8 && isComputer)) ? "" : creditHour.toString(), 
         gp: subjTotalGP, 
         grade: subjFinalGrade,
         remarks: getRemarks(subjFinalGrade)
