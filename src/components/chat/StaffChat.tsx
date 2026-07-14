@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Send, MessageSquare, Loader2 } from "lucide-react";
 
@@ -10,6 +10,7 @@ interface Message {
   sender_role: "admin" | "teacher";
   content: string;
   created_at: string;
+  pending?: boolean; // optimistic flag
 }
 
 interface StaffChatProps {
@@ -23,35 +24,53 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const scrollToBottom = () => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    bottomRef.current?.scrollIntoView({ behavior });
   };
 
+  const fetchMessages = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("messages")
+      .select("*")
+      .order("created_at", { ascending: true });
+
+    if (!error && data) {
+      // Replace all messages (removes pending ones that were confirmed)
+      setMessages(data as Message[]);
+    }
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
-    // Fetch existing messages
-    const fetchMessages = async () => {
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .order("created_at", { ascending: true });
-
-      if (!error && data) {
-        setMessages(data as Message[]);
-      }
-      setLoading(false);
-    };
-
     fetchMessages();
 
-    // Subscribe to real-time new messages
+    // Primary: postgres_changes for real-time DB events
     const channel = supabase
-      .channel("staff-chat")
+      .channel("staff-chat-v2", { config: { broadcast: { self: true } } })
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message]);
+          const incoming = payload.new as Message;
+          setMessages((prev) => {
+            // If it's our own optimistic message, replace the pending one
+            const hasPending = prev.some(
+              (m) => m.pending && m.sender_name === incoming.sender_name && m.content === incoming.content
+            );
+            if (hasPending) {
+              return prev.map((m) =>
+                m.pending && m.sender_name === incoming.sender_name && m.content === incoming.content
+                  ? incoming
+                  : m
+              );
+            }
+            // Otherwise append (message from someone else)
+            const alreadyExists = prev.some((m) => m.id === incoming.id);
+            if (alreadyExists) return prev;
+            return [...prev, incoming];
+          });
         }
       )
       .subscribe();
@@ -59,7 +78,7 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [fetchMessages]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -68,19 +87,46 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || sending) return;
+    const content = newMessage.trim();
+    if (!content || sending) return;
 
     setSending(true);
+
+    // ── Optimistic update: show the message immediately ──
+    const optimisticMsg: Message = {
+      id: `pending-${Date.now()}`,
+      sender_name: senderName,
+      sender_role: senderRole,
+      content,
+      created_at: new Date().toISOString(),
+      pending: true,
+    };
+    setMessages((prev) => [...prev, optimisticMsg]);
+    setNewMessage("");
+    inputRef.current?.focus();
+
+    // ── Insert into Supabase ──
     const { error } = await supabase.from("messages").insert({
       sender_name: senderName,
       sender_role: senderRole,
-      content: newMessage.trim(),
+      content,
     });
 
-    if (!error) {
-      setNewMessage("");
+    if (error) {
+      // Rollback optimistic message on error
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
+      setNewMessage(content); // restore text
+      console.error("Send failed:", error.message);
     }
+
     setSending(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend(e as any);
+    }
   };
 
   const formatTime = (ts: string) => {
@@ -160,7 +206,9 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
                 return (
                   <div
                     key={msg.id}
-                    className={`flex items-end gap-2 mb-2 ${mine ? "flex-row-reverse" : "flex-row"}`}
+                    className={`flex items-end gap-2 mb-2 ${mine ? "flex-row-reverse" : "flex-row"} ${
+                      msg.pending ? "opacity-70" : "opacity-100"
+                    } transition-opacity duration-200`}
                   >
                     {/* Avatar */}
                     <div
@@ -201,9 +249,15 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
                         {msg.content}
                       </div>
 
-                      {/* Timestamp */}
+                      {/* Timestamp / Sending indicator */}
                       <span className="text-[10px] text-slate-400 mt-1 px-1">
-                        {formatTime(msg.created_at)}
+                        {msg.pending ? (
+                          <span className="flex items-center gap-1">
+                            <Loader2 className="w-2.5 h-2.5 animate-spin" /> Sending...
+                          </span>
+                        ) : (
+                          formatTime(msg.created_at)
+                        )}
                       </span>
                     </div>
                   </div>
@@ -222,10 +276,12 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
       >
         <div className="flex-1 relative">
           <input
+            ref={inputRef}
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder={`Message as ${senderName}...`}
+            onKeyDown={handleKeyDown}
+            placeholder={`Message as ${senderName}... (Enter to send)`}
             className="w-full pl-4 pr-4 py-2.5 bg-slate-100 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400 transition-all"
           />
         </div>
@@ -234,11 +290,7 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
           disabled={!newMessage.trim() || sending}
           className="p-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
-          {sending ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Send className="w-5 h-5" />
-          )}
+          <Send className="w-5 h-5" />
         </button>
       </form>
     </div>
