@@ -70,6 +70,10 @@ export default function NewsTicker() {
               <span className="mr-2 text-brand-500">•</span>
               Welcome to Shree Himalaya Basic School
             </span>
+            <span className="inline-block px-8 text-sm">
+              <span className="mr-2 text-brand-500">•</span>
+              श्री हिमालय आधारभूत विद्यालयमा हार्दिक स्वागत छ
+            </span>
             {news.map((item) => (
               <span key={item.id} className="inline-block px-8 text-sm">
                 <span className="mr-2 text-brand-500">•</span>
