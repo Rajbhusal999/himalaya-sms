@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: "6-8", name: "Class 6 to 8", classes: ["6", "7", "8"] }
 ];
 
-const EXAM_TERMS = ["First Term", "Second Term", "Final"];
+const EXAM_TERMS = ["First terminal exam", "Second terminal Examination", "Final Examination"];
 const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2082 + i).toString());
 
 export default function GradeSheet() {
@@ -32,7 +32,12 @@ export default function GradeSheet() {
   const printRef = useRef<HTMLDivElement>(null);
 
   const getDisplayRollNo = (cls: string, index: number) => {
-    return (index + 1).toString();
+    const classPrefixMap: Record<string, string> = {
+      "1": "ON", "2": "TW", "3": "TH", "4": "FO", "5": "FI",
+      "6": "SI", "7": "SE", "8": "EI", "Nursery": "NU", "KG": "KG", "ECD": "EC"
+    };
+    const classPrefix = classPrefixMap[cls] || cls.substring(0, 2).toUpperCase();
+    return `H${classPrefix}${(index + 1).toString().padStart(3, '0')}`;
   };
 
   const loadData = async () => {
@@ -89,9 +94,6 @@ export default function GradeSheet() {
       setMarks(savedMarks);
 
       let mappedTerm = selectedTerm;
-      if (selectedTerm === "First Term") mappedTerm = "First terminal exam";
-      else if (selectedTerm === "Second Term") mappedTerm = "Second terminal Examination";
-      else if (selectedTerm === "Final") mappedTerm = "Final Examination";
 
       const { data: attendanceData, error: attendanceError } = await supabase
         .from("attendance")
@@ -128,14 +130,11 @@ export default function GradeSheet() {
 
   const getFormattedTerm = () => {
     let baseTerm = selectedTerm;
-    if (baseTerm === 'First Term') baseTerm = 'FIRST';
-    else if (baseTerm === 'Second Term') baseTerm = 'SECOND';
-    else if (baseTerm === 'Final') baseTerm = 'FINAL';
+    if (baseTerm === 'First terminal exam') baseTerm = 'FIRST TERMINAL';
+    else if (baseTerm === 'Second terminal Examination') baseTerm = 'SECOND TERMINAL';
+    else if (baseTerm === 'Final Examination') baseTerm = 'FINAL';
 
-    if (baseTerm === 'FINAL') {
-        return `FINAL EXAMINATION - ${selectedYear}`;
-    }
-    return `${baseTerm} TERMINAL EXAMINATION - ${selectedYear}`;
+    return `${baseTerm} EXAMINATION - ${selectedYear}`;
   };
 
   const processStudentGrades = (student: any) => {
@@ -211,7 +210,21 @@ export default function GradeSheet() {
     let finalGPA = totalCreditHours > 0 ? totalWGP / totalCreditHours : 0;
     if (hasNG) finalGPA = 0;
 
-    return { subjectResults, finalGPA, hasNG };
+    let finalGrade = "NG";
+    if (finalGPA >= 3.6) finalGrade = "A+";
+    else if (finalGPA >= 3.2) finalGrade = "A";
+    else if (finalGPA >= 2.8) finalGrade = "B+";
+    else if (finalGPA >= 2.4) finalGrade = "B";
+    else if (finalGPA >= 2.0) finalGrade = "C+";
+    else if (finalGPA >= 1.6) finalGrade = "C";
+    else if (finalGPA > 0) finalGrade = "D";
+    
+    if (hasNG || finalGPA === 0) {
+      finalGrade = "NG";
+    }
+    const finalRemarks = getRemarks(finalGrade);
+
+    return { subjectResults, finalGPA, hasNG, finalRemarks };
   };
 
   // Compute ranks
@@ -237,25 +250,21 @@ export default function GradeSheet() {
   }
 
   const renderGradeSheet = (studentData: any) => {
-    const { student, subjectResults, finalGPA, rank } = studentData;
+    const { student, subjectResults, finalGPA, rank, finalRemarks } = studentData;
     
     return (
       <div className="w-1/2 p-2 border-r border-black last:border-r-0 relative">
         {/* Header */}
         <div className="flex border-b border-black text-black mb-1">
-          <div className="w-20 border-r border-black flex items-center justify-center p-1">
-            <div className="w-16 h-16 rounded-full border border-black flex items-center justify-center text-xs text-center">
-              School<br/>Logo
-            </div>
+          <div className="w-24 border-r border-black flex items-center justify-center bg-white overflow-hidden p-1">
+            <img src="/saraswati.png" alt="Saraswati" className="w-full h-full object-contain" />
           </div>
           <div className="flex-1 flex flex-col items-center justify-center text-center px-2 py-1">
             <h1 className="text-xl font-bold uppercase tracking-tight leading-tight">Shree Himalaya Basic School (1-8)</h1>
             <h2 className="text-sm font-bold mt-1">BHARATPUR-11, JAGRITICHOWK</h2>
           </div>
-          <div className="w-20 border-l border-black flex items-center justify-center p-1">
-            <div className="w-16 h-16 rounded-full border border-black flex items-center justify-center text-xs text-center">
-              Logo
-            </div>
+          <div className="w-24 border-l border-black flex items-center justify-center bg-white overflow-hidden p-1">
+            <img src="/logo.png" alt="School Logo" className="w-full h-full object-contain" />
           </div>
         </div>
         
@@ -306,13 +315,11 @@ export default function GradeSheet() {
                   <td className="border border-black p-1">{res.grade}</td>
                   {idx === 0 && (
                     <td className="border border-black p-1 relative" rowSpan={subjectResults.length}>
-                      {studentData.hasNG && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="font-bold text-lg tracking-widest text-slate-700" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
-                            NOT GRADED
-                          </span>
-                        </div>
-                      )}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className={`font-bold text-lg tracking-widest text-slate-700 ${studentData.hasNG ? 'text-slate-700' : 'text-slate-700'}`} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+                          {finalRemarks}
+                        </span>
+                      </div>
                     </td>
                   )}
                 </tr>
@@ -426,7 +433,7 @@ export default function GradeSheet() {
               onChange={(e) => setSelectedTerm(e.target.value)}
               className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 bg-white text-slate-900"
             >
-              {EXAM_TERMS.map(term => <option key={term} value={term}>{term.toUpperCase()} EXAMINATION</option>)}
+              {EXAM_TERMS.map(term => <option key={term} value={term}>{term.toUpperCase()}</option>)}
             </select>
           </div>
 
