@@ -213,7 +213,7 @@ export default function LandingPage() {
       </section>
 
       {/* Feature Section */}
-      <section className="py-12 bg-slate-50">
+      <section id="academics" className="py-12 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
