@@ -324,8 +324,14 @@ export default function MarkEntry() {
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex flex-col lg:flex-row items-center justify-between mb-6 gap-4 border-b border-slate-100 pb-4">
-            <div>
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 gap-4 border-b border-slate-100 pb-4">
+            <div className="w-full lg:w-auto flex flex-col items-start">
+              <button 
+                onClick={() => setSelectedClass(null)}
+                className="text-sm font-medium text-brand-600 hover:text-brand-700 mb-2 flex items-center"
+              >
+                &larr; Back to Classes
+              </button>
               <h3 className="text-xl font-bold text-slate-800">
                 Class {selectedClass} - Mark Entry
               </h3>
