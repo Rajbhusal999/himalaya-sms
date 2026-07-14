@@ -19,6 +19,16 @@ export default function ManageNews() {
 
   useEffect(() => {
     fetchNews();
+
+    // Real-time subscription — auto-refresh on any change
+    const channel = supabase
+      .channel("news-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "news" }, () => {
+        fetchNews();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const fetchNews = async () => {

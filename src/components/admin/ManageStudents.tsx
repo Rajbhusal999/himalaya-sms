@@ -56,6 +56,16 @@ export default function ManageStudents() {
 
   useEffect(() => {
     fetchStudents();
+
+    // Real-time subscription — auto-refresh on any change
+    const channel = supabase
+      .channel("students-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "students" }, () => {
+        fetchStudents();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

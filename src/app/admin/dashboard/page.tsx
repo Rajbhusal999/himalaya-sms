@@ -129,6 +129,17 @@ export default function AdminDashboard() {
     };
 
     fetchDashboardData();
+
+    // Real-time subscriptions — auto-refresh overview stats on any DB change
+    const channels = [
+      supabase.channel("rt-students").on("postgres_changes", { event: "*", schema: "public", table: "students" }, fetchDashboardData).subscribe(),
+      supabase.channel("rt-teachers").on("postgres_changes", { event: "*", schema: "public", table: "teachers" }, fetchDashboardData).subscribe(),
+      supabase.channel("rt-admissions").on("postgres_changes", { event: "*", schema: "public", table: "admissions" }, fetchDashboardData).subscribe(),
+      supabase.channel("rt-marks").on("postgres_changes", { event: "*", schema: "public", table: "marks" }, fetchDashboardData).subscribe(),
+      supabase.channel("rt-subjects").on("postgres_changes", { event: "*", schema: "public", table: "subjects" }, fetchDashboardData).subscribe(),
+    ];
+
+    return () => { channels.forEach(c => supabase.removeChannel(c)); };
   }, []);
 
   const renderContent = () => {

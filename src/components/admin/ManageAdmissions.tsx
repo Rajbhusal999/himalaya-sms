@@ -11,6 +11,16 @@ export default function ManageAdmissions() {
 
   useEffect(() => {
     fetchAdmissions();
+
+    // Real-time subscription — auto-refresh on any change
+    const channel = supabase
+      .channel("admissions-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "admissions" }, () => {
+        fetchAdmissions();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const fetchAdmissions = async () => {

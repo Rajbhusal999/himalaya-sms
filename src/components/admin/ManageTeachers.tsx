@@ -50,6 +50,16 @@ export default function ManageTeachers() {
 
   useEffect(() => {
     fetchTeachers();
+
+    // Real-time subscription — auto-refresh on any change
+    const channel = supabase
+      .channel("teachers-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "teachers" }, () => {
+        fetchTeachers();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const handleDelete = async (id: string) => {
