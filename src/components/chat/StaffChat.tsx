@@ -22,7 +22,6 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -88,13 +87,12 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     const content = newMessage.trim();
-    if (!content || sending) return;
-
-    setSending(true);
+    if (!content) return;
 
     // ── Optimistic update: show the message immediately ──
+    const tempId = `pending-${Date.now()}`;
     const optimisticMsg: Message = {
-      id: `pending-${Date.now()}`,
+      id: tempId,
       sender_name: senderName,
       sender_role: senderRole,
       content,
@@ -102,24 +100,28 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
       pending: true,
     };
     setMessages((prev) => [...prev, optimisticMsg]);
+
+    // Clear input and refocus INSTANTLY — don't wait for server
     setNewMessage("");
     inputRef.current?.focus();
 
-    // ── Insert into Supabase ──
-    const { error } = await supabase.from("messages").insert({
-      sender_name: senderName,
-      sender_role: senderRole,
-      content,
-    });
-
-    if (error) {
-      // Rollback optimistic message on error
-      setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
-      setNewMessage(content); // restore text
-      console.error("Send failed:", error.message);
-    }
-
-    setSending(false);
+    // ── Insert into Supabase in the background (fire-and-forget) ──
+    supabase
+      .from("messages")
+      .insert({ sender_name: senderName, sender_role: senderRole, content })
+      .then(({ error }) => {
+        if (error) {
+          // Rollback optimistic message on failure
+          setMessages((prev) => prev.filter((m) => m.id !== tempId));
+          setNewMessage(content); // restore text so user can retry
+          console.error("Send failed:", error.message);
+        } else {
+          // Mark message as confirmed (removes "Sending..." spinner)
+          setMessages((prev) =>
+            prev.map((m) => (m.id === tempId ? { ...m, pending: false } : m))
+          );
+        }
+      });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -287,7 +289,7 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
         </div>
         <button
           type="submit"
-          disabled={!newMessage.trim() || sending}
+          disabled={!newMessage.trim()}
           className="p-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
           <Send className="w-5 h-5" />
