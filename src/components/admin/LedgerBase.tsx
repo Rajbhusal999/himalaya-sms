@@ -192,11 +192,21 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
     <div className="space-y-6">
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
+          html, body {
+            height: auto !important;
+            overflow: visible !important;
+          }
           body * { visibility: hidden; }
           .print-area, .print-area * { visibility: visible; }
-          .print-area { position: absolute; left: 0; top: 0; width: 100%; }
-          .print-a3 { @page { size: A3 landscape; margin: 0.5cm; } }
-          .print-a4 { @page { size: A4 landscape; margin: 0.5cm; } }
+          .print-area { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            overflow: visible !important;
+          }
+          .print-a3 { @page { size: A3 landscape; margin: 0.25in; } }
+          .print-a4 { @page { size: A4 landscape; margin: 0.25in; } }
         }
       `}} />
 
@@ -254,7 +264,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
       {loading ? (
         <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div></div>
       ) : students.length > 0 ? (
-        <div className={`print-area ${pageClass} bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto`} ref={printRef}>
+        <div className={`print-area ${pageClass} bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto print:overflow-visible print:border-none print:shadow-none`} ref={printRef}>
           {/* Header for Print */}
           <div className="p-4 text-center border-b border-black text-black">
             <h1 className="text-2xl font-bold uppercase">Shree Himalaya Basic School (1-8)</h1>
