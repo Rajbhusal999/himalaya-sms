@@ -54,6 +54,24 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [recentMarks, setRecentMarks] = useState<any[]>([]);
 
+  // Sync tab from URL on mount and popstate (handles back button/mobile swipe back)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const currentTab = params.get("tab") || "overview";
+      setActiveTab(currentTab);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);
@@ -119,7 +137,7 @@ export default function AdminDashboard() {
     }
 
     if (activeTab === "routine") {
-      return <CreateRoutine onRoutineSaved={() => setActiveTab("admit-card")} />;
+      return <CreateRoutine onRoutineSaved={() => handleTabClick("admit-card")} />;
     }
 
     if (activeTab === "admit-card") {
@@ -201,7 +219,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div onClick={() => setActiveTab("reports")} className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl shadow-md text-white p-6 relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1">
+          <div onClick={() => handleTabClick("reports")} className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl shadow-md text-white p-6 relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1">
             <div className="absolute right-0 top-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
             <BarChart3 className="w-10 h-10 mb-4 text-emerald-200" />
             <h3 className="text-xl font-bold mb-2">Reports & Analysis</h3>
@@ -265,6 +283,11 @@ export default function AdminDashboard() {
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
     setIsMobileMenuOpen(false);
+
+    // Update URL without full page reload to support back button/swipe back
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tab);
+    window.history.pushState({}, "", url);
   };
 
   return (
