@@ -15,6 +15,7 @@ import Ledger from "@/components/admin/Ledger";
 import GradeLedger from "@/components/admin/GradeLedger";
 import GradeSheet from "@/components/admin/GradeSheet";
 import ReportsDashboard from "@/components/admin/ReportsDashboard";
+import ManageNews from "@/components/admin/ManageNews";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -35,7 +36,8 @@ import {
   FileText,
   BarChart3,
   Menu,
-  X
+  X,
+  Megaphone
 } from "lucide-react";
 
 type Stat = {
@@ -166,6 +168,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "reports") {
       return <ReportsDashboard />;
+    }
+
+    if (activeTab === "news") {
+      return <ManageNews />;
     }
 
     return (
@@ -436,6 +442,17 @@ export default function AdminDashboard() {
             >
               <BarChart3 className="w-5 h-5 mr-3" />
               Reports
+            </button>
+            <button
+              onClick={() => handleTabClick("news")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "news" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <Megaphone className="w-5 h-5 mr-3" />
+              Manage News
             </button>
           </nav>
           

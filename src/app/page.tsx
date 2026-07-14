@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, Award, Heart, ChevronRight, Menu, X, MapPin } from "lucide-react";
+import NewsTicker from "@/components/NewsTicker";
 
 export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -310,10 +311,12 @@ export default function LandingPage() {
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-slate-800 text-sm text-center text-slate-500 font-medium">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 pb-10 border-t border-slate-800 text-sm text-center text-slate-500 font-medium">
           &copy; {new Date().getFullYear()} Shree Himalaya Basic School. All rights reserved. | Exam Management System
         </div>
       </footer>
+      
+      <NewsTicker />
     </div>
   );
 }
