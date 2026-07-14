@@ -103,15 +103,15 @@ export default function AdmissionForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
-                  <input type="text" name="student_name" required value={formData.student_name} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" />
+                  <input type="text" name="student_name" required value={formData.student_name} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Date of Birth *</label>
-                  <input type="date" name="dob" required value={formData.dob} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" />
+                  <input type="date" name="dob" required value={formData.dob} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Gender *</label>
-                  <select name="gender" required value={formData.gender} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                  <select name="gender" required value={formData.gender} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white">
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -120,7 +120,7 @@ export default function AdmissionForm() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Applying for Class *</label>
-                  <select name="applied_class" required value={formData.applied_class} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none">
+                  <select name="applied_class" required value={formData.applied_class} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white">
                     <option value="">Select Class</option>
                     <option value="ECD">ECD</option>
                     <option value="1">Class 1</option>
@@ -142,23 +142,23 @@ export default function AdmissionForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Father's Name</label>
-                  <input type="text" name="father_name" value={formData.father_name} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" />
+                  <input type="text" name="father_name" value={formData.father_name} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Mother's Name</label>
-                  <input type="text" name="mother_name" value={formData.mother_name} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" />
+                  <input type="text" name="mother_name" value={formData.mother_name} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Guardian's Name *</label>
-                  <input type="text" name="guardian_name" required value={formData.guardian_name} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" />
+                  <input type="text" name="guardian_name" required value={formData.guardian_name} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Guardian's Contact Number *</label>
-                  <input type="tel" name="guardian_contact" required value={formData.guardian_contact} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" />
+                  <input type="tel" name="guardian_contact" required value={formData.guardian_contact} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-slate-700 mb-1">Permanent Address *</label>
-                  <input type="text" name="address" required value={formData.address} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" placeholder="e.g. Pokhara-15, Kaski" />
+                  <input type="text" name="address" required value={formData.address} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white" placeholder="e.g. Pokhara-15, Kaski" />
                 </div>
               </div>
             </div>
@@ -167,7 +167,7 @@ export default function AdmissionForm() {
               <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2">Previous Education (If applicable)</h3>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Name of Previous School</label>
-                <input type="text" name="previous_school" value={formData.previous_school} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none" />
+                <input type="text" name="previous_school" value={formData.previous_school} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white" />
               </div>
             </div>
 
