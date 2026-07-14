@@ -132,7 +132,16 @@ export default function GradeSheet() {
   };
 
   const getFormattedTerm = () => {
+    const isNurseryTo5 = ["Nursery", "KG", "ECD", "1", "2", "3", "4", "5"].includes(selectedClass || "");
     let baseTerm = selectedTerm;
+    
+    if (isNurseryTo5) {
+      if (baseTerm === 'First Term') baseTerm = 'FIRST';
+      else if (baseTerm === 'Second Term') baseTerm = 'SECOND';
+      else if (baseTerm === 'Final') baseTerm = 'FINAL';
+      return `${baseTerm} PERIODICAL CAS ASSESSMENT - ${selectedYear}`;
+    }
+
     if (baseTerm === 'First Term') baseTerm = 'FIRST TERMINAL';
     else if (baseTerm === 'Second Term') baseTerm = 'SECOND TERMINAL';
     else if (baseTerm === 'Final') baseTerm = 'FINAL';
