@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, Award, Heart, ChevronRight, Menu, X } from "lucide-react";
+import { GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, Award, Heart, ChevronRight, Menu, X, MapPin } from "lucide-react";
 
 export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -135,17 +135,81 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Feature Section */}
-      <section id="about" className="py-20 bg-slate-50">
+      {/* About Section */}
+      <section id="about" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-brand-600 font-bold tracking-widest uppercase text-sm mb-3">Why Choose Us</h2>
-            <h3 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6">A Foundation for Lifelong Success</h3>
+            <h2 className="text-brand-600 font-bold tracking-widest uppercase text-sm mb-3">About Us</h2>
+            <h3 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-6">Welcome to Shree Himalaya</h3>
             <p className="text-lg text-slate-600 leading-relaxed">
-              We focus on holistic education that combines academic rigor with character development. Our students graduate prepared for the challenges of tomorrow.
+              Discover our legacy of excellence, our core values, and where we are located.
             </p>
           </div>
 
+          <div className="grid md:grid-cols-2 gap-12 items-start">
+            {/* School Details */}
+            <div className="space-y-8">
+              <div className="bg-slate-50 p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center text-brand-600">
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-slate-900">Our Mission</h4>
+                </div>
+                <p className="text-slate-600 leading-relaxed">
+                  To provide holistic education that combines academic rigor with character development. We strive to nurture young minds, fostering critical thinking, creativity, and a genuine love for learning that lasts a lifetime.
+                </p>
+              </div>
+
+              <div className="bg-slate-50 p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center text-brand-600">
+                    <Award className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-slate-900">Our Vision</h4>
+                </div>
+                <p className="text-slate-600 leading-relaxed">
+                  To be a leading center of educational excellence, shaping future leaders who are compassionate, confident, and prepared to tackle the challenges of tomorrow's world with integrity and innovation.
+                </p>
+              </div>
+            </div>
+            
+            {/* Location & Contact Details */}
+            <div className="bg-slate-50 p-8 rounded-2xl shadow-sm border border-slate-100 h-full flex flex-col">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center text-brand-600">
+                  <MapPin className="w-6 h-6" />
+                </div>
+                <h4 className="text-2xl font-bold text-slate-900">Our Location</h4>
+              </div>
+              
+              <div className="text-slate-600 mb-6 space-y-2">
+                <p className="flex items-center gap-2"><MapPin className="w-4 h-4 text-brand-500" /> Nepal, Gandaki Province</p>
+                <p className="pl-6 text-sm">We are situated in a serene environment perfect for learning, easily accessible for all our students and staff.</p>
+              </div>
+
+              {/* Embed Map (Placeholder but realistic looking) */}
+              <div className="flex-1 w-full min-h-[250px] bg-slate-200 rounded-xl overflow-hidden relative border border-slate-300">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14068.749448834616!2d83.9715!3d28.2096!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3995937bbf0376ff%3A0xf6cf823b2580c166!2sPokhara%2C%20Nepal!5e0!3m2!1sen!2sus!4v1699999999999!5m2!1sen!2sus" 
+                  width="100%" 
+                  height="100%" 
+                  style={{ border: 0 }} 
+                  allowFullScreen={false} 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="School Location"
+                  className="absolute inset-0"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Section */}
+      <section className="py-12 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
               <div className="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-600 transition-colors duration-300">
