@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  ChevronDown, 
-  ChevronRight, 
-  GraduationCap, 
+import {
+  ChevronDown,
+  ChevronRight,
+  GraduationCap,
   FileText,
   BarChart3,
   CircleDot,
@@ -20,11 +20,11 @@ const CLASSES = ["Nursery", "KG", "ECD", "1", "2", "3", "4", "5", "6", "7", "8"]
 export default function ReportsDashboard() {
   const [openSection, setOpenSection] = useState<string>("exam");
   const [activeReport, setActiveReport] = useState<string>("");
-  
+
   const [selectedYear, setSelectedYear] = useState(ACADEMIC_YEARS[0]);
   const [selectedTerm, setSelectedTerm] = useState(EXAM_TERMS[0]);
   const [selectedClass, setSelectedClass] = useState(CLASSES[0]);
-  
+
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState<any>(null);
   const [schoolData, setSchoolData] = useState<any[]>([]);
@@ -207,7 +207,7 @@ export default function ReportsDashboard() {
     if (!schoolData || schoolData.length === 0) return (
       <div className="p-12 text-center text-slate-500">No data found for the selected term.</div>
     );
-    
+
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left border-collapse">
@@ -348,7 +348,7 @@ export default function ReportsDashboard() {
             Export Report
           </button>
         </div>
-        
+
         {/* Render Summary Cards for specific reports */}
         {activeReport === "avg-gpa" && reportData && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -369,7 +369,7 @@ export default function ReportsDashboard() {
 
         {activeReport === "agg-ng" && reportData && (
           <div className="flex justify-center mb-8">
-             <div className="bg-red-50 border border-red-100 p-8 rounded-xl text-center max-w-sm w-full shadow-sm">
+            <div className="bg-red-50 border border-red-100 p-8 rounded-xl text-center max-w-sm w-full shadow-sm">
               <div className="text-red-500 text-sm font-bold uppercase tracking-wider mb-2">Total NG Students</div>
               <div className="text-7xl font-extrabold text-red-700">{reportData.aggregatedNGCount}</div>
               <p className="text-red-400 text-sm mt-4">Out of {reportData.totalStudents} total students</p>
@@ -390,7 +390,7 @@ export default function ReportsDashboard() {
             {activeReport === "subj-ng" && renderSubjectwiseNG()}
             {activeReport === "student-ng" && renderStudentwiseNG()}
             {activeReport === "school-analysis" && renderSchoolwiseAnalysis()}
-            
+
             {activeReport === "attendance" && renderAttendanceReport()}
             {activeReport === "demographics" && renderDemographicsReport()}
           </div>
@@ -405,19 +405,19 @@ export default function ReportsDashboard() {
       <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-slate-700">Academic Year:</label>
-          <select 
-            value={selectedYear} 
+          <select
+            value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
             className="border-slate-300 rounded-md text-sm shadow-sm py-1.5 focus:border-brand-500 focus:ring-brand-500 text-black"
           >
             {ACADEMIC_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-slate-700">Exam Term:</label>
-          <select 
-            value={selectedTerm} 
+          <select
+            value={selectedTerm}
             onChange={(e) => setSelectedTerm(e.target.value)}
             className="border-slate-300 rounded-md text-sm shadow-sm py-1.5 focus:border-brand-500 focus:ring-brand-500 text-black"
           >
@@ -428,8 +428,8 @@ export default function ReportsDashboard() {
         {activeReport !== "school-analysis" && (
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium text-slate-700">Class:</label>
-            <select 
-              value={selectedClass} 
+            <select
+              value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
               className="border-slate-300 rounded-md text-sm shadow-sm py-1.5 focus:border-brand-500 focus:ring-brand-500 text-black"
             >
@@ -448,11 +448,11 @@ export default function ReportsDashboard() {
               Report Categories
             </h3>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {/* Student Related */}
             <div className="rounded-lg overflow-hidden border border-slate-100">
-              <button 
+              <button
                 onClick={() => toggleSection("student")}
                 className="w-full flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition-colors text-left"
               >
@@ -468,11 +468,10 @@ export default function ReportsDashboard() {
                     <button
                       key={report.id}
                       onClick={() => setActiveReport(report.id)}
-                      className={`w-full flex items-center p-2 rounded-md text-sm transition-colors text-left pl-6 ${
-                        activeReport === report.id 
-                          ? "bg-brand-100 text-brand-700 font-medium" 
+                      className={`w-full flex items-center p-2 rounded-md text-sm transition-colors text-left pl-6 ${activeReport === report.id
+                          ? "bg-brand-100 text-brand-700 font-medium"
                           : "text-slate-600 hover:bg-slate-200 hover:text-slate-800"
-                      }`}
+                        }`}
                     >
                       <CircleDot className={`w-3 h-3 mr-2 ${activeReport === report.id ? "text-brand-600" : "text-slate-400"}`} />
                       {report.title}
@@ -484,7 +483,7 @@ export default function ReportsDashboard() {
 
             {/* Examination Related */}
             <div className="rounded-lg overflow-hidden border border-slate-100">
-              <button 
+              <button
                 onClick={() => toggleSection("exam")}
                 className="w-full flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition-colors text-left"
               >
@@ -500,11 +499,10 @@ export default function ReportsDashboard() {
                     <button
                       key={report.id}
                       onClick={() => setActiveReport(report.id)}
-                      className={`w-full flex items-center p-2 rounded-md text-sm transition-colors text-left pl-6 ${
-                        activeReport === report.id 
-                          ? "bg-brand-100 text-brand-700 font-medium" 
+                      className={`w-full flex items-center p-2 rounded-md text-sm transition-colors text-left pl-6 ${activeReport === report.id
+                          ? "bg-brand-100 text-brand-700 font-medium"
                           : "text-slate-600 hover:bg-slate-200 hover:text-slate-800"
-                      }`}
+                        }`}
                     >
                       <CircleDot className={`w-3 h-3 mr-2 ${activeReport === report.id ? "text-brand-600" : "text-slate-400"}`} />
                       {report.title}
