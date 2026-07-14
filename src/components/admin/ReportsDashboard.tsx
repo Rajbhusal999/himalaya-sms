@@ -136,14 +136,14 @@ export default function ReportsDashboard() {
           <div key={idx} className="border rounded-lg overflow-hidden">
             <div className="bg-slate-100 p-3 border-b font-bold flex justify-between">
               <span>{subject}</span>
-              <span className="text-red-600">{students.length} Failures</span>
+              <span className="text-black">{students.length} Failures</span>
             </div>
             {students.length > 0 ? (
               <ul className="p-4 space-y-2">
                 {students.map((s: any, i: number) => (
-                  <li key={i} className="flex items-center text-sm">
-                    <span className="w-24 text-slate-500 font-mono">{s.roll}</span>
-                    <span className="font-medium text-slate-800">{s.name}</span>
+                  <li key={i} className="flex items-center text-sm text-black">
+                    <span className="w-24 font-mono">{s.roll}</span>
+                    <span className="font-medium">{s.name}</span>
                   </li>
                 ))}
               </ul>
@@ -171,14 +171,14 @@ export default function ReportsDashboard() {
           </thead>
           <tbody>
             {reportData.studentNGs.map((student: any, idx: number) => (
-              <tr key={idx} className="border-b hover:bg-slate-50 text-red-600">
+              <tr key={idx} className="border-b hover:bg-slate-50 text-black">
                 <td className="border p-3 font-mono">{student.roll}</td>
-                <td className="border p-3 font-medium text-slate-800">{student.name}</td>
+                <td className="border p-3 font-medium">{student.name}</td>
                 <td className="border p-3 text-center font-bold text-lg">{student.failedSubjects.length}</td>
                 <td className="border p-3">
                   <div className="flex flex-wrap gap-1">
                     {student.failedSubjects.map((sub: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-red-50 text-red-700 border border-red-200 rounded-md text-xs">{sub}</span>
+                      <span key={i} className="px-2 py-1 bg-slate-100 text-black border border-slate-300 rounded-md text-xs font-medium">{sub}</span>
                     ))}
                   </div>
                 </td>
@@ -257,7 +257,7 @@ export default function ReportsDashboard() {
         <div className="flex justify-between items-center mb-6 pb-4 border-b">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">{reportTitle}</h2>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-black font-medium mt-1">
               Data for Academic Year {selectedYear}, Term: {selectedTerm} {activeReport !== 'school-analysis' && `, Class: ${selectedClass}`}
             </p>
           </div>
