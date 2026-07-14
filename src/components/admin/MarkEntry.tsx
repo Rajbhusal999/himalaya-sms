@@ -202,51 +202,63 @@ export default function MarkEntry() {
   const handleSaveMarks = async () => {
     try {
       const upsertRows: any[] = [];
+      const parseVal = (v: any) => (v !== undefined && v !== null && v !== "" ? parseFloat(v) : null);
 
       students.forEach(student => {
-        const studentMarks = marks[student.id];
-        if (!studentMarks) return;
-
         subjects.forEach(sub => {
-          const m = studentMarks[sub.id];
-          if (!m) return;
+          const m = marks[student.id]?.[sub.id] || {};
+
+          const hasAnyValue = [
+            m.written, m.oral, m.cu, m.total,
+            m.attendance, m.activity, m.project16, m.project20,
+            m.termExam, m.firstTerm, m.secondTerm, m.writtenFinal,
+          ].some(v => v !== undefined && v !== null && v !== "");
+
+          if (!hasAnyValue) return;
 
           upsertRows.push({
             student_id: student.id,
             subject_id: sub.id,
             term: selectedTerm,
             academic_year: selectedYear,
-            written: m.written !== "" ? parseFloat(m.written) : null,
-            oral: m.oral !== "" ? parseFloat(m.oral) : null,
-            cu: m.cu !== "" ? parseFloat(m.cu) : null,
-            total: m.total !== "" ? parseFloat(m.total) : null,
-            attendance: m.attendance !== "" ? parseFloat(m.attendance) : null,
-            activity: m.activity !== "" ? parseFloat(m.activity) : null,
-            project16: m.project16 !== "" ? parseFloat(m.project16) : null,
-            project20: m.project20 !== "" ? parseFloat(m.project20) : null,
-            term_exam: m.termExam !== "" ? parseFloat(m.termExam) : null,
-            first_term: m.firstTerm !== "" ? parseFloat(m.firstTerm) : null,
-            second_term: m.secondTerm !== "" ? parseFloat(m.secondTerm) : null,
-            written_final: m.writtenFinal !== "" ? parseFloat(m.writtenFinal) : null,
+            written: parseVal(m.written),
+            oral: parseVal(m.oral),
+            cu: parseVal(m.cu),
+            total: parseVal(m.total),
+            attendance: parseVal(m.attendance),
+            activity: parseVal(m.activity),
+            project16: parseVal(m.project16),
+            project20: parseVal(m.project20),
+            term_exam: parseVal(m.termExam),
+            first_term: parseVal(m.firstTerm),
+            second_term: parseVal(m.secondTerm),
+            written_final: parseVal(m.writtenFinal),
           });
         });
       });
 
       if (upsertRows.length === 0) {
-        alert("No marks to save.");
+        alert("No marks to save. Please enter some marks first.");
         return;
       }
 
-      const { error } = await supabase
+      console.log("Saving rows to Supabase:", upsertRows);
+
+      const { data, error } = await supabase
         .from("marks")
-        .upsert(upsertRows, { onConflict: "student_id,subject_id,term,academic_year" });
+        .upsert(upsertRows, { onConflict: "student_id,subject_id,term,academic_year" })
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase upsert error:", error);
+        throw error;
+      }
 
-      alert("Marks saved successfully!");
+      console.log("Saved successfully:", data);
+      alert(`Marks saved successfully! (${upsertRows.length} records saved)`);
     } catch (err: any) {
-      console.error(err);
-      alert("Failed to save marks: " + err.message);
+      console.error("Save marks error:", err);
+      alert("Failed to save marks: " + (err.message || JSON.stringify(err)));
     }
   };
 
