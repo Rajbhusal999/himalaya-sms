@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, Award, Heart, ChevronRight, Menu, X, MapPin } from "lucide-react";
+import { GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, Award, Heart, ChevronRight, Menu, X, MapPin, Phone, Mail, Facebook, MessageCircle } from "lucide-react";
 import NewsTicker from "@/components/NewsTicker";
 
 export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
@@ -29,6 +30,7 @@ export default function LandingPage() {
               <a href="#about" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">About Us</a>
               <a href="#academics" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Academics</a>
               <Link href="/apply" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Admissions</Link>
+              <button onClick={() => setIsContactOpen(true)} className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Contact Us</button>
               
               <div className="h-6 w-px bg-slate-200"></div>
               
@@ -57,7 +59,8 @@ export default function LandingPage() {
             <div className="px-4 pt-2 pb-6 space-y-1">
               <a href="#about" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">About Us</a>
               <a href="#academics" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Academics</a>
-              <a href="#admissions" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Admissions</a>
+              <Link href="/apply" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Admissions</Link>
+              <button onClick={() => { setIsMenuOpen(false); setIsContactOpen(true); }} className="w-full text-left block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Contact Us</button>
               <div className="my-2 border-t border-slate-100"></div>
               <Link href="/teacher/login" className="flex items-center gap-3 px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">
                 <Users className="w-5 h-5 text-slate-500" />
@@ -257,12 +260,9 @@ export default function LandingPage() {
             Enrollments are now open for the upcoming academic year. Secure your child's future today.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="px-8 py-4 bg-accent-500 hover:bg-accent-400 text-brand-950 rounded-xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-1">
+            <Link href="/apply" className="px-8 py-4 bg-accent-500 hover:bg-accent-400 text-brand-950 rounded-xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-1">
               Apply for Admission
-            </button>
-            <button className="px-8 py-4 bg-transparent border border-brand-300 text-white hover:bg-white/10 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 transform hover:-translate-y-1">
-              Contact Admissions
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -315,6 +315,66 @@ export default function LandingPage() {
           &copy; {new Date().getFullYear()} Shree Himalaya Basic School. All rights reserved. | Exam Management System
         </div>
       </footer>
+      
+      {isContactOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-brand-600 p-6 text-white flex justify-between items-start">
+              <div>
+                <h3 className="text-2xl font-bold mb-1">Contact Us</h3>
+                <p className="text-brand-100 text-sm">We'd love to hear from you!</p>
+              </div>
+              <button 
+                onClick={() => setIsContactOpen(false)}
+                className="text-brand-200 hover:text-white hover:bg-brand-500 p-1.5 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <a href="mailto:himalayabasicschool01@gmail.com" className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-brand-300 hover:bg-brand-50 transition-all group">
+                <div className="w-12 h-12 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center group-hover:bg-brand-600 group-hover:text-white transition-colors">
+                  <Mail className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Email Us</div>
+                  <div className="font-medium text-slate-900">himalayabasicschool01@gmail.com</div>
+                </div>
+              </a>
+              
+              <a href="https://wa.me/9779855065451" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-green-300 hover:bg-green-50 transition-all group">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center group-hover:bg-green-600 group-hover:text-white transition-colors">
+                  <MessageCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">WhatsApp</div>
+                  <div className="font-medium text-slate-900">+977-9855065451</div>
+                </div>
+              </a>
+
+              <a href="tel:+9779855065451" className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-all group">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <Phone className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Call Us</div>
+                  <div className="font-medium text-slate-900">+977-9855065451</div>
+                </div>
+              </a>
+
+              <a href="#" className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all group">
+                <div className="w-12 h-12 bg-[#1877F2]/10 text-[#1877F2] rounded-full flex items-center justify-center group-hover:bg-[#1877F2] group-hover:text-white transition-colors">
+                  <Facebook className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Facebook</div>
+                  <div className="font-medium text-slate-900">Shree Himalaya Basic School</div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
       
       <NewsTicker />
     </div>
