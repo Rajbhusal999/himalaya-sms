@@ -332,8 +332,8 @@ export default function GradeSheet() {
           </div>
           <div className="flex-1 flex flex-col items-center justify-center text-center px-2 py-1 overflow-hidden relative">
             <div className="text-[10px] font-bold w-full text-center">IEMIS CODE: 350050006</div>
-            <h1 className="text-lg sm:text-xl font-bold uppercase tracking-tight leading-tight whitespace-nowrap">SHREE HIMALAYA BASIC SCHOOL (1-8)</h1>
-            <h2 className="text-sm font-bold mt-1">BHARATPUR-11, JAGRITICHOWK</h2>
+            <h1 className="text-base sm:text-lg font-bold uppercase tracking-tight leading-tight whitespace-nowrap">SHREE HIMALAYA BASIC SCHOOL (1-8)</h1>
+            <h2 className="text-xs sm:text-sm font-bold mt-1">BHARATPUR-11, JAGRITICHOWK</h2>
           </div>
           <div className="w-24 border-l border-black flex items-center justify-center bg-white overflow-hidden p-1">
             <img src="/logo.png" alt="School Logo" className="w-full h-full object-contain" />
