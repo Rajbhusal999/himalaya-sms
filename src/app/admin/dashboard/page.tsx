@@ -19,6 +19,7 @@ import ReportsDashboard from "@/components/admin/ReportsDashboard";
 import ManageNews from "@/components/admin/ManageNews";
 import ManageAdmissions from "@/components/admin/ManageAdmissions";
 import ManageSettings from "@/components/admin/ManageSettings";
+import StaffChat from "@/components/chat/StaffChat";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -40,7 +41,8 @@ import {
   BarChart3,
   Menu,
   X,
-  Megaphone
+  Megaphone,
+  MessageSquare
 } from "lucide-react";
 
 type Stat = {
@@ -196,6 +198,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "settings") {
       return <ManageSettings />;
+    }
+
+    if (activeTab === "chat") {
+      return <StaffChat senderName="Admin" senderRole="admin" />;
     }
 
     return (
@@ -530,6 +536,23 @@ export default function AdminDashboard() {
             >
               <ClipboardCheck className="w-5 h-5 mr-3" />
               Admissions
+            </button>
+          </nav>
+
+          <div className="px-4 mt-8 mb-2 text-xs font-semibold text-brand-400 uppercase tracking-wider">
+            Communication
+          </div>
+          <nav className="space-y-1 px-2">
+            <button
+              onClick={() => handleTabClick("chat")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "chat" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <MessageSquare className="w-5 h-5 mr-3" />
+              Staff Chat
             </button>
           </nav>
           
