@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: "6-8", name: "Class 6 to 8", classes: ["6", "7", "8"] }
 ];
 
-const EXAM_TERMS = ["First terminal exam", "Second terminal Examination", "Final Examination"];
+const EXAM_TERMS = ["First Term", "Second Term", "Final"];
 const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2082 + i).toString());
 
 export default function GradeSheet() {
@@ -94,6 +94,9 @@ export default function GradeSheet() {
       setMarks(savedMarks);
 
       let mappedTerm = selectedTerm;
+      if (selectedTerm === "First Term") mappedTerm = "First terminal exam";
+      else if (selectedTerm === "Second Term") mappedTerm = "Second terminal Examination";
+      else if (selectedTerm === "Final") mappedTerm = "Final Examination";
 
       const { data: attendanceData, error: attendanceError } = await supabase
         .from("attendance")
@@ -130,9 +133,9 @@ export default function GradeSheet() {
 
   const getFormattedTerm = () => {
     let baseTerm = selectedTerm;
-    if (baseTerm === 'First terminal exam') baseTerm = 'FIRST TERMINAL';
-    else if (baseTerm === 'Second terminal Examination') baseTerm = 'SECOND TERMINAL';
-    else if (baseTerm === 'Final Examination') baseTerm = 'FINAL';
+    if (baseTerm === 'First Term') baseTerm = 'FIRST TERMINAL';
+    else if (baseTerm === 'Second Term') baseTerm = 'SECOND TERMINAL';
+    else if (baseTerm === 'Final') baseTerm = 'FINAL';
 
     return `${baseTerm} EXAMINATION - ${selectedYear}`;
   };
@@ -259,8 +262,8 @@ export default function GradeSheet() {
           <div className="w-24 border-r border-black flex items-center justify-center bg-white overflow-hidden p-1">
             <img src="/saraswati.png" alt="Saraswati" className="w-full h-full object-contain" />
           </div>
-          <div className="flex-1 flex flex-col items-center justify-center text-center px-2 py-1">
-            <h1 className="text-xl font-bold uppercase tracking-tight leading-tight">Shree Himalaya Basic School (1-8)</h1>
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-2 py-1 overflow-hidden">
+            <h1 className="text-lg sm:text-xl font-bold uppercase tracking-tight leading-tight whitespace-nowrap">SHREE HIMALAYA BASIC SCHOOL (1-8)</h1>
             <h2 className="text-sm font-bold mt-1">BHARATPUR-11, JAGRITICHOWK</h2>
           </div>
           <div className="w-24 border-l border-black flex items-center justify-center bg-white overflow-hidden p-1">
