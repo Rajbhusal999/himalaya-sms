@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, Award, Heart, ChevronRight, Menu, X, MapPin, Phone, Mail, Facebook, MessageCircle } from "lucide-react";
 import NewsTicker from "@/components/NewsTicker";
+import OurFaculty from "@/components/OurFaculty";
 
 export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -266,6 +267,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      
+      <OurFaculty />
 
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
