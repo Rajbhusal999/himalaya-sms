@@ -45,37 +45,62 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
   useEffect(() => {
     fetchMessages();
 
-    // Primary: postgres_changes for real-time DB events
+    // Primary: postgres_changes real-time (works once publication is enabled)
     const channel = supabase
-      .channel("staff-chat-v2", { config: { broadcast: { self: true } } })
+      .channel("staff-chat-v3")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
           const incoming = payload.new as Message;
           setMessages((prev) => {
-            // If it's our own optimistic message, replace the pending one
+            // Replace a pending optimistic message from THIS user
             const hasPending = prev.some(
-              (m) => m.pending && m.sender_name === incoming.sender_name && m.content === incoming.content
+              (m) =>
+                m.pending &&
+                m.sender_name === incoming.sender_name &&
+                m.content === incoming.content
             );
             if (hasPending) {
               return prev.map((m) =>
-                m.pending && m.sender_name === incoming.sender_name && m.content === incoming.content
+                m.pending &&
+                m.sender_name === incoming.sender_name &&
+                m.content === incoming.content
                   ? incoming
                   : m
               );
             }
-            // Otherwise append (message from someone else)
-            const alreadyExists = prev.some((m) => m.id === incoming.id);
-            if (alreadyExists) return prev;
+            // Append if it doesn't already exist (message from someone else)
+            if (prev.some((m) => m.id === incoming.id)) return prev;
             return [...prev, incoming];
           });
         }
       )
       .subscribe();
 
+    // Fallback: poll every 3 seconds to catch any missed real-time events
+    const pollInterval = setInterval(async () => {
+      const { data } = await supabase
+        .from("messages")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+      if (data) {
+        setMessages((prev) => {
+          // Keep pending (optimistic) messages, merge in confirmed ones
+          const pendingMsgs = prev.filter((m) => m.pending);
+          const confirmedIds = new Set(data.map((m: Message) => m.id));
+          // Only update if there are genuinely new messages
+          const prevConfirmedCount = prev.filter((m) => !m.pending).length;
+          if (data.length === prevConfirmedCount) return prev; // no change
+          return [...data, ...pendingMsgs];
+        });
+      }
+    }, 3000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
   }, [fetchMessages]);
 
