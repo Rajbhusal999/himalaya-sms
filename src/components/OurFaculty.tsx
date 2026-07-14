@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Phone } from "lucide-react";
 
 export default function OurFaculty() {
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -58,13 +58,17 @@ export default function OurFaculty() {
                   {teacher.first_name} {teacher.middle_name ? teacher.middle_name + ' ' : ''}{teacher.last_name}
                 </h3>
                 <div className="inline-block bg-brand-100 text-brand-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
-                  {teacher.subject_teach || "General Subject"}
+                  {teacher.subject_teach || "Faculty Member"}
                 </div>
-                <p className="text-slate-600 text-sm mb-4 line-clamp-3">
-                  {teacher.teacher_category || "Dedicated Teacher"}
-                  {teacher.post ? ` - ${teacher.post}` : ""}
-                  . Committed to providing excellent education and fostering a positive learning environment.
+                <p className="text-slate-600 text-sm mb-2 line-clamp-2 min-h-[40px]">
+                  <span className="font-semibold text-slate-700">Role:</span> {teacher.post || "Dedicated Teacher"}
                 </p>
+                {teacher.phone_number && (
+                  <div className="flex items-center justify-center gap-2 text-slate-500 text-sm bg-slate-100 py-1.5 px-3 rounded-lg mx-auto w-fit">
+                    <Phone className="w-4 h-4 text-brand-500" />
+                    <span className="font-medium">{teacher.phone_number}</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
