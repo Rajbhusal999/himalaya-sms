@@ -33,7 +33,9 @@ import {
   FileEdit,
   Library,
   FileText,
-  BarChart3
+  BarChart3,
+  Menu,
+  X
 } from "lucide-react";
 
 type Stat = {
@@ -43,6 +45,7 @@ type Stat = {
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [stats, setStats] = useState({
     students: 0,
     subjects: 0,
@@ -259,12 +262,31 @@ export default function AdminDashboard() {
     );
   };
 
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 flex print:block print:bg-white">
+    <div className="min-h-screen bg-slate-50 flex print:block print:bg-white overflow-hidden">
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-brand-950 text-white shadow-xl flex-shrink-0 hidden md:flex md:flex-col print:hidden">
-        <div className="h-16 flex items-center px-6 bg-brand-900 border-b border-white/10">
+      <aside className={`w-64 bg-brand-950 text-white shadow-xl flex-shrink-0 flex-col print:hidden fixed md:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out md:translate-x-0 flex ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="h-16 flex items-center justify-between px-6 bg-brand-900 border-b border-white/10">
           <span className="font-bold text-xl tracking-tight">Admin Portal</span>
+          <button 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="md:hidden p-2 text-brand-200 hover:text-white hover:bg-brand-800 rounded-md -mr-2"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
         <div className="flex-1 overflow-y-auto py-6">
           <div className="px-4 mb-2 text-xs font-semibold text-brand-400 uppercase tracking-wider">
@@ -272,7 +294,7 @@ export default function AdminDashboard() {
           </div>
           <nav className="space-y-1 px-2">
             <button
-              onClick={() => setActiveTab("overview")}
+              onClick={() => handleTabClick("overview")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "overview" 
                   ? "bg-brand-800 text-white" 
@@ -283,7 +305,7 @@ export default function AdminDashboard() {
               Overview
             </button>
             <button
-              onClick={() => setActiveTab("routine")}
+              onClick={() => handleTabClick("routine")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "routine" 
                   ? "bg-brand-800 text-white" 
@@ -294,7 +316,7 @@ export default function AdminDashboard() {
               Create Routine
             </button>
             <button
-              onClick={() => setActiveTab("subjects")}
+              onClick={() => handleTabClick("subjects")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "subjects" 
                   ? "bg-brand-800 text-white" 
@@ -305,7 +327,7 @@ export default function AdminDashboard() {
               Subject Management
             </button>
             <button
-              onClick={() => setActiveTab("attendance")}
+              onClick={() => handleTabClick("attendance")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "attendance" 
                   ? "bg-brand-800 text-white" 
@@ -316,7 +338,7 @@ export default function AdminDashboard() {
               Attendance
             </button>
             <button
-              onClick={() => setActiveTab("admit-card")}
+              onClick={() => handleTabClick("admit-card")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "admit-card" 
                   ? "bg-brand-800 text-white" 
@@ -327,7 +349,7 @@ export default function AdminDashboard() {
               Admit Card
             </button>
             <button
-              onClick={() => setActiveTab("mark-entry")}
+              onClick={() => handleTabClick("mark-entry")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "mark-entry" 
                   ? "bg-brand-800 text-white" 
@@ -338,7 +360,7 @@ export default function AdminDashboard() {
               Mark Entry
             </button>
             <button
-              onClick={() => setActiveTab("ledger")}
+              onClick={() => handleTabClick("ledger")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "ledger" 
                   ? "bg-brand-800 text-white" 
@@ -349,7 +371,7 @@ export default function AdminDashboard() {
               Ledger
             </button>
             <button
-              onClick={() => setActiveTab("mark-ledger")}
+              onClick={() => handleTabClick("mark-ledger")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "mark-ledger" 
                   ? "bg-brand-800 text-white" 
@@ -360,7 +382,7 @@ export default function AdminDashboard() {
               Mark Ledger
             </button>
             <button
-              onClick={() => setActiveTab("grade-ledger")}
+              onClick={() => handleTabClick("grade-ledger")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "grade-ledger" 
                   ? "bg-brand-800 text-white" 
@@ -371,7 +393,7 @@ export default function AdminDashboard() {
               Grade Ledger
             </button>
             <button
-              onClick={() => setActiveTab("grade-sheet")}
+              onClick={() => handleTabClick("grade-sheet")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "grade-sheet" 
                   ? "bg-brand-800 text-white" 
@@ -382,7 +404,7 @@ export default function AdminDashboard() {
               Grade Sheet
             </button>
             <button
-              onClick={() => setActiveTab("reports")}
+              onClick={() => handleTabClick("reports")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "reports" 
                   ? "bg-brand-800 text-white" 
@@ -399,7 +421,7 @@ export default function AdminDashboard() {
           </div>
           <nav className="space-y-1 px-2">
             <button
-              onClick={() => setActiveTab("students")}
+              onClick={() => handleTabClick("students")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "students" 
                   ? "bg-brand-800 text-white" 
@@ -410,7 +432,7 @@ export default function AdminDashboard() {
               Manage Students
             </button>
             <button
-              onClick={() => setActiveTab("teachers")}
+              onClick={() => handleTabClick("teachers")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "teachers" 
                   ? "bg-brand-800 text-white" 
@@ -437,7 +459,13 @@ export default function AdminDashboard() {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden print:overflow-visible">
         {/* Header */}
         <header className="h-16 bg-white shadow-sm border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 print:hidden">
-          <div className="flex md:hidden items-center">
+          <div className="flex md:hidden items-center gap-3">
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-md"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <span className="font-bold text-lg text-slate-800">Admin Portal</span>
           </div>
           <div className="hidden md:flex items-center">
