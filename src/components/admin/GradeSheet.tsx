@@ -163,12 +163,12 @@ export default function GradeSheet() {
       let creditHour = 4;
       if (isClass6to8) {
         if (selectedTerm === "Final") {
-          creditHour = isComputer ? 2 : 5; // TH + PR = 5
+          creditHour = sub.credit_hour !== null ? sub.credit_hour : (isComputer ? 2 : 5);
         } else {
-          creditHour = isComputer ? 0 : 4;
+          creditHour = sub.credit_hour !== null ? sub.credit_hour : (isComputer ? 0 : 4);
         }
       } else if (isClass1to5) {
-        creditHour = 4;
+        creditHour = sub.credit_hour !== null ? sub.credit_hour : 4;
       }
 
       let subjTotalGP = 0;
@@ -189,7 +189,7 @@ export default function GradeSheet() {
           const prGradeGP = getGradeAndGP(prPercent);
           const thGradeGP = getGradeAndGP(thPercent);
           
-          subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : ((thGradeGP.gp * 2.5) + (prGradeGP.gp * 2.5)) / 5;
+          subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : ((thGradeGP.gp * (creditHour / 2)) + (prGradeGP.gp * (creditHour / 2))) / creditHour;
           const subjTotalMarks = prTotal + thTotal;
           subjFinalGrade = getGradeAndGP((subjTotalMarks / (isComputer ? 50 : 100)) * 100).grade;
 

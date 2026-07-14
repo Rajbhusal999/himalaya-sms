@@ -487,7 +487,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         hasNG = true;
                       }
                       
-                      const assumedCreditHour = 4; // Default to 4
+                      const assumedCreditHour = sub.credit_hour !== null ? sub.credit_hour : 4; // Use subject credit hour or default to 4
                       const wgp = gp * assumedCreditHour;
 
                       if (!isComputer) {
@@ -671,12 +671,13 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     const prGradeGP = getGradeAndGP(prPercent);
                     const thGradeGP = getGradeAndGP(thPercent);
 
-                    // Credit hours are 2.5 each for non-computer subjects
-                    const thWGP = thGradeGP.gp * 2.5;
-                    const prWGP = prGradeGP.gp * 2.5;
+                    const subjectCredit = sub.credit_hour !== null ? sub.credit_hour : (isComputer ? 2 : 5);
+                    const halfCredit = subjectCredit / 2;
+                    const thWGP = thGradeGP.gp * halfCredit;
+                    const prWGP = prGradeGP.gp * halfCredit;
                     
                     let subjTotalWGP = thWGP + prWGP;
-                    let subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : subjTotalWGP / 5;
+                    let subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : subjTotalWGP / subjectCredit;
                     
                     const subjTotalMarks = prTotal + thTotal;
                     
@@ -693,7 +694,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
 
                     if (!isComputer) {
                       totalWGP += subjTotalWGP; 
-                      totalCreditHours += 5;
+                      totalCreditHours += subjectCredit;
                       grandTotal += subjTotalMarks;
                     }
 
@@ -831,7 +832,8 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                     
                     const percent = (total / 50) * 100;
                     const { grade, gp } = getGradeAndGP(percent);
-                    const wgp = gp * 4; // Default 4 credit hours
+                    const subjectCredit = sub.credit_hour !== null ? sub.credit_hour : 4;
+                    const wgp = gp * subjectCredit;
 
                     if (gp === 0 || grade === "NG") {
                       hasNG = true;
@@ -839,7 +841,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
 
                     if (!isComputer) {
                       totalWGP += wgp;
-                      totalCU += 4;
+                      totalCU += subjectCredit;
                       grandTotal += total;
                     }
 
