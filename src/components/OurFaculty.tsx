@@ -13,7 +13,7 @@ export default function OurFaculty() {
       const { data, error } = await supabase
         .from('teachers')
         .select('*')
-        .order('first_name', { ascending: true });
+        .order('sort_order', { ascending: true });
         
       if (data) {
         setTeachers(data);
