@@ -16,6 +16,7 @@ import GradeLedger from "@/components/admin/GradeLedger";
 import GradeSheet from "@/components/admin/GradeSheet";
 import ReportsDashboard from "@/components/admin/ReportsDashboard";
 import ManageNews from "@/components/admin/ManageNews";
+import ManageAdmissions from "@/components/admin/ManageAdmissions";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -172,6 +173,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "news") {
       return <ManageNews />;
+    }
+
+    if (activeTab === "admissions") {
+      return <ManageAdmissions />;
     }
 
     return (
@@ -453,6 +458,17 @@ export default function AdminDashboard() {
             >
               <Megaphone className="w-5 h-5 mr-3" />
               Manage News
+            </button>
+            <button
+              onClick={() => handleTabClick("admissions")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "admissions" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <ClipboardCheck className="w-5 h-5 mr-3" />
+              Admissions
             </button>
           </nav>
           

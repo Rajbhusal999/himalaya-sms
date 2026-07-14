@@ -28,7 +28,7 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center space-x-8">
               <a href="#about" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">About Us</a>
               <a href="#academics" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Academics</a>
-              <a href="#admissions" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Admissions</a>
+              <Link href="/apply" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Admissions</Link>
               
               <div className="h-6 w-px bg-slate-200"></div>
               
@@ -92,10 +92,10 @@ export default function LandingPage() {
             Shree Himalaya Basic School provides a supportive, innovative, and inclusive learning environment where every child can discover their true potential.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#admissions" className="px-8 py-4 bg-white text-brand-900 rounded-xl font-bold text-lg hover:bg-brand-50 transition-all shadow-xl shadow-white/10 flex items-center justify-center gap-2 group">
+            <Link href="/apply" className="px-8 py-4 bg-white text-brand-900 rounded-xl font-bold text-lg hover:bg-brand-50 transition-all shadow-xl shadow-white/10 flex items-center justify-center gap-2 group">
               Apply Now
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </a>
+            </Link>
             <a href="#about" className="px-8 py-4 bg-brand-800/50 border border-brand-400/30 text-white rounded-xl font-bold text-lg hover:bg-brand-800 transition-all backdrop-blur-sm flex items-center justify-center gap-2">
               Learn More
             </a>
