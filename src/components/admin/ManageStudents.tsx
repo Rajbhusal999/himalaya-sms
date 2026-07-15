@@ -12,6 +12,7 @@ type Student = {
   roll_no: number;
   class: string;
   iemis_code?: string;
+  symbol_number?: string;
   student_id_string?: string;
   gender?: string;
   father_name?: string;
@@ -44,9 +45,27 @@ export default function ManageStudents() {
         .from("students")
         .select("*")
         .order("class", { ascending: true })
-        .order("roll_no", { ascending: true });
+        .order("name", { ascending: true });
       if (error) throw error;
-      setStudents(data || []);
+
+      const classPrefixMap: Record<string, string> = {
+        "1": "ON", "2": "TW", "3": "TH", "4": "FO", "5": "FI",
+        "6": "SI", "7": "SE", "8": "EI", "Nursery": "NU", "KG": "KG", "ECD": "EC"
+      };
+
+      const classCounters: Record<string, number> = {};
+      const withSymbolNumbers = (data || []).map((s: any) => {
+        if (!classCounters[s.class]) classCounters[s.class] = 0;
+        classCounters[s.class]++;
+        
+        const classPrefix = classPrefixMap[s.class] || s.class.substring(0, 2).toUpperCase();
+        return {
+          ...s,
+          symbol_number: `H${classPrefix}${classCounters[s.class].toString().padStart(3, '0')}`
+        };
+      });
+
+      setStudents(withSymbolNumbers);
     } catch (err: any) {
       console.error(err.message);
     } finally {
@@ -136,6 +155,7 @@ export default function ManageStudents() {
     // Map DB columns to Excel headers
     const exportData = filteredStudents.map((s, index) => ({
       "S.N": index + 1,
+      "Symbol No": s.symbol_number || "",
       "IEMIS Code": s.iemis_code || "",
       "Student Id": s.student_id_string || "",
       "FullName": s.name,
@@ -268,6 +288,7 @@ export default function ManageStudents() {
           <thead className="sticky top-0 bg-white shadow-sm z-10">
             <tr className="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider bg-slate-100">
               <th className="px-4 py-3 font-medium">S.N</th>
+              <th className="px-4 py-3 font-medium">Symbol No</th>
               <th className="px-4 py-3 font-medium">IEMIS Code</th>
               <th className="px-4 py-3 font-medium">Student Id</th>
               <th className="px-4 py-3 font-medium">FullName</th>
@@ -289,7 +310,7 @@ export default function ManageStudents() {
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               <tr>
-                <td colSpan={17} className="px-6 py-12 text-center">
+                <td colSpan={18} className="px-6 py-12 text-center">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-600"></div>
                   <p className="mt-2 text-slate-500">Loading students...</p>
                 </td>
@@ -298,6 +319,7 @@ export default function ManageStudents() {
               filteredStudents.map((student, index) => (
                 <tr key={student.id} className="hover:bg-slate-50 transition-colors text-sm">
                   <td className="px-4 py-3 text-slate-600">{index + 1}</td>
+                  <td className="px-4 py-3 text-brand-600 font-medium">{student.symbol_number || "-"}</td>
                   <td className="px-4 py-3 text-slate-900">{student.iemis_code || "-"}</td>
                   <td className="px-4 py-3 text-brand-600 font-medium">{student.student_id_string || "-"}</td>
                   <td className="px-4 py-3 font-semibold text-slate-800">{student.name}</td>
@@ -336,7 +358,7 @@ export default function ManageStudents() {
               ))
             ) : (
               <tr>
-                <td colSpan={17} className="px-6 py-12 text-center text-slate-500">
+                <td colSpan={18} className="px-6 py-12 text-center text-slate-500">
                   No students found. Import an Excel file to add students.
                 </td>
               </tr>
