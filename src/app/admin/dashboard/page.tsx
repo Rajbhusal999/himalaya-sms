@@ -64,6 +64,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [recentMarks, setRecentMarks] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Authentication Check
   useEffect(() => {
@@ -123,6 +124,39 @@ export default function AdminDashboard() {
           .limit(5);
 
         if (recent) setRecentMarks(recent);
+
+        // Fetch Real Notifications
+        const [admissionsRes, messagesRes] = await Promise.all([
+          supabase.from('admissions').select('id, student_name, created_at, class_applied').eq('status', 'New').order('created_at', { ascending: false }).limit(3),
+          supabase.from('messages').select('id, sender_name, created_at').order('created_at', { ascending: false }).limit(3)
+        ]);
+
+        const notifs: any[] = [];
+        if (admissionsRes.data) {
+          admissionsRes.data.forEach(adm => {
+            notifs.push({
+              id: `adm_${adm.id}`,
+              type: 'admission',
+              title: `New admission received for Class ${adm.class_applied}`,
+              subtitle: adm.student_name,
+              created_at: new Date(adm.created_at)
+            });
+          });
+        }
+        if (messagesRes.data) {
+          messagesRes.data.forEach(msg => {
+            notifs.push({
+              id: `msg_${msg.id}`,
+              type: 'message',
+              title: `New message from ${msg.sender_name}`,
+              subtitle: 'Check Staff Chat',
+              created_at: new Date(msg.created_at)
+            });
+          });
+        }
+
+        notifs.sort((a, b) => b.created_at.getTime() - a.created_at.getTime());
+        setNotifications(notifs.slice(0, 5));
 
       } catch (error) {
         console.error("Error fetching dashboard data", error);
@@ -380,6 +414,21 @@ export default function AdminDashboard() {
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
     window.history.pushState({}, "", url);
+  };
+
+  const timeAgo = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " years ago";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " months ago";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " mins ago";
+    return "Just now";
   };
 
   if (isAuthChecking) {
@@ -643,7 +692,9 @@ export default function AdminDashboard() {
                 className={`p-2 transition-colors rounded-full ${isNotificationsOpen ? 'bg-brand-100 text-brand-600' : 'text-slate-400 hover:text-slate-500 hover:bg-slate-100'}`}
               >
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                {notifications.length > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                )}
               </button>
               
               {isNotificationsOpen && (
@@ -653,33 +704,31 @@ export default function AdminDashboard() {
                     <span className="text-xs text-brand-600 cursor-pointer hover:underline">Mark all as read</span>
                   </div>
                   <div className="max-h-80 overflow-y-auto">
-                    <div className="px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer">
-                      <div className="flex gap-3">
-                        <div className="w-2 h-2 bg-brand-500 rounded-full mt-2 flex-shrink-0"></div>
-                        <div>
-                          <p className="text-sm text-slate-800">New admission application received for Class 5.</p>
-                          <p className="text-xs text-slate-500 mt-1">10 minutes ago</p>
+                    {notifications.length > 0 ? (
+                      notifications.map(notif => (
+                        <div 
+                          key={notif.id} 
+                          className="px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                          onClick={() => {
+                            if (notif.type === 'admission') handleTabClick('admissions');
+                            if (notif.type === 'message') handleTabClick('chat');
+                            setIsNotificationsOpen(false);
+                          }}
+                        >
+                          <div className="flex gap-3">
+                            <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${notif.type === 'admission' ? 'bg-amber-500' : 'bg-brand-500'}`}></div>
+                            <div>
+                              <p className="text-sm text-slate-800">{notif.title}</p>
+                              <p className="text-xs text-slate-500 mt-1">{notif.subtitle} • {timeAgo(notif.created_at)}</p>
+                            </div>
+                          </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-8 text-center text-slate-500 text-sm">
+                        No new notifications
                       </div>
-                    </div>
-                    <div className="px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer">
-                      <div className="flex gap-3">
-                        <div className="w-2 h-2 bg-transparent rounded-full mt-2 flex-shrink-0"></div>
-                        <div>
-                          <p className="text-sm text-slate-800">System backup completed successfully.</p>
-                          <p className="text-xs text-slate-500 mt-1">2 hours ago</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="px-4 py-3 hover:bg-slate-50 transition-colors cursor-pointer">
-                      <div className="flex gap-3">
-                        <div className="w-2 h-2 bg-transparent rounded-full mt-2 flex-shrink-0"></div>
-                        <div>
-                          <p className="text-sm text-slate-800">New notice published: "Upcoming Final Examinations".</p>
-                          <p className="text-xs text-slate-500 mt-1">Yesterday</p>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                   <div className="px-4 py-2 border-t border-slate-100 text-center">
                     <button className="text-sm font-medium text-brand-600 hover:text-brand-700">View all notifications</button>
