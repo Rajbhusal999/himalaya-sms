@@ -75,14 +75,6 @@ export default function AdminDashboard() {
     }
   }, [router]);
 
-  if (isAuthChecking) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-600"></div>
-      </div>
-    );
-  }
-
   // Sync tab from URL on mount and popstate (handles back button/mobile swipe back)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -389,6 +381,14 @@ export default function AdminDashboard() {
     url.searchParams.set("tab", tab);
     window.history.pushState({}, "", url);
   };
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex print:block print:bg-white overflow-hidden">
