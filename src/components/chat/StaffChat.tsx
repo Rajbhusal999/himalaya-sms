@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { Send, MessageSquare, Loader2 } from "lucide-react";
+import { Send, MessageSquare, Loader2, AlertCircle } from "lucide-react";
 
 interface Message {
   id: string;
@@ -30,9 +30,15 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
   };
 
   const fetchMessages = useCallback(async () => {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    
+    // Fire and forget cleanup of old messages
+    supabase.from("messages").delete().lt("created_at", twentyFourHoursAgo).then();
+
     const { data, error } = await supabase
       .from("messages")
       .select("*")
+      .gte("created_at", twentyFourHoursAgo)
       .order("created_at", { ascending: true });
 
     if (!error && data) {
@@ -80,9 +86,11 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
 
     // Fallback: poll every 3 seconds to catch any missed real-time events
     const pollInterval = setInterval(async () => {
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data } = await supabase
         .from("messages")
         .select("*")
+        .gte("created_at", twentyFourHoursAgo)
         .order("created_at", { ascending: true });
 
       if (data) {
@@ -202,6 +210,12 @@ export default function StaffChat({ senderName, senderRole }: StaffChatProps) {
           <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
           <span className="text-white/70 text-xs">Live</span>
         </div>
+      </div>
+
+      {/* Warning Banner */}
+      <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-center gap-2 text-amber-800 text-xs font-medium">
+        <AlertCircle className="w-4 h-4" />
+        For security and privacy, all messages are automatically deleted after 24 hours.
       </div>
 
       {/* Messages */}
