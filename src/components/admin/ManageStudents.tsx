@@ -122,9 +122,19 @@ export default function ManageStudents() {
     reader.readAsBinaryString(file);
   };
 
+  const filteredStudents = students.filter(
+    (s) => {
+      const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||
+        (s.student_id_string && s.student_id_string.toLowerCase().includes(search.toLowerCase())) ||
+        (s.iemis_code && s.iemis_code.toLowerCase().includes(search.toLowerCase()));
+      const matchesClass = selectedClass === "All Classes" || String(s.class) === selectedClass;
+      return matchesSearch && matchesClass;
+    }
+  );
+
   const exportToExcel = () => {
     // Map DB columns to Excel headers
-    const exportData = students.map((s, index) => ({
+    const exportData = filteredStudents.map((s, index) => ({
       "S.N": index + 1,
       "IEMIS Code": s.iemis_code || "",
       "Student Id": s.student_id_string || "",
@@ -161,16 +171,6 @@ export default function ManageStudents() {
       alert("Error deleting student: " + err.message);
     }
   };
-
-  const filteredStudents = students.filter(
-    (s) => {
-      const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||
-        (s.student_id_string && s.student_id_string.toLowerCase().includes(search.toLowerCase())) ||
-        (s.iemis_code && s.iemis_code.toLowerCase().includes(search.toLowerCase()));
-      const matchesClass = selectedClass === "All Classes" || String(s.class) === selectedClass;
-      return matchesSearch && matchesClass;
-    }
-  );
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
