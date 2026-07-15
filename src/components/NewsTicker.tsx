@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 type News = {
   id: string;
   content: string;
+  file_url?: string;
 };
 
 const dailyColors = [
@@ -84,6 +85,16 @@ export default function NewsTicker() {
               <span key={item.id} className="inline-block px-8 text-lg">
                 <span className="mr-3 text-red-500 text-xl">✦</span>
                 {item.content}
+                {item.file_url && (
+                  <a 
+                    href={item.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-3 inline-flex items-center gap-1 text-sm font-semibold bg-white/20 text-white hover:bg-white/30 px-3 py-1 rounded-full transition-colors"
+                  >
+                    View File
+                  </a>
+                )}
               </span>
             ))}
           </div>

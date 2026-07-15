@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { Plus, Trash2, Loader2, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Loader2, AlertCircle, FileText } from "lucide-react";
 
 type News = {
   id: string;
   content: string;
+  file_url?: string;
   created_at: string;
 };
 
@@ -14,6 +15,7 @@ export default function ManageNews() {
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
   const [newContent, setNewContent] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,9 +56,32 @@ export default function ManageNews() {
     setIsSubmitting(true);
     setError(null);
     
+    let file_url = null;
+    
+    if (selectedFile) {
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const { error: uploadError, data: uploadData } = await supabase.storage
+        .from('news_attachments')
+        .upload(fileName, selectedFile);
+        
+      if (uploadError) {
+        console.error("Error uploading file:", uploadError);
+        setError("Failed to upload file");
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const { data: publicUrlData } = supabase.storage
+        .from('news_attachments')
+        .getPublicUrl(fileName);
+        
+      file_url = publicUrlData.publicUrl;
+    }
+    
     const { data, error } = await supabase
       .from('news')
-      .insert([{ content: newContent.trim() }])
+      .insert([{ content: newContent.trim(), file_url }])
       .select();
       
     if (error) {
@@ -65,6 +90,7 @@ export default function ManageNews() {
     } else if (data) {
       setNews([data[0], ...news]);
       setNewContent("");
+      setSelectedFile(null);
     }
     setIsSubmitting(false);
   };
@@ -107,6 +133,27 @@ export default function ManageNews() {
             />
           </div>
           
+          <div>
+            <label htmlFor="file-upload" className="block text-sm font-medium text-slate-700 mb-1">
+              Attach PDF / Result (Optional)
+            </label>
+            <input
+              type="file"
+              id="file-upload"
+              accept=".pdf,.doc,.docx,.xls,.xlsx"
+              onChange={(e) => setSelectedFile(e.target.files ? e.target.files[0] : null)}
+              className="block w-full text-sm text-slate-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-brand-50 file:text-brand-700
+                hover:file:bg-brand-100 transition-colors"
+            />
+            {selectedFile && (
+              <p className="mt-1 text-xs text-brand-600 font-medium">Selected: {selectedFile.name}</p>
+            )}
+          </div>
+          
           {error && (
             <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg text-sm">
               <AlertCircle className="w-4 h-4" />
@@ -140,8 +187,19 @@ export default function ManageNews() {
           <ul className="divide-y divide-slate-100">
             {news.map((item) => (
               <li key={item.id} className="p-6 flex justify-between items-start hover:bg-slate-50 transition-colors">
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <p className="text-slate-800 font-medium">{item.content}</p>
+                  {item.file_url && (
+                    <a 
+                      href={item.file_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 bg-brand-50 border border-brand-200 px-3 py-1.5 rounded-lg hover:bg-brand-100 hover:border-brand-300 transition-all shadow-sm"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      View Attachment
+                    </a>
+                  )}
                   <p className="text-xs text-slate-500">
                     Posted on {new Date(item.created_at).toLocaleDateString()} at {new Date(item.created_at).toLocaleTimeString()}
                   </p>
