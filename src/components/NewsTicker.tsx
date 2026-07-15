@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { FileText } from "lucide-react";
 
 type News = {
   id: string;
@@ -90,9 +91,10 @@ export default function NewsTicker() {
                     href={item.file_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="ml-3 inline-flex items-center gap-1 text-sm font-semibold bg-white/20 text-white hover:bg-white/30 px-3 py-1 rounded-full transition-colors"
+                    className="ml-3 inline-flex items-center gap-1.5 text-sm font-semibold bg-red-600 text-white hover:bg-red-700 px-3 py-1 rounded-full transition-colors shadow-sm"
                   >
-                    View File
+                    <FileText className="w-4 h-4" />
+                    View PDF
                   </a>
                 )}
               </span>
