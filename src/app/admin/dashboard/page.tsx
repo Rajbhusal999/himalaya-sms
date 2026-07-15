@@ -62,6 +62,7 @@ export default function AdminDashboard() {
     subjects: 0
   });
   const [loading, setLoading] = useState(true);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [recentMarks, setRecentMarks] = useState<any[]>([]);
 
   // Authentication Check
@@ -69,8 +70,18 @@ export default function AdminDashboard() {
     const isAuthenticated = localStorage.getItem("isAdminAuthenticated");
     if (isAuthenticated !== "true") {
       router.push("/admin/login");
+    } else {
+      setIsAuthChecking(false);
     }
   }, [router]);
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-600"></div>
+      </div>
+    );
+  }
 
   // Sync tab from URL on mount and popstate (handles back button/mobile swipe back)
   useEffect(() => {
