@@ -20,6 +20,7 @@ import ManageNews from "@/components/admin/ManageNews";
 import ManageAdmissions from "@/components/admin/ManageAdmissions";
 import ManageSettings from "@/components/admin/ManageSettings";
 import StaffChat from "@/components/chat/StaffChat";
+import ManageRatings from "@/components/admin/ManageRatings";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -42,7 +43,8 @@ import {
   Menu,
   X,
   Megaphone,
-  MessageSquare
+  MessageSquare,
+  Star
 } from "lucide-react";
 
 type Stat = {
@@ -126,9 +128,10 @@ export default function AdminDashboard() {
         if (recent) setRecentMarks(recent);
 
         // Fetch Real Notifications
-        const [admissionsRes, messagesRes] = await Promise.all([
+        const [admissionsRes, messagesRes, ratingsRes] = await Promise.all([
           supabase.from('admissions').select('id, student_name, created_at, class_applied').eq('status', 'New').order('created_at', { ascending: false }).limit(3),
-          supabase.from('messages').select('id, sender_name, created_at').order('created_at', { ascending: false }).limit(3)
+          supabase.from('messages').select('id, sender_name, created_at').order('created_at', { ascending: false }).limit(3),
+          supabase.from('ratings').select('id, name, rating, created_at').order('created_at', { ascending: false }).limit(3)
         ]);
 
         const notifs: any[] = [];
@@ -151,6 +154,17 @@ export default function AdminDashboard() {
               title: `New message from ${msg.sender_name}`,
               subtitle: 'Check Staff Chat',
               created_at: new Date(msg.created_at)
+            });
+          });
+        }
+        if (ratingsRes.data) {
+          ratingsRes.data.forEach(rating => {
+            notifs.push({
+              id: `rating_${rating.id}`,
+              type: 'rating',
+              title: `New ${rating.rating}-star review from ${rating.name}`,
+              subtitle: 'Check Ratings & Reviews',
+              created_at: new Date(rating.created_at)
             });
           });
         }
@@ -250,6 +264,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "chat") {
       return <StaffChat senderName="Admin" senderRole="admin" />;
+    }
+
+    if (activeTab === "ratings") {
+      return <ManageRatings />;
     }
 
     return (
@@ -625,6 +643,17 @@ export default function AdminDashboard() {
               <MessageSquare className="w-5 h-5 mr-3" />
               Staff Chat
             </button>
+            <button
+              onClick={() => handleTabClick("ratings")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "ratings" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <Star className="w-5 h-5 mr-3" />
+              Ratings & Reviews
+            </button>
           </nav>
           
           <div className="px-4 mt-8 mb-2 text-xs font-semibold text-brand-400 uppercase tracking-wider">
@@ -712,11 +741,12 @@ export default function AdminDashboard() {
                           onClick={() => {
                             if (notif.type === 'admission') handleTabClick('admissions');
                             if (notif.type === 'message') handleTabClick('chat');
+                            if (notif.type === 'rating') handleTabClick('ratings');
                             setIsNotificationsOpen(false);
                           }}
                         >
                           <div className="flex gap-3">
-                            <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${notif.type === 'admission' ? 'bg-amber-500' : 'bg-brand-500'}`}></div>
+                            <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${notif.type === 'admission' ? 'bg-amber-500' : notif.type === 'rating' ? 'bg-green-500' : 'bg-brand-500'}`}></div>
                             <div>
                               <p className="text-sm text-slate-800">{notif.title}</p>
                               <p className="text-xs text-slate-500 mt-1">{notif.subtitle} • {timeAgo(notif.created_at)}</p>
