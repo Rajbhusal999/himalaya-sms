@@ -29,10 +29,11 @@ export default function LandingPage() {
             
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#about" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">About Us</a>
-              <a href="#academics" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Academics</a>
+              <a href="/#about" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">About Us</a>
+              <a href="/#academics" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Academics</a>
               <Link href="/apply" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Admissions</Link>
               <button onClick={() => setIsContactOpen(true)} className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Contact Us</button>
+              <Link href="/recent-news" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">Recent News</Link>
               
               <div className="h-6 w-px bg-slate-200"></div>
               
@@ -59,10 +60,11 @@ export default function LandingPage() {
         {isMenuOpen && (
           <div className="md:hidden bg-white border-b border-slate-200 shadow-xl animate-in fade-in slide-in-from-top-2">
             <div className="px-4 pt-2 pb-6 space-y-1">
-              <a href="#about" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">About Us</a>
-              <a href="#academics" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Academics</a>
+              <a href="/#about" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">About Us</a>
+              <a href="/#academics" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Academics</a>
               <Link href="/apply" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Admissions</Link>
               <button onClick={() => { setIsMenuOpen(false); setIsContactOpen(true); }} className="w-full text-left block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Contact Us</button>
+              <Link href="/recent-news" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Recent News</Link>
               <div className="my-2 border-t border-slate-100"></div>
               <Link href="/teacher/login" className="flex items-center gap-3 px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">
                 <Users className="w-5 h-5 text-slate-500" />
