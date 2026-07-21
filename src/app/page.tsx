@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, Award, Heart, ChevronRight, Menu, X, MapPin, Phone, Mail, MessageCircle } from "lucide-react";
 import NewsTicker from "@/components/NewsTicker";
 import OurFaculty from "@/components/OurFaculty";
@@ -80,8 +81,21 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden" style={{ backgroundImage: 'url("/school.jpg")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-        <div className="absolute inset-0 bg-white/40 z-0 backdrop-blur-sm"></div>
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image 
+            src="/school.jpg" 
+            alt="School Background" 
+            fill 
+            className="object-cover object-center"
+            priority
+          />
+        </div>
+        
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-white/80 z-0 backdrop-blur-[2px]"></div>
+        
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse" style={{ animationDelay: '1s' }}></div>
