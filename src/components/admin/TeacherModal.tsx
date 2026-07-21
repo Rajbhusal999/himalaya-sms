@@ -22,6 +22,7 @@ type Teacher = {
   username?: string;
   password?: string;
   pan_no?: string;
+  role?: string;
 };
 
 type TeacherModalProps = {
@@ -49,6 +50,7 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSuccess }: Te
     username: "",
     password: "",
     pan_no: "",
+    role: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -71,6 +73,7 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSuccess }: Te
         username: teacher.username || "",
         password: teacher.password || "",
         pan_no: teacher.pan_no || "",
+        role: teacher.role || "",
       });
     } else {
       setFormData({
@@ -90,6 +93,7 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSuccess }: Te
         username: "",
         password: "",
         pan_no: "",
+        role: "",
       });
     }
   }, [teacher, isOpen]);
@@ -124,6 +128,7 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSuccess }: Te
         username: formData.username,
         password: formData.password,
         pan_no: formData.pan_no,
+        role: formData.role,
       };
 
       if (teacher?.id) {
@@ -201,6 +206,10 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSuccess }: Te
                 <option value="निजि स्रोत" />
                 <option value="अन्य" />
               </datalist>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
+              <input type="text" name="role" value={formData.role} onChange={handleChange} placeholder="e.g. Admin, Teacher, Staff" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-slate-900" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Subject Teach</label>

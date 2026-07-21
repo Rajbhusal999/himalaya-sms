@@ -23,6 +23,7 @@ type Teacher = {
   username?: string;
   password?: string;
   pan_no?: string;
+  role?: string;
 };
 
 export default function ManageTeachers() {
@@ -134,6 +135,7 @@ export default function ManageTeachers() {
               <th className="px-4 py-3 font-medium">Last Name</th>
               <th className="px-4 py-3 font-medium">Gender</th>
               <th className="px-4 py-3 font-medium">Post</th>
+              <th className="px-4 py-3 font-medium">Role</th>
               <th className="px-4 py-3 font-medium">Category</th>
               <th className="px-4 py-3 font-medium">Subject Teach</th>
               <th className="px-4 py-3 font-medium">DOB</th>
@@ -146,7 +148,7 @@ export default function ManageTeachers() {
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               <tr>
-                <td colSpan={13} className="px-6 py-12 text-center">
+                <td colSpan={14} className="px-6 py-12 text-center">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-600"></div>
                   <p className="mt-2 text-slate-500">Loading teachers...</p>
                 </td>
@@ -160,6 +162,7 @@ export default function ManageTeachers() {
                   <td className="px-4 py-3 font-medium text-slate-800">{teacher.last_name}</td>
                   <td className="px-4 py-3 text-slate-600">{teacher.gender || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{teacher.post || "-"}</td>
+                  <td className="px-4 py-3 text-slate-600">{teacher.role || "-"}</td>
                   <td className="px-4 py-3 text-brand-600 font-medium">{teacher.teacher_category || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{teacher.subject_teach || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{teacher.dob || "-"}</td>
@@ -189,7 +192,7 @@ export default function ManageTeachers() {
               ))
             ) : (
               <tr>
-                <td colSpan={13} className="px-6 py-12 text-center text-slate-500">
+                <td colSpan={14} className="px-6 py-12 text-center text-slate-500">
                   No teachers found. Click "Add Teacher/Staff" to add one.
                 </td>
               </tr>
