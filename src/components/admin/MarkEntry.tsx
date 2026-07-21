@@ -339,16 +339,18 @@ export default function MarkEntry() {
             </div>
             
             <div className="flex items-center gap-4">
-              {["6", "7", "8"].includes(selectedClass || "") && (
-                <select
-                  value={selectedSubject || ""}
-                  onChange={(e) => setSelectedSubject(e.target.value)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900 font-medium"
-                >
+              <select
+                value={selectedSubject || ""}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900 font-medium max-w-[200px] truncate"
+              >
+                {!["6", "7", "8"].includes(selectedClass || "") ? (
+                  <option value="">All Subjects</option>
+                ) : (
                   <option value="" disabled>Select Subject</option>
-                  {subjects.map(s => <option key={s.id} value={s.id}>{s.subject_name}</option>)}
-                </select>
-              )}
+                )}
+                {subjects.map(s => <option key={s.id} value={s.id}>{s.subject_name}</option>)}
+              </select>
               <select
                 value={selectedTerm}
                 onChange={(e) => setSelectedTerm(e.target.value)}
@@ -492,17 +494,20 @@ export default function MarkEntry() {
               );
             })()
           ) : (
-            <div className="overflow-x-auto border border-black max-w-full">
-              <table className="w-full text-center border-collapse text-sm text-black">
+            (() => {
+              const displayedSubjects = selectedSubject ? subjects.filter(s => s.id === selectedSubject) : subjects;
+              return (
+                <div className="overflow-x-auto border border-black max-w-full mt-4">
+                  <table className="w-full text-center border-collapse text-sm text-black">
                 <thead>
                   <tr>
                     <th rowSpan={2} className="border border-black px-2 py-2 w-24">Symbol No.</th>
                     <th rowSpan={2} className="border border-black px-4 py-2 min-w-[150px]">Student Name</th>
-                    <th colSpan={["1", "2", "3", "4", "5"].includes(selectedClass || "") ? subjects.length * 2 : subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)} className="border border-black px-4 py-1">Subject</th>
+                    <th colSpan={["1", "2", "3", "4", "5"].includes(selectedClass || "") ? displayedSubjects.length * 2 : displayedSubjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)} className="border border-black px-4 py-1">Subject</th>
                     <th rowSpan={2} className="border border-black px-4 py-2 w-20">Total</th>
                   </tr>
                   <tr>
-                    {subjects.map(sub => {
+                    {displayedSubjects.map(sub => {
                       const columns = [];
                       const isClass1to5 = ["1", "2", "3", "4", "5"].includes(selectedClass || "");
                       if (isClass1to5) {
@@ -531,7 +536,7 @@ export default function MarkEntry() {
                       <td className="border border-black px-2 py-1">{student.displayRollNo}</td>
                       <td className="border border-black px-2 py-1 text-left font-medium whitespace-nowrap">{student.name}</td>
                       
-                      {subjects.map(sub => {
+                      {displayedSubjects.map(sub => {
                         const isClass1to5 = ["1", "2", "3", "4", "5"].includes(selectedClass || "");
                         return (
                           <td key={sub.id} colSpan={isClass1to5 ? 2 : ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0))} className="border border-black p-0">
@@ -595,7 +600,7 @@ export default function MarkEntry() {
                   ))}
                   {students.length === 0 && (
                     <tr>
-                      <td colSpan={(["1", "2", "3", "4", "5"].includes(selectedClass || "") ? subjects.length * 2 : subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)) + 3} className="border border-black px-4 py-8 text-center text-slate-500">
+                      <td colSpan={(["1", "2", "3", "4", "5"].includes(selectedClass || "") ? displayedSubjects.length * 2 : displayedSubjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)) + 3} className="border border-black px-4 py-8 text-center text-slate-500">
                         No students found in this class.
                       </td>
                     </tr>
@@ -603,6 +608,8 @@ export default function MarkEntry() {
                 </tbody>
               </table>
             </div>
+            );
+          })()
           )}
 
           {students.length > 0 && subjects.length > 0 && (
