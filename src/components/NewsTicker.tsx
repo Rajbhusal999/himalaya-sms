@@ -58,7 +58,7 @@ export default function NewsTicker() {
           100% { transform: translateX(-100%); }
         }
         .animate-marquee {
-          animation: marquee 30s linear infinite;
+          animation: marquee 80s linear infinite;
         }
       `}</style>
       <div className="fixed top-20 w-full bg-gradient-to-r from-slate-100 via-white to-slate-100 overflow-hidden py-3 flex items-center z-[40] border-b border-slate-300 shadow-md">
