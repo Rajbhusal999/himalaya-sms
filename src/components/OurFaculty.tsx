@@ -61,7 +61,7 @@ export default function OurFaculty() {
                   {teacher.subject_teach || "Faculty Member"}
                 </div>
                 <p className="text-slate-600 text-sm mb-2 line-clamp-2 min-h-[40px]">
-                  <span className="font-semibold text-slate-700">Role:</span> {teacher.post || "Dedicated Teacher"}
+                  <span className="font-semibold text-slate-700">Role:</span> {teacher.role || teacher.post || "Dedicated Teacher"}
                 </p>
                 {teacher.phone_number && (
                   <div className="flex items-center justify-center gap-2 text-slate-500 text-sm bg-slate-100 py-1.5 px-3 rounded-lg mx-auto w-fit">
