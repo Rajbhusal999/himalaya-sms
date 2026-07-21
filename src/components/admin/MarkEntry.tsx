@@ -97,7 +97,7 @@ export default function MarkEntry() {
         });
       }
       setSubjects(subjectsList);
-      if (["6", "7", "8"].includes(selectedClass) && subjectsList.length > 0) {
+      if (subjectsList.length > 0) {
         setSelectedSubject(subjectsList[0].id);
       } else {
         setSelectedSubject(null);
@@ -339,16 +339,14 @@ export default function MarkEntry() {
             </div>
             
             <div className="flex items-center gap-4">
-              {["6", "7", "8"].includes(selectedClass || "") && (
-                <select
-                  value={selectedSubject || ""}
-                  onChange={(e) => setSelectedSubject(e.target.value)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900 font-medium"
-                >
-                  <option value="" disabled>Select Subject</option>
-                  {subjects.map(s => <option key={s.id} value={s.id}>{s.subject_name}</option>)}
-                </select>
-              )}
+              <select
+                value={selectedSubject || ""}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900 font-medium"
+              >
+                <option value="" disabled>Select Subject</option>
+                {subjects.map(s => <option key={s.id} value={s.id}>{s.subject_name}</option>)}
+              </select>
               <select
                 value={selectedTerm}
                 onChange={(e) => setSelectedTerm(e.target.value)}
@@ -380,7 +378,7 @@ export default function MarkEntry() {
             <div className="flex justify-center items-center h-48">
               <RefreshCw className="w-8 h-8 text-brand-600 animate-spin" />
             </div>
-          ) : ["6", "7", "8"].includes(selectedClass || "") ? (
+          ) : (
             (() => {
               const activeSubject = subjects.find(s => s.id === selectedSubject);
               if (!activeSubject) return <div className="text-center py-8">Please select a subject.</div>;
@@ -491,119 +489,8 @@ export default function MarkEntry() {
                 </div>
               );
             })()
-          ) : (
-            <div className="overflow-x-auto border border-black max-w-full">
-              <table className="w-full text-center border-collapse text-sm text-black">
-                <thead>
-                  <tr>
-                    <th rowSpan={2} className="border border-black px-2 py-2 w-24">Symbol No.</th>
-                    <th rowSpan={2} className="border border-black px-4 py-2 min-w-[150px]">Student Name</th>
-                    <th colSpan={["1", "2", "3", "4", "5"].includes(selectedClass || "") ? subjects.length * 2 : subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)} className="border border-black px-4 py-1">Subject</th>
-                    <th rowSpan={2} className="border border-black px-4 py-2 w-20">Total</th>
-                  </tr>
-                  <tr>
-                    {subjects.map(sub => {
-                      const columns = [];
-                      const isClass1to5 = ["1", "2", "3", "4", "5"].includes(selectedClass || "");
-                      if (isClass1to5) {
-                        columns.push(<th key={`${sub.id}-cu`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">मुल्यांकन गरिएका सि.उ.</th>);
-                        columns.push(<th key={`${sub.id}-total`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">जम्मा अंक</th>);
-                      } else {
-                        if (sub.has_written) columns.push(<th key={`${sub.id}-w`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">Written</th>);
-                        if (sub.has_oral) columns.push(<th key={`${sub.id}-o`} className="border border-black px-2 py-1 min-w-[60px] text-xs font-normal">Oral</th>);
-                      }
-                      return (
-                        <th key={sub.id} colSpan={columns.length} className="border border-black p-0">
-                          <div className="border-b border-black py-1 font-bold">{sub.subject_name}</div>
-                          <div className="flex">
-                            {columns.map((col, idx) => (
-                              <div key={idx} className={`flex-1 ${idx > 0 ? 'border-l border-black' : ''}`}>{col.props.children}</div>
-                            ))}
-                          </div>
-                        </th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((student) => (
-                    <tr key={student.id} className="hover:bg-slate-50">
-                      <td className="border border-black px-2 py-1">{student.displayRollNo}</td>
-                      <td className="border border-black px-2 py-1 text-left font-medium whitespace-nowrap">{student.name}</td>
-                      
-                      {subjects.map(sub => {
-                        const isClass1to5 = ["1", "2", "3", "4", "5"].includes(selectedClass || "");
-                        return (
-                          <td key={sub.id} colSpan={isClass1to5 ? 2 : ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0))} className="border border-black p-0">
-                            <div className="flex h-full">
-                              {isClass1to5 ? (
-                                <>
-                                  <div className="flex-1 border-r border-black last:border-r-0">
-                                    <input 
-                                      type="number"
-                                      min="0"
-                                      value={marks[student.id]?.[sub.id]?.cu || ""}
-                                      onChange={(e) => handleCuChange(sub.id, e.target.value)}
-                                      className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
-                                    />
-                                  </div>
-                                  <div className="flex-1 last:border-r-0">
-                                    <input 
-                                      type="number"
-                                      min="0"
-                                      value={marks[student.id]?.[sub.id]?.total || ""}
-                                      onChange={(e) => handleMarkChange(student.id, sub.id, 'total', e.target.value)}
-                                      className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
-                                    />
-                                  </div>
-                                </>
-                              ) : (
-                                <>
-                                  {sub.has_written && (
-                                    <div className="flex-1 border-r border-black last:border-r-0">
-                                      <input 
-                                        type="number"
-                                        min="0"
-                                        value={marks[student.id]?.[sub.id]?.written || ""}
-                                        onChange={(e) => handleMarkChange(student.id, sub.id, 'written', e.target.value)}
-                                        className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
-                                      />
-                                    </div>
-                                  )}
-                                  {sub.has_oral && (
-                                    <div className="flex-1 last:border-r-0">
-                                      <input 
-                                        type="number"
-                                        min="0"
-                                        value={marks[student.id]?.[sub.id]?.oral || ""}
-                                        onChange={(e) => handleMarkChange(student.id, sub.id, 'oral', e.target.value)}
-                                        className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
-                                      />
-                                    </div>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          </td>
-                        );
-                      })}
-                      
-                      <td className="border border-black px-2 py-1 font-bold bg-slate-50">
-                        {calculateTotal(student.id)}
-                      </td>
-                    </tr>
-                  ))}
-                  {students.length === 0 && (
-                    <tr>
-                      <td colSpan={(["1", "2", "3", "4", "5"].includes(selectedClass || "") ? subjects.length * 2 : subjects.reduce((acc, sub) => acc + ((sub.has_written ? 1 : 0) + (sub.has_oral ? 1 : 0)), 0)) + 3} className="border border-black px-4 py-8 text-center text-slate-500">
-                        No students found in this class.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
           )}
+
 
           {students.length > 0 && subjects.length > 0 && (
             <div className="mt-6 flex justify-end">
