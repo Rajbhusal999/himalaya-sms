@@ -23,7 +23,15 @@ export default function AdmissionForm() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    let { name, value } = e.target;
+    
+    if (name === "dob") {
+      value = value.replace(/\D/g, "");
+      if (value.length > 4) value = value.substring(0, 4) + "/" + value.substring(4);
+      if (value.length > 7) value = value.substring(0, 7) + "/" + value.substring(7, 9);
+    }
+    
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,7 +115,7 @@ export default function AdmissionForm() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Date of Birth *</label>
-                  <input type="date" name="dob" required value={formData.dob} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white" />
+                  <input type="text" placeholder="YYYY/MM/DD" name="dob" required value={formData.dob} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-slate-900 bg-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Gender *</label>

@@ -14,7 +14,7 @@ import {
 import { getAggregatedReports, getSchoolwiseAnalysis, getStudentAttendanceReport, getStudentDemographicsReport } from "@/lib/reportServices";
 
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
-const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2082 + i).toString());
+const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2083 + i).toString());
 const CLASSES = ["Nursery", "KG", "ECD", "1", "2", "3", "4", "5", "6", "7", "8"];
 
 export default function ReportsDashboard() {

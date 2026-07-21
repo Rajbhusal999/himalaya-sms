@@ -98,7 +98,14 @@ export default function StudentModal({ isOpen, onClose, student, onSuccess }: St
   }, [student, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    
+    if (name === "dob") {
+      value = value.replace(/\D/g, "");
+      if (value.length > 4) value = value.substring(0, 4) + "/" + value.substring(4);
+      if (value.length > 7) value = value.substring(0, 7) + "/" + value.substring(7, 9);
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [name]: name === "roll_no" ? parseInt(value) || 0 : value,

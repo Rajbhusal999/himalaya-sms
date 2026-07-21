@@ -19,7 +19,7 @@ type AttendanceRecord = {
 
 const CLASSES = ["Nursery", "KG", "ECD", "1", "2", "3", "4", "5", "6", "7", "8"];
 const EXAM_TERMS = ["First terminal exam", "Second terminal Examination", "Final Examination"];
-const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2082 + i).toString());
+const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2083 + i).toString());
 
 export default function ManageAttendance() {
   const [selectedClass, setSelectedClass] = useState<string>("1");

@@ -13,7 +13,7 @@ const CATEGORIES = [
 ];
 
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
-const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2082 + i).toString());
+const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2083 + i).toString());
 
 export default function MarkEntry() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
