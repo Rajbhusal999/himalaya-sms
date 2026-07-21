@@ -4,6 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { GraduationCap, ArrowLeft, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function AdmissionForm() {
   const [formData, setFormData] = useState({
@@ -81,8 +82,8 @@ export default function AdmissionForm() {
             Back to Home
           </Link>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-brand-600 rounded-lg shadow-sm">
-              <GraduationCap className="w-6 h-6 text-white" />
+            <div className="relative w-12 h-12 bg-white rounded-lg shadow-sm overflow-hidden flex-shrink-0">
+              <Image src="/logo.png" alt="School Logo" fill className="object-contain p-1" />
             </div>
             <div>
               <h1 className="font-bold text-lg text-brand-950 tracking-tight leading-none">Shree Himalaya</h1>

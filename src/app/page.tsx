@@ -19,8 +19,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-brand-600 rounded-lg shadow-sm">
-                <GraduationCap className="w-8 h-8 text-white" />
+              <div className="relative w-12 h-12 bg-white rounded-lg shadow-sm overflow-hidden flex-shrink-0">
+                <Image src="/logo.png" alt="School Logo" fill className="object-contain p-1" />
               </div>
               <div>
                 <h1 className="font-bold text-xl text-brand-950 tracking-tight leading-none">Shree Himalaya</h1>
