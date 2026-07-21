@@ -78,30 +78,30 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-900 via-brand-800 to-brand-950 z-0"></div>
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden" style={{ backgroundImage: 'url("/school.jpg")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="absolute inset-0 bg-white/85 z-0 backdrop-blur-[2px]"></div>
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-brand-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-accent-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse" style={{ animationDelay: '1s' }}></div>
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-brand-100 mb-8 backdrop-blur-md">
-            <span className="flex h-2 w-2 rounded-full bg-accent-400"></span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-50 border border-brand-200 text-brand-800 mb-8 backdrop-blur-md shadow-sm">
+            <span className="flex h-2 w-2 rounded-full bg-accent-500"></span>
             <span className="text-sm font-semibold tracking-wide">Admissions open for 2026/2027</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-6 leading-tight">
             Nurturing Minds, <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-200 to-white">Building Futures.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-brand-800">Building Futures.</span>
           </h1>
-          <p className="mt-4 text-xl md:text-2xl text-brand-100 max-w-3xl mx-auto font-light leading-relaxed mb-10">
+          <p className="mt-4 text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto font-medium leading-relaxed mb-10">
             Shree Himalaya Basic School provides a supportive, innovative, and inclusive learning environment where every child can discover their true potential.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/apply" className="px-8 py-4 bg-white text-brand-900 rounded-xl font-bold text-lg hover:bg-brand-50 transition-all shadow-xl shadow-white/10 flex items-center justify-center gap-2 group">
+            <Link href="/apply" className="px-8 py-4 bg-brand-600 text-white rounded-xl font-bold text-lg hover:bg-brand-700 transition-all shadow-xl shadow-brand-600/20 flex items-center justify-center gap-2 group">
               Apply Now
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <a href="#about" className="px-8 py-4 bg-brand-800/50 border border-brand-400/30 text-white rounded-xl font-bold text-lg hover:bg-brand-800 transition-all backdrop-blur-sm flex items-center justify-center gap-2">
+            <a href="#about" className="px-8 py-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-lg hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-2">
               Learn More
             </a>
           </div>
