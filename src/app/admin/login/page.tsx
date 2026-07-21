@@ -19,7 +19,7 @@ export default function AdminLogin() {
     setError(null);
 
     // Hardcoded check for Admin credentials as requested
-    if (email === "rajbhusal235@gmail.com" && password === "RajBhusal@986107") {
+    if (email === "himalayabasicschool01@gmail.com" && password === "Himal@98550") {
       // Simulate network request
       setTimeout(() => {
         localStorage.setItem("isAdminAuthenticated", "true");
