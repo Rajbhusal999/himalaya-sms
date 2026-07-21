@@ -94,7 +94,7 @@ export default function LandingPage() {
         </div>
         
         {/* Overlay */}
-        <div className="absolute inset-0 bg-white/80 z-0 backdrop-blur-[2px]"></div>
+        <div className="absolute inset-0 bg-white/50 z-0"></div>
         
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
