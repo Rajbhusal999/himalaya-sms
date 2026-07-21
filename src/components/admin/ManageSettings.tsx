@@ -3,6 +3,9 @@ import { Save, User, Bell, Lock, Globe, Key, Shield, Smartphone, Laptop, History
 
 export default function ManageSettings() {
   const [activeTab, setActiveTab] = useState("profile");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -110,16 +113,31 @@ export default function ManageSettings() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Current Password</label>
-                  <input type="password" placeholder="••••••••" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500" />
+                  <div className="relative">
+                    <input type={showCurrentPassword ? "text" : "password"} placeholder="••••••••" className="w-full px-4 py-2 pr-10 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500" />
+                    <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-xl">
+                      {showCurrentPassword ? "🙈" : "👁️"}
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">New Password</label>
-                    <input type="password" placeholder="••••••••" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500" />
+                    <div className="relative">
+                      <input type={showNewPassword ? "text" : "password"} placeholder="••••••••" className="w-full px-4 py-2 pr-10 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500" />
+                      <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-xl">
+                        {showNewPassword ? "🙈" : "👁️"}
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Confirm New Password</label>
-                    <input type="password" placeholder="••••••••" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500" />
+                    <div className="relative">
+                      <input type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" className="w-full px-4 py-2 pr-10 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500" />
+                      <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-xl">
+                        {showConfirmPassword ? "🙈" : "👁️"}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <button className="px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition-colors font-medium text-sm">
