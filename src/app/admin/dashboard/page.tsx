@@ -118,9 +118,12 @@ export default function AdminDashboard() {
           .from('marks')
           .select(`
             id,
-            marks_obtained,
+            total,
+            written_final,
+            term_exam,
             students ( name, class, roll_no ),
-            subjects ( subject_name )
+            subjects ( subject_name ),
+            teachers ( first_name, last_name )
           `)
           .order('created_at', { ascending: false })
           .limit(5);
@@ -388,6 +391,7 @@ export default function AdminDashboard() {
                   <th className="px-6 py-4 font-medium">Student</th>
                   <th className="px-6 py-4 font-medium">Class</th>
                   <th className="px-6 py-4 font-medium">Subject</th>
+                  <th className="px-6 py-4 font-medium">Entered By</th>
                   <th className="px-6 py-4 font-medium text-right">Marks</th>
                 </tr>
               </thead>
@@ -404,14 +408,17 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-slate-600">
                         {mark.subjects?.subject_name}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-600">
+                        {mark.teachers ? `${mark.teachers.first_name} ${mark.teachers.last_name}` : 'Admin'}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-slate-800">
-                        {mark.marks_obtained}
+                        {mark.total || mark.written_final || mark.term_exam || '-'}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                    <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
                       No mark entries found.
                     </td>
                   </tr>

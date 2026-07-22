@@ -203,6 +203,7 @@ export default function MarkEntry() {
     try {
       const upsertRows: any[] = [];
       const parseVal = (v: any) => (v !== undefined && v !== null && v !== "" ? parseFloat(v) : null);
+      const currentTeacherId = localStorage.getItem("teacherId");
 
       students.forEach(student => {
         subjects.forEach(sub => {
@@ -221,6 +222,7 @@ export default function MarkEntry() {
             subject_id: sub.id,
             term: selectedTerm,
             academic_year: selectedYear,
+            teacher_id: currentTeacherId || null,
             written: parseVal(m.written),
             oral: parseVal(m.oral),
             cu: parseVal(m.cu),
