@@ -146,7 +146,6 @@ export default function PublicRatings() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       className="pl-10 w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
-                      placeholder="John Doe"
                     />
                   </div>
                 </div>
