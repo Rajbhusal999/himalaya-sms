@@ -23,7 +23,7 @@ export default function AdminLogin() {
       // Simulate network request
       setTimeout(() => {
         localStorage.setItem("isAdminAuthenticated", "true");
-        router.push("/admin/dashboard");
+        router.replace("/admin/dashboard");
       }, 800);
     } else {
       setTimeout(() => {

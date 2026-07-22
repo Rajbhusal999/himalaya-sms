@@ -36,7 +36,7 @@ export default function TeacherLogin() {
       localStorage.setItem("teacherId", data.id);
       localStorage.setItem("teacherName", `${data.first_name} ${data.last_name}`);
       
-      router.push("/teacher/dashboard");
+      router.replace("/teacher/dashboard");
     } catch (err: any) {
       setError("Invalid username or password");
     } finally {
