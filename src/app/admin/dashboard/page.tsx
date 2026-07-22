@@ -435,27 +435,29 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-slate-800">
                         {(() => {
-                          if (mark.total) return mark.total;
-                          if (mark.written_final) return mark.written_final;
-                          if (mark.term_exam) return mark.term_exam;
-                          if (mark.written) {
+                          const has = (val: any) => val !== null && val !== undefined && val !== '';
+                          
+                          if (has(mark.total)) return mark.total;
+                          if (has(mark.written_final)) return mark.written_final;
+                          if (has(mark.term_exam)) return mark.term_exam;
+                          if (has(mark.written)) {
                             let t = Number(mark.written);
-                            if (mark.oral) t += Number(mark.oral);
+                            if (has(mark.oral)) t += Number(mark.oral);
                             return t.toString();
                           }
-                          if (mark.cu) return `CU: ${mark.cu}`;
+                          if (has(mark.cu)) return `CU: ${mark.cu}`;
                           
                           let sum = 0;
                           let hasMarks = false;
                           ['project16', 'project20', 'activity', 'attendance', 'first_term', 'second_term'].forEach(key => {
-                            if (mark[key]) {
+                            if (has(mark[key])) {
                               sum += Number(mark[key]);
                               hasMarks = true;
                             }
                           });
                           if (hasMarks) return sum.toString();
                           
-                          return 'Entered';
+                          return '-';
                         })()}
                       </td>
                     </tr>
