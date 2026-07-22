@@ -203,7 +203,9 @@ export default function MarkEntry() {
     try {
       const upsertRows: any[] = [];
       const parseVal = (v: any) => (v !== undefined && v !== null && v !== "" ? parseFloat(v) : null);
-      const currentTeacherId = localStorage.getItem("teacherId");
+      const { validateSession } = await import("@/app/actions/auth");
+      const session = await validateSession();
+      const currentTeacherId = session?.user_id || null;
 
       students.forEach(student => {
         subjects.forEach(sub => {

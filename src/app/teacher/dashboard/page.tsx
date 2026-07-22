@@ -13,15 +13,26 @@ export default function TeacherDashboard() {
   const [activeTab, setActiveTab] = useState<"marks" | "chat">("marks");
 
   useEffect(() => {
-    const teacherId = localStorage.getItem("teacherId");
-    const name = localStorage.getItem("teacherName");
-
-    if (!teacherId) {
-      router.push("/teacher/login");
-    } else {
-      setTeacherName(name || "Teacher");
-      setLoading(false);
-    }
+    const checkSession = async () => {
+      try {
+        const { validateSession } = await import("@/app/actions/auth");
+        const session = await validateSession();
+        
+        if (!session || session.role !== "teacher") {
+          router.push("/teacher/login");
+        } else {
+          const name = session.teachers 
+            ? `${session.teachers.first_name} ${session.teachers.last_name}`
+            : "Teacher";
+          setTeacherName(name);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Session check failed", err);
+        router.push("/teacher/login");
+      }
+    };
+    checkSession();
   }, [router]);
 
   // Sync tab from URL on mount and popstate (handles back button)
@@ -51,9 +62,9 @@ export default function TeacherDashboard() {
     window.history.pushState({}, "", url);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("teacherId");
-    localStorage.removeItem("teacherName");
+  const handleLogout = async () => {
+    const { clearSession } = await import("@/app/actions/auth");
+    await clearSession();
     router.push("/teacher/login");
   };
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase/client";
 import { Mail, Lock, LogIn, ArrowLeft, AlertCircle, ShieldCheck } from "lucide-react";
 
 export default function AdminLogin() {
@@ -15,7 +16,7 @@ export default function AdminLogin() {
 
   useEffect(() => {
     // Clear session when login page mounts (prevents forward button bypassing login)
-    localStorage.removeItem("isAdminAuthenticated");
+    import("@/app/actions/auth").then(m => m.clearSession());
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -26,15 +27,26 @@ export default function AdminLogin() {
     // Hardcoded check for Admin credentials as requested
     if (email === "himalayabasicschool01@gmail.com" && password === "Himal@98550") {
       // Simulate network request
-      setTimeout(() => {
-        localStorage.setItem("isAdminAuthenticated", "true");
-        router.replace("/admin/dashboard");
-      }, 800);
+      await new Promise(r => setTimeout(r, 800));
+
+      const sessionId = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 1);
+
+      await supabase.from("active_sessions").insert([{
+        id: sessionId,
+        role: "admin",
+        expires_at: expiresAt.toISOString(),
+      }]);
+
+      const { setSession } = await import("@/app/actions/auth");
+      await setSession(sessionId, expiresAt);
+
+      router.replace("/admin/dashboard");
     } else {
-      setTimeout(() => {
-        setError("Invalid admin credentials. Please try again.");
-        setLoading(false);
-      }, 800);
+      await new Promise(r => setTimeout(r, 800));
+      setError("Invalid admin credentials. Please try again.");
+      setLoading(false);
     }
   };
 

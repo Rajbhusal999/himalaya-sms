@@ -16,8 +16,7 @@ export default function TeacherLogin() {
 
   useEffect(() => {
     // Clear session when login page mounts (prevents forward button bypassing login)
-    localStorage.removeItem("teacherId");
-    localStorage.removeItem("teacherName");
+    import("@/app/actions/auth").then(m => m.clearSession());
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -38,9 +37,23 @@ export default function TeacherLogin() {
         throw new Error("Invalid username or password");
       }
 
-      // Store teacher info in localStorage for the dashboard
-      localStorage.setItem("teacherId", data.id);
-      localStorage.setItem("teacherName", `${data.first_name} ${data.last_name}`);
+      const sessionId = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 1); // 1 day
+
+      const { error: sessionError } = await supabase
+        .from("active_sessions")
+        .insert([{
+          id: sessionId,
+          user_id: data.id,
+          role: "teacher",
+          expires_at: expiresAt.toISOString(),
+        }]);
+
+      if (sessionError) throw new Error("Failed to create session");
+
+      const { setSession } = await import("@/app/actions/auth");
+      await setSession(sessionId, expiresAt);
       
       router.replace("/teacher/dashboard");
     } catch (err: any) {

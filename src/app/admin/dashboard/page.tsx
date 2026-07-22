@@ -70,12 +70,22 @@ export default function AdminDashboard() {
 
   // Authentication Check
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAdminAuthenticated");
-    if (isAuthenticated !== "true") {
-      router.push("/admin/login");
-    } else {
-      setIsAuthChecking(false);
-    }
+    const checkSession = async () => {
+      try {
+        const { validateSession } = await import("@/app/actions/auth");
+        const session = await validateSession();
+        
+        if (!session || session.role !== "admin") {
+          router.push("/admin/login");
+        } else {
+          setIsAuthChecking(false);
+        }
+      } catch (err) {
+        console.error("Session check failed", err);
+        router.push("/admin/login");
+      }
+    };
+    checkSession();
   }, [router]);
 
   // Sync tab from URL on mount and popstate (handles back button/mobile swipe back)
@@ -693,9 +703,10 @@ export default function AdminDashboard() {
         </div>
         <div className="p-4 border-t border-white/10">
           <button 
-            onClick={() => {
-              localStorage.removeItem("isAdminAuthenticated");
-              router.push("/");
+            onClick={async () => {
+              const { clearSession } = await import("@/app/actions/auth");
+              await clearSession();
+              router.push("/admin/login");
             }}
             className="flex items-center px-4 py-3 text-sm font-medium text-brand-200 hover:text-white hover:bg-white/10 rounded-lg transition-colors w-full text-left"
           >
