@@ -237,6 +237,7 @@ export default function MarkEntry() {
             first_term: parseVal(m.firstTerm),
             second_term: parseVal(m.secondTerm),
             written_final: parseVal(m.writtenFinal),
+            updated_at: new Date().toISOString(),
           });
         });
       });

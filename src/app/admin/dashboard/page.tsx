@@ -131,6 +131,8 @@ export default function AdminDashboard() {
             total,
             written_final,
             term_exam,
+            written, oral, cu, first_term, second_term, project16, project20, activity, attendance,
+            created_at, updated_at,
             students ( name, class, roll_no ),
             subjects ( subject_name ),
             teachers ( first_name, last_name )
@@ -402,6 +404,7 @@ export default function AdminDashboard() {
                   <th className="px-6 py-4 font-medium">Class</th>
                   <th className="px-6 py-4 font-medium">Subject</th>
                   <th className="px-6 py-4 font-medium">Entered By</th>
+                  <th className="px-6 py-4 font-medium">Date</th>
                   <th className="px-6 py-4 font-medium text-right">Marks</th>
                 </tr>
               </thead>
@@ -421,14 +424,45 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-slate-600">
                         {mark.teachers ? `${mark.teachers.first_name} ${mark.teachers.last_name}` : 'Admin'}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-500 text-sm">
+                        {mark.updated_at ? (
+                           <span className="text-amber-600 font-medium" title="Edited">
+                             {new Date(mark.updated_at).toLocaleDateString()} (Edited)
+                           </span>
+                        ) : (
+                           <span>{new Date(mark.created_at).toLocaleDateString()}</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-slate-800">
-                        {mark.total || mark.written_final || mark.term_exam || '-'}
+                        {(() => {
+                          if (mark.total) return mark.total;
+                          if (mark.written_final) return mark.written_final;
+                          if (mark.term_exam) return mark.term_exam;
+                          if (mark.written) {
+                            let t = Number(mark.written);
+                            if (mark.oral) t += Number(mark.oral);
+                            return t.toString();
+                          }
+                          if (mark.cu) return `CU: ${mark.cu}`;
+                          
+                          let sum = 0;
+                          let hasMarks = false;
+                          ['project16', 'project20', 'activity', 'attendance', 'first_term', 'second_term'].forEach(key => {
+                            if (mark[key]) {
+                              sum += Number(mark[key]);
+                              hasMarks = true;
+                            }
+                          });
+                          if (hasMarks) return sum.toString();
+                          
+                          return 'Entered';
+                        })()}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                    <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
                       No mark entries found.
                     </td>
                   </tr>
