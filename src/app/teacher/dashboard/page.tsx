@@ -24,6 +24,33 @@ export default function TeacherDashboard() {
     }
   }, [router]);
 
+  // Sync tab from URL on mount and popstate (handles back button)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab === "marks" || tab === "chat") {
+      setActiveTab(tab);
+    }
+
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const currentTab = params.get("tab") || "marks";
+      if (currentTab === "marks" || currentTab === "chat") {
+        setActiveTab(currentTab);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const handleTabClick = (tab: "marks" | "chat") => {
+    setActiveTab(tab);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tab);
+    window.history.pushState({}, "", url);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("teacherId");
     localStorage.removeItem("teacherName");
@@ -78,7 +105,7 @@ export default function TeacherDashboard() {
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 mb-6">
           <button
-            onClick={() => setActiveTab("marks")}
+            onClick={() => handleTabClick("marks")}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
               activeTab === "marks"
                 ? "bg-brand-600 text-white shadow-md shadow-brand-500/30"
@@ -89,7 +116,7 @@ export default function TeacherDashboard() {
             Mark Entry
           </button>
           <button
-            onClick={() => setActiveTab("chat")}
+            onClick={() => handleTabClick("chat")}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
               activeTab === "chat"
                 ? "bg-brand-600 text-white shadow-md shadow-brand-500/30"
