@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
@@ -13,6 +13,12 @@ export default function TeacherLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Clear session when login page mounts (prevents forward button bypassing login)
+    localStorage.removeItem("teacherId");
+    localStorage.removeItem("teacherName");
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
