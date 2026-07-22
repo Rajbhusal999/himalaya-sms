@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BookOpen, LogOut, User, GraduationCap, MessageSquare } from "lucide-react";
 import MarkEntry from "@/components/admin/MarkEntry";
 import StaffChat from "@/components/chat/StaffChat";
+import { validateSession, clearSession } from "@/app/actions/auth";
 
 export default function TeacherDashboard() {
   const router = useRouter();
@@ -15,7 +16,6 @@ export default function TeacherDashboard() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { validateSession } = await import("@/app/actions/auth");
         const session = await validateSession();
         
         if (!session || session.role !== "teacher") {
@@ -63,7 +63,6 @@ export default function TeacherDashboard() {
   };
 
   const handleLogout = async () => {
-    const { clearSession } = await import("@/app/actions/auth");
     await clearSession();
     router.push("/teacher/login");
   };

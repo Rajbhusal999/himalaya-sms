@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { Mail, Lock, LogIn, ArrowLeft, AlertCircle, ShieldCheck } from "lucide-react";
+import { setSession, clearSession } from "@/app/actions/auth";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function AdminLogin() {
 
   useEffect(() => {
     // Clear session when login page mounts (prevents forward button bypassing login)
-    import("@/app/actions/auth").then(m => m.clearSession());
+    clearSession();
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -39,7 +40,6 @@ export default function AdminLogin() {
         expires_at: expiresAt.toISOString(),
       }]);
 
-      const { setSession } = await import("@/app/actions/auth");
       await setSession(sessionId, expiresAt);
 
       router.replace("/admin/dashboard");

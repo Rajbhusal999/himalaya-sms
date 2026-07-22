@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { Mail, Lock, LogIn, ArrowLeft, AlertCircle } from "lucide-react";
+import { setSession, clearSession } from "@/app/actions/auth";
 
 export default function TeacherLogin() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function TeacherLogin() {
 
   useEffect(() => {
     // Clear session when login page mounts (prevents forward button bypassing login)
-    import("@/app/actions/auth").then(m => m.clearSession());
+    clearSession();
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -52,7 +53,6 @@ export default function TeacherLogin() {
 
       if (sessionError) throw new Error("Failed to create session");
 
-      const { setSession } = await import("@/app/actions/auth");
       await setSession(sessionId, expiresAt);
       
       router.replace("/teacher/dashboard");

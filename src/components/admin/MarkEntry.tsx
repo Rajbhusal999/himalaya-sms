@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Folder, ChevronRight, GraduationCap, Save, RefreshCw } from "lucide-react";
+import { validateSession } from "@/app/actions/auth";
 
 const CATEGORIES = [
   { id: "nursery", name: "Nursery", classes: ["Nursery"], color: "bg-pink-100 text-pink-600 border-pink-200" },
@@ -203,7 +204,6 @@ export default function MarkEntry() {
     try {
       const upsertRows: any[] = [];
       const parseVal = (v: any) => (v !== undefined && v !== null && v !== "" ? parseFloat(v) : null);
-      const { validateSession } = await import("@/app/actions/auth");
       const session = await validateSession();
       const currentTeacherId = session?.user_id || null;
 

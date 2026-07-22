@@ -46,6 +46,7 @@ import {
   MessageSquare,
   Star
 } from "lucide-react";
+import { validateSession, clearSession } from "@/app/actions/auth";
 
 type Stat = {
   label: string;
@@ -72,7 +73,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { validateSession } = await import("@/app/actions/auth");
         const session = await validateSession();
         
         if (!session || session.role !== "admin") {
@@ -740,7 +740,6 @@ export default function AdminDashboard() {
         <div className="p-4 border-t border-white/10">
           <button 
             onClick={async () => {
-              const { clearSession } = await import("@/app/actions/auth");
               await clearSession();
               router.push("/admin/login");
             }}
