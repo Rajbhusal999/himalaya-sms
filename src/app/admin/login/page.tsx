@@ -26,7 +26,7 @@ export default function AdminLogin() {
     setError(null);
 
     // Hardcoded check for Admin credentials as requested
-    if (email === "himalayabasicschool01@gmail.com" && password === "Himal@98550") {
+    if (email === "himalayabasicschool01@gmail.com" && password === "RJAryan@986107") {
       // Simulate network request
       await new Promise(r => setTimeout(r, 800));
 
