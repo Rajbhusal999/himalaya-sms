@@ -47,8 +47,17 @@ export default function PublicRatings() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
+    const trimmedName = name.trim();
+    
+    if (!trimmedName) {
       setError("Please enter your name.");
+      return;
+    }
+    
+    // Validate name to only contain letters, spaces, hyphens, and apostrophes
+    const nameRegex = /^[a-zA-Z\s\.\-']+$/;
+    if (trimmedName.length < 2 || !nameRegex.test(trimmedName)) {
+      setError("Please enter a valid name (letters only).");
       return;
     }
 
