@@ -22,6 +22,7 @@ export default function MarkEntry() {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<string>(EXAM_TERMS[0]);
   const [selectedYear, setSelectedYear] = useState<string>(ACADEMIC_YEARS[0]);
+  const [focusedStudentId, setFocusedStudentId] = useState<string | null>(null);
 
   const [students, setStudents] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -444,7 +445,16 @@ export default function MarkEntry() {
                           : ((pTotalNum + projTotalNum + parseFloat(m.termExam || "0")) || "");
                           
                         return (
-                          <tr key={student.id} className="hover:bg-slate-50">
+                          <tr 
+                            key={student.id} 
+                            className={focusedStudentId === student.id ? "bg-blue-200" : "hover:bg-slate-50"}
+                            onFocus={() => setFocusedStudentId(student.id)}
+                            onBlur={(e) => {
+                              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                                setFocusedStudentId(null);
+                              }
+                            }}
+                          >
                             <td className="border border-black px-2 py-1">{idx + 1}</td>
                             <td className="border border-black px-2 py-1 text-left font-medium">{student.name}</td>
                             
@@ -454,7 +464,7 @@ export default function MarkEntry() {
                             <td className="border border-black p-0">
                               <input type="number" min="0" max="2" value={m.activity || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'activity', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
                             </td>
-                            <td className="border border-black p-1 bg-slate-50 font-medium">{pTotal}</td>
+                            <td className={`border border-black p-1 font-medium ${focusedStudentId === student.id ? '' : 'bg-slate-50'}`}>{pTotal}</td>
                             
                             <td className="border border-black p-0">
                               <input type="number" min="0" max="16" value={m.project16 || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'project16', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
@@ -462,7 +472,7 @@ export default function MarkEntry() {
                             <td className="border border-black p-0">
                               <input type="number" min="0" max="20" value={m.project20 || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'project20', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
                             </td>
-                            <td className="border border-black p-1 bg-slate-50 font-medium">{projTotal}</td>
+                            <td className={`border border-black p-1 font-medium ${focusedStudentId === student.id ? '' : 'bg-slate-50'}`}>{projTotal}</td>
                             
                             {isFinal ? (
                               <>
@@ -472,7 +482,7 @@ export default function MarkEntry() {
                                 <td className="border border-black p-0">
                                   <input type="number" min="0" max="5" value={m.secondTerm || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'secondTerm', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
                                 </td>
-                                <td className="border border-black p-1 bg-slate-50 font-bold">{subTotal50}</td>
+                                <td className={`border border-black p-1 font-bold ${focusedStudentId === student.id ? '' : 'bg-slate-50'}`}>{subTotal50}</td>
                                 <td className="border border-black p-0">
                                   <input type="number" min="0" max="50" value={m.writtenFinal || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'writtenFinal', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none font-bold text-brand-700" />
                                 </td>
@@ -482,7 +492,7 @@ export default function MarkEntry() {
                                 <td className="border border-black p-0">
                                   <input type="number" min="0" max="10" value={m.termExam || ""} onChange={e => handleMarkChange(student.id, activeSubject.id, 'termExam', e.target.value)} className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none" />
                                 </td>
-                                <td className="border border-black p-1 bg-slate-50 font-bold text-brand-700">{subTotal50}</td>
+                                <td className={`border border-black p-1 font-bold text-brand-700 ${focusedStudentId === student.id ? '' : 'bg-slate-50'}`}>{subTotal50}</td>
                               </>
                             )}
                           </tr>
@@ -537,7 +547,16 @@ export default function MarkEntry() {
                 </thead>
                 <tbody>
                   {students.map((student) => (
-                    <tr key={student.id} className="hover:bg-slate-50">
+                    <tr 
+                      key={student.id} 
+                      className={focusedStudentId === student.id ? "bg-blue-200" : "hover:bg-slate-50"}
+                      onFocus={() => setFocusedStudentId(student.id)}
+                      onBlur={(e) => {
+                        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                          setFocusedStudentId(null);
+                        }
+                      }}
+                    >
                       <td className="border border-black px-2 py-1">{student.displayRollNo}</td>
                       <td className="border border-black px-2 py-1 text-left font-medium whitespace-nowrap">{student.name}</td>
                       
@@ -598,7 +617,7 @@ export default function MarkEntry() {
                         );
                       })}
                       
-                      <td className="border border-black px-2 py-1 font-bold bg-slate-50">
+                      <td className={`border border-black px-2 py-1 font-bold ${focusedStudentId === student.id ? '' : 'bg-slate-50'}`}>
                         {calculateTotal(student.id)}
                       </td>
                     </tr>
