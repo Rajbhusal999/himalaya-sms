@@ -593,6 +593,7 @@ export default function MarkEntry() {
                                       <input 
                                         type="number"
                                         min="0"
+                                        max="50"
                                         value={marks[student.id]?.[sub.id]?.written || ""}
                                         onChange={(e) => handleMarkChange(student.id, sub.id, 'written', e.target.value)}
                                         className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"
@@ -604,6 +605,7 @@ export default function MarkEntry() {
                                       <input 
                                         type="number"
                                         min="0"
+                                        max="50"
                                         value={marks[student.id]?.[sub.id]?.oral || ""}
                                         onChange={(e) => handleMarkChange(student.id, sub.id, 'oral', e.target.value)}
                                         className="w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none"

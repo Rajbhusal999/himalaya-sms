@@ -325,9 +325,12 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                   
                   {subjects.map((sub, i) => {
                     const bgColor = "bg-emerald-500 text-white";
+                    const hasW = sub.has_written !== false;
+                    const hasO = sub.has_oral !== false;
+                    const marksCols = (hasW ? 1 : 0) + (hasO ? 1 : 0) + 2;
                     let colCount = 0;
-                    if (mode === 'all') colCount = 6;
-                    else if (mode === 'marks') colCount = 4;
+                    if (mode === 'all') colCount = marksCols + 2;
+                    else if (mode === 'marks') colCount = marksCols;
                     else if (mode === 'grades') colCount = 2;
 
                     return (
@@ -339,10 +342,10 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                   
                   {(mode === 'all' || mode === 'marks') && (
                     <th rowSpan={2} className="border border-black p-1 w-12 bg-purple-700 text-white">
-                      Total<br/>{subjects.reduce((sum, sub) => sum + (sub.subject_name.toLowerCase().includes("computer") ? 0 : 100), 0)}
+                      Total<br/>{subjects.reduce((sum, sub) => sum + (sub.subject_name.toLowerCase().includes("computer") ? 0 : ((sub.has_written !== false ? 50 : 0) + (sub.has_oral !== false ? 50 : 0))), 0)}
                     </th>
                   )}
-                  {(mode === 'all' || mode === 'marks') && <th rowSpan={2} className="border border-black p-1 w-12 bg-purple-700 text-white">Percentag</th>}
+                  {(mode === 'all' || mode === 'marks') && <th rowSpan={2} className="border border-black p-1 w-12 bg-purple-700 text-white">Percentage</th>}
                   {(mode === 'all' || mode === 'grades') && <th rowSpan={2} className="border border-black p-1 w-10 bg-blue-500 text-white">GPA</th>}
                   {(mode === 'all' || mode === 'marks') && <th rowSpan={2} className="border border-black p-1 w-10 bg-purple-700 text-white">Att</th>}
                   <th rowSpan={2} className="border border-black p-1 w-10 bg-red-600 text-white">Rank</th>
@@ -351,13 +354,16 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                 <tr>
                   {subjects.map((sub, i) => {
                     const bgColor = "bg-purple-700 text-white";
+                    const hasW = sub.has_written !== false;
+                    const hasO = sub.has_oral !== false;
+                    const fullMarks = (hasW ? 50 : 0) + (hasO ? 50 : 0);
                     return (
                       <Fragment key={`headers-${sub.id}`}>
                         {(mode === 'all' || mode === 'marks') && (
                           <>
-                            <th className={`border border-black p-1 font-normal ${bgColor}`}>RW<br/><b>50</b></th>
-                            <th className={`border border-black p-1 font-normal ${bgColor}`}>LS<br/><b>50</b></th>
-                            <th className={`border border-black p-1 font-normal ${bgColor}`}>OM<br/><b>100</b></th>
+                            {hasW && <th className={`border border-black p-1 font-normal ${bgColor}`}>RW<br/><b>50</b></th>}
+                            {hasO && <th className={`border border-black p-1 font-normal ${bgColor}`}>LS<br/><b>50</b></th>}
+                            <th className={`border border-black p-1 font-normal ${bgColor}`}>OM<br/><b>{fullMarks}</b></th>
                             <th className={`border border-black p-1 font-normal ${bgColor}`}>Percentage<br/><b>100</b></th>
                           </>
                         )}
@@ -375,23 +381,25 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
               <tbody>
                 {students.map((student, idx) => {
                   let totalOM = 0;
-                  let validSubjectCount = 0;
+                  let grandTotalMax = 0;
                   const subjectResults = subjects.map(sub => {
                     const isComputer = sub.subject_name.toLowerCase().includes("computer");
+                    const hasW = sub.has_written !== false;
+                    const hasO = sub.has_oral !== false;
+                    const fullMarks = (hasW ? 50 : 0) + (hasO ? 50 : 0);
                     const m = marks[student.id]?.[sub.id] || {};
-                    const rw = parseFloat(m.written || "0");
-                    const ls = parseFloat(m.oral || "0");
+                    const rw = hasW ? parseFloat(m.written || "0") : 0;
+                    const ls = hasO ? parseFloat(m.oral || "0") : 0;
                     const om = rw + ls;
                     if (!isComputer) {
                       totalOM += om;
-                      validSubjectCount++;
+                      grandTotalMax += fullMarks;
                     }
-                    const percent = om; // out of 100
+                    const percent = fullMarks > 0 ? (om / fullMarks) * 100 : 0;
                     const { grade, gp } = getGradeAndGP(percent);
-                    return { rw, ls, om, percent, gp, grade };
+                    return { hasW, hasO, rw, ls, om, percent, gp, grade };
                   });
 
-                  const grandTotalMax = validSubjectCount * 100;
                   const finalPercentage = grandTotalMax > 0 ? (totalOM / grandTotalMax) * 100 : 0;
                   const { grade: finalGrade, gp: finalGPA } = getGradeAndGP(finalPercentage);
                   const remarks = getRemarks(finalGrade);
@@ -405,10 +413,10 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         <Fragment key={i}>
                           {(mode === 'all' || mode === 'marks') && (
                             <>
-                              <td className="border border-black p-1">{res.rw}</td>
-                              <td className="border border-black p-1">{res.ls}</td>
+                              {res.hasW && <td className="border border-black p-1">{res.rw}</td>}
+                              {res.hasO && <td className="border border-black p-1">{res.ls}</td>}
                               <td className="border border-black p-1 font-bold">{res.om}</td>
-                              <td className="border border-black p-1">{res.percent}</td>
+                              <td className="border border-black p-1">{Number.isInteger(res.percent) ? res.percent : res.percent.toFixed(2)}</td>
                             </>
                           )}
                           {(mode === 'all' || mode === 'grades') && (

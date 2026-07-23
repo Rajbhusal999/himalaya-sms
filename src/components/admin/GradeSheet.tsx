@@ -244,10 +244,21 @@ export default function GradeSheet() {
             subjFinalGrade = "NG";
           }
         }
-      } else {
+      } else if (isClass1to5) {
         const cu = parseFloat(m.cu || "0"); 
         const om = parseFloat(m.total || "0"); 
         const percent = cu > 0 ? (om / cu) * 100 : 0; 
+        const { grade, gp } = getGradeAndGP(percent);
+        subjTotalGP = gp;
+        subjFinalGrade = grade;
+      } else {
+        const hasW = sub.has_written !== false;
+        const hasO = sub.has_oral !== false;
+        const fullMarks = (hasW ? 50 : 0) + (hasO ? 50 : 0);
+        const rw = hasW ? parseFloat(m.written || "0") : 0;
+        const ls = hasO ? parseFloat(m.oral || "0") : 0;
+        const om = rw + ls;
+        const percent = fullMarks > 0 ? (om / fullMarks) * 100 : 0;
         const { grade, gp } = getGradeAndGP(percent);
         subjTotalGP = gp;
         subjFinalGrade = grade;
