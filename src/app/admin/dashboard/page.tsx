@@ -21,6 +21,7 @@ import ManageAdmissions from "@/components/admin/ManageAdmissions";
 import ManageSettings from "@/components/admin/ManageSettings";
 import StaffChat from "@/components/chat/StaffChat";
 import ManageRatings from "@/components/admin/ManageRatings";
+import RecentMarksLedger from "@/components/admin/RecentMarksLedger";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -249,6 +250,10 @@ export default function AdminDashboard() {
       return <Ledger />;
     }
 
+    if (activeTab === "recent-marks") {
+      return <RecentMarksLedger />;
+    }
+
     if (activeTab === "mark-ledger") {
       return <MarkLedger />;
     }
@@ -394,7 +399,7 @@ export default function AdminDashboard() {
         <div className="mt-8 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="p-6 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-slate-800">Recent Mark Entries</h2>
-            <button onClick={() => handleTabClick("ledger")} className="text-brand-600 hover:text-brand-700 text-sm font-medium">View Full Ledger</button>
+            <button onClick={() => handleTabClick("recent-marks")} className="text-brand-600 hover:text-brand-700 text-sm font-medium">View Full Ledger</button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
