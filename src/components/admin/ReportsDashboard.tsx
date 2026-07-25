@@ -11,7 +11,8 @@ import {
   Loader2,
   Download
 } from "lucide-react";
-import { getAggregatedReports, getSchoolwiseAnalysis, getStudentAttendanceReport, getStudentDemographicsReport } from "@/lib/reportServices";
+import * as XLSX from "xlsx";
+import { getAggregatedReports, getSchoolwiseAnalysis, getStudentAttendanceReport, getStudentDemographicsReport, getSchoolwiseCasteReport } from "@/lib/reportServices";
 
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
 const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2083 + i).toString());
@@ -45,7 +46,8 @@ export default function ReportsDashboard() {
 
   const studentReports = [
     { id: "attendance", title: "Attendance Report" },
-    { id: "demographics", title: "Student Demographics" }
+    { id: "demographics", title: "Student Demographics" },
+    { id: "caste-wise", title: "Class/Caste Wise Report" }
   ];
 
   useEffect(() => {
@@ -61,6 +63,9 @@ export default function ReportsDashboard() {
           setReportData(stats);
         } else if (activeReport === "demographics") {
           const stats = await getStudentDemographicsReport(selectedYear, selectedClass);
+          setReportData(stats);
+        } else if (activeReport === "caste-wise") {
+          const stats = await getSchoolwiseCasteReport();
           setReportData(stats);
         } else if (examReports.find(r => r.id === activeReport)) {
           const stats = await getAggregatedReports(selectedYear, selectedClass, selectedTerm);
@@ -321,6 +326,99 @@ export default function ReportsDashboard() {
     );
   };
 
+  const exportCasteWiseReport = () => {
+    if (!reportData || !Array.isArray(reportData)) return;
+
+    // Create a worksheet
+    const ws = XLSX.utils.aoa_to_sheet([]);
+    
+    // Create headers (Row 1 and Row 2)
+    const header1 = ["कक्षा", "दलित", "", "", "सिमान्तकृत", "", "", "जनजाती", "", "", "अन्य", "", "", "जम्मा"];
+    const header2 = ["", "छात्रा", "छात्र", "जम्मा", "छात्रा", "छात्र", "जम्मा", "छात्रा", "छात्र", "जम्मा", "छात्रा", "छात्र", "जम्मा", ""];
+    
+    XLSX.utils.sheet_add_aoa(ws, [header1, header2], { origin: "A1" });
+    
+    // Add data rows
+    const dataRows = reportData.map(row => [
+      row.className,
+      row.dalit.f || "", row.dalit.m || "", row.dalit.t || "",
+      row.marginalized.f || "", row.marginalized.m || "", row.marginalized.t || "",
+      row.janajati.f || "", row.janajati.m || "", row.janajati.t || "",
+      row.others.f || "", row.others.m || "", row.others.t || "",
+      row.total || ""
+    ]);
+    
+    XLSX.utils.sheet_add_aoa(ws, dataRows, { origin: "A3" });
+    
+    // Merge cells for headers
+    ws["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }, // कक्षा
+      { s: { r: 0, c: 1 }, e: { r: 0, c: 3 } }, // दलित
+      { s: { r: 0, c: 4 }, e: { r: 0, c: 6 } }, // सिमान्तकृत
+      { s: { r: 0, c: 7 }, e: { r: 0, c: 9 } }, // जनजाती
+      { s: { r: 0, c: 10 }, e: { r: 0, c: 12 } }, // अन्य
+      { s: { r: 0, c: 13 }, e: { r: 1, c: 13 } } // जम्मा
+    ];
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Caste Wise Report");
+    XLSX.writeFile(wb, "Class_Caste_Wise_Report.xlsx");
+  };
+
+  const renderCasteWiseReport = () => {
+    if (!reportData || !Array.isArray(reportData)) return null;
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left border-collapse border border-slate-300">
+          <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-xs">
+            <tr>
+              <th className="border border-slate-300 p-2 text-center" rowSpan={2}>कक्षा</th>
+              <th className="border border-slate-300 p-2 text-center" colSpan={3}>दलित</th>
+              <th className="border border-slate-300 p-2 text-center" colSpan={3}>सिमान्तकृत</th>
+              <th className="border border-slate-300 p-2 text-center" colSpan={3}>जनजाती</th>
+              <th className="border border-slate-300 p-2 text-center" colSpan={3}>अन्य</th>
+              <th className="border border-slate-300 p-2 text-center" rowSpan={2}>जम्मा</th>
+            </tr>
+            <tr>
+              <th className="border border-slate-300 p-2 text-center">छात्रा</th>
+              <th className="border border-slate-300 p-2 text-center">छात्र</th>
+              <th className="border border-slate-300 p-2 text-center">जम्मा</th>
+              <th className="border border-slate-300 p-2 text-center">छात्रा</th>
+              <th className="border border-slate-300 p-2 text-center">छात्र</th>
+              <th className="border border-slate-300 p-2 text-center">जम्मा</th>
+              <th className="border border-slate-300 p-2 text-center">छात्रा</th>
+              <th className="border border-slate-300 p-2 text-center">छात्र</th>
+              <th className="border border-slate-300 p-2 text-center">जम्मा</th>
+              <th className="border border-slate-300 p-2 text-center">छात्रा</th>
+              <th className="border border-slate-300 p-2 text-center">छात्र</th>
+              <th className="border border-slate-300 p-2 text-center">जम्मा</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reportData.map((row: any, idx: number) => (
+              <tr key={idx} className="border-b border-slate-300 hover:bg-slate-50 text-black">
+                <td className="border border-slate-300 p-2 font-bold text-center">{row.className}</td>
+                <td className="border border-slate-300 p-2 text-center">{row.dalit.f || ""}</td>
+                <td className="border border-slate-300 p-2 text-center">{row.dalit.m || ""}</td>
+                <td className="border border-slate-300 p-2 text-center font-semibold bg-slate-50">{row.dalit.t || ""}</td>
+                <td className="border border-slate-300 p-2 text-center">{row.marginalized.f || ""}</td>
+                <td className="border border-slate-300 p-2 text-center">{row.marginalized.m || ""}</td>
+                <td className="border border-slate-300 p-2 text-center font-semibold bg-slate-50">{row.marginalized.t || ""}</td>
+                <td className="border border-slate-300 p-2 text-center">{row.janajati.f || ""}</td>
+                <td className="border border-slate-300 p-2 text-center">{row.janajati.m || ""}</td>
+                <td className="border border-slate-300 p-2 text-center font-semibold bg-slate-50">{row.janajati.t || ""}</td>
+                <td className="border border-slate-300 p-2 text-center">{row.others.f || ""}</td>
+                <td className="border border-slate-300 p-2 text-center">{row.others.m || ""}</td>
+                <td className="border border-slate-300 p-2 text-center font-semibold bg-slate-50">{row.others.t || ""}</td>
+                <td className="border border-slate-300 p-2 text-center font-bold bg-slate-100">{row.total || ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   const renderReportContent = () => {
     if (!activeReport) {
       return (
@@ -343,7 +441,16 @@ export default function ReportsDashboard() {
               Data for Academic Year {selectedYear}, Term: {selectedTerm} {activeReport !== 'school-analysis' && `, Class: ${selectedClass}`}
             </p>
           </div>
-          <button className="flex items-center px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 text-sm font-medium transition-colors">
+          <button 
+            onClick={() => {
+              if (activeReport === "caste-wise") {
+                exportCasteWiseReport();
+              } else {
+                alert("Export is currently supported for Caste Wise Report.");
+              }
+            }}
+            className="flex items-center px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 text-sm font-medium transition-colors"
+          >
             <Download className="w-4 h-4 mr-2" />
             Export Report
           </button>
@@ -393,6 +500,7 @@ export default function ReportsDashboard() {
 
             {activeReport === "attendance" && renderAttendanceReport()}
             {activeReport === "demographics" && renderDemographicsReport()}
+            {activeReport === "caste-wise" && renderCasteWiseReport()}
           </div>
         )}
       </div>
@@ -425,7 +533,7 @@ export default function ReportsDashboard() {
           </select>
         </div>
 
-        {activeReport !== "school-analysis" && (
+        {activeReport !== "school-analysis" && activeReport !== "caste-wise" && (
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium text-slate-700">Class:</label>
             <select

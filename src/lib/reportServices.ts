@@ -212,3 +212,44 @@ export const getStudentDemographicsReport = async (academicYear: string, selecte
     guardianContact: student.guardian_contact_number || "N/A",
   }));
 };
+
+export const getSchoolwiseCasteReport = async () => {
+  const { data: students, error } = await supabase
+    .from("students")
+    .select("class, gender, caste");
+
+  if (error) {
+    throw new Error("Failed to fetch caste report data");
+  }
+
+  const classes = ["Nursery", "KG", "ECD", "1", "2", "3", "4", "5", "6", "7", "8"];
+  const reportData = classes.map(cls => {
+    const classStudents = (students || []).filter(s => String(s.class) === cls);
+    
+    const count = (caste: string, gender: string) => 
+      classStudents.filter(s => 
+        (s.caste?.toLowerCase() === caste.toLowerCase()) && 
+        (s.gender?.toLowerCase() === gender.toLowerCase())
+      ).length;
+
+    const dalitF = count("Dalit", "Female");
+    const dalitM = count("Dalit", "Male");
+    const margF = count("Marginalized", "Female");
+    const margM = count("Marginalized", "Male");
+    const janF = count("Janajati", "Female");
+    const janM = count("Janajati", "Male");
+    const otherF = count("Others", "Female");
+    const otherM = count("Others", "Male");
+
+    return {
+      className: cls,
+      dalit: { f: dalitF, m: dalitM, t: dalitF + dalitM },
+      marginalized: { f: margF, m: margM, t: margF + margM },
+      janajati: { f: janF, m: janM, t: janF + janM },
+      others: { f: otherF, m: otherM, t: otherF + otherM },
+      total: classStudents.length
+    };
+  });
+
+  return reportData;
+};
