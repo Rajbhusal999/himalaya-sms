@@ -23,6 +23,7 @@ type Student = {
   disability_type?: string;
   guardian_name?: string;
   guardian_contact_number?: string;
+  caste?: string;
 };
 
 type StudentModalProps = {
@@ -51,6 +52,7 @@ export default function StudentModal({ isOpen, onClose, student, onSuccess }: St
     disability_type: "",
     guardian_name: "",
     guardian_contact_number: "",
+    caste: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -73,6 +75,7 @@ export default function StudentModal({ isOpen, onClose, student, onSuccess }: St
         disability_type: student.disability_type || "",
         guardian_name: student.guardian_name || "",
         guardian_contact_number: student.guardian_contact_number || "",
+        caste: student.caste || "",
       });
     } else {
       setFormData({
@@ -93,6 +96,7 @@ export default function StudentModal({ isOpen, onClose, student, onSuccess }: St
         disability_type: "",
         guardian_name: "",
         guardian_contact_number: "",
+        caste: "",
       });
     }
   }, [student, isOpen]);
@@ -135,6 +139,7 @@ export default function StudentModal({ isOpen, onClose, student, onSuccess }: St
         disability_type: formData.disability_type,
         guardian_name: formData.guardian_name,
         guardian_contact_number: formData.guardian_contact_number,
+        caste: formData.caste,
       };
 
       if (student?.id) {
@@ -212,6 +217,16 @@ export default function StudentModal({ isOpen, onClose, student, onSuccess }: St
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Caste</label>
+              <select name="caste" value={formData.caste} onChange={handleChange} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-white text-slate-900">
+                <option value="">Select Caste</option>
+                <option value="Dalit">Dalit</option>
+                <option value="Janajati">Janajati</option>
+                <option value="Marginalized">Marginalized</option>
+                <option value="Others">Others</option>
               </select>
             </div>
             <div>

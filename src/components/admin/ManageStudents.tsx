@@ -26,6 +26,7 @@ type Student = {
   disability_type?: string;
   guardian_name?: string;
   guardian_contact_number?: string;
+  caste?: string;
 };
 
 export default function ManageStudents() {
@@ -122,6 +123,7 @@ export default function ManageStudents() {
           disability_type: row["Disability Type"] || null,
           guardian_name: row["Guardian Name"] || null,
           guardian_contact_number: row["Guardian Contact Number"] ? String(row["Guardian Contact Number"]) : null,
+          caste: row["Caste"] || null,
         };
         });
 
@@ -173,6 +175,7 @@ export default function ManageStudents() {
       "Age": "", // Calculate if needed based on DOB
       "Guardian Name": s.guardian_name || "",
       "Guardian Contact Number": s.guardian_contact_number || "",
+      "Caste": s.caste || "",
     }));
 
     const ws = XLSX.utils.json_to_sheet(exportData);
@@ -302,6 +305,7 @@ export default function ManageStudents() {
               <th className="px-4 py-3 font-medium">DOB</th>
               <th className="px-4 py-3 font-medium">Mother Tongue</th>
               <th className="px-4 py-3 font-medium">Disability Type</th>
+              <th className="px-4 py-3 font-medium">Caste</th>
               <th className="px-4 py-3 font-medium">Guardian Name</th>
               <th className="px-4 py-3 font-medium">Guardian Contact</th>
               <th className="px-4 py-3 font-medium text-right">Actions</th>
@@ -310,7 +314,7 @@ export default function ManageStudents() {
           <tbody className="divide-y divide-slate-100">
             {loading ? (
               <tr>
-                <td colSpan={18} className="px-6 py-12 text-center">
+                <td colSpan={19} className="px-6 py-12 text-center">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-600"></div>
                   <p className="mt-2 text-slate-500">Loading students...</p>
                 </td>
@@ -333,6 +337,7 @@ export default function ManageStudents() {
                   <td className="px-4 py-3 text-slate-600">{student.dob || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{student.mother_tongue || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{student.disability_type || "-"}</td>
+                  <td className="px-4 py-3 text-slate-600">{student.caste || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{student.guardian_name || "-"}</td>
                   <td className="px-4 py-3 text-slate-600">{student.guardian_contact_number || "-"}</td>
                   <td className="px-4 py-3 text-right">
@@ -358,7 +363,7 @@ export default function ManageStudents() {
               ))
             ) : (
               <tr>
-                <td colSpan={18} className="px-6 py-12 text-center text-slate-500">
+                <td colSpan={19} className="px-6 py-12 text-center text-slate-500">
                   No students found. Import an Excel file to add students.
                 </td>
               </tr>

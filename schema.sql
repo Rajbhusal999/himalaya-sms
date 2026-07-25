@@ -21,7 +21,8 @@ create table public.students (
     mother_tongue text,
     disability_type text,
     guardian_name text,
-    guardian_contact_number text
+    guardian_contact_number text,
+    caste text
 );
 
 -- Create Subjects Table
