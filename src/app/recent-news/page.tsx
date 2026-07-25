@@ -23,13 +23,13 @@ export default function RecentNewsPage() {
         .from('news')
         .select('*')
         .order('created_at', { ascending: false });
-        
+
       if (data && !error) {
         setNews(data);
       }
       setIsLoading(false);
     };
-    
+
     fetchNews();
   }, []);
 
@@ -82,14 +82,14 @@ export default function RecentNewsPage() {
                       })}
                     </time>
                   </div>
-                  
+
                   <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 leading-snug">
                     {item.content}
                   </h3>
-                  
+
                   {item.file_url && (
                     <div className="mt-6 pt-6 border-t border-slate-100">
-                      <a 
+                      <a
                         href={item.file_url}
                         target="_blank"
                         rel="noopener noreferrer"

@@ -379,72 +379,84 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                 </tr>
               </thead>
               <tbody>
-                {students.map((student, idx) => {
-                  let totalOM = 0;
-                  let grandTotalMax = 0;
-                  const subjectResults = subjects.map(sub => {
-                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
-                    const hasW = sub.has_written !== false;
-                    const hasO = sub.has_oral !== false;
-                    const fullMarks = (hasW ? 50 : 0) + (hasO ? 50 : 0);
-                    const m = marks[student.id]?.[sub.id] || {};
-                    const rw = hasW ? parseFloat(m.written || "0") : 0;
-                    const ls = hasO ? parseFloat(m.oral || "0") : 0;
-                    const om = rw + ls;
-                    if (!isComputer) {
-                      totalOM += om;
-                      grandTotalMax += fullMarks;
-                    }
-                    const percent = fullMarks > 0 ? (om / fullMarks) * 100 : 0;
-                    const { grade, gp } = getGradeAndGP(percent);
-                    return { hasW, hasO, rw, ls, om, percent, gp, grade };
+                {(() => {
+                  const processedStudents = students.map((student, idx) => {
+                    let totalOM = 0;
+                    let grandTotalMax = 0;
+                    let hasNG = false;
+                    const subjectResults = subjects.map(sub => {
+                      const isComputer = sub.subject_name.toLowerCase().includes("computer");
+                      const hasW = sub.has_written !== false;
+                      const hasO = sub.has_oral !== false;
+                      const fullMarks = (hasW ? 50 : 0) + (hasO ? 50 : 0);
+                      const m = marks[student.id]?.[sub.id] || {};
+                      const rw = hasW ? parseFloat(m.written || "0") : 0;
+                      const ls = hasO ? parseFloat(m.oral || "0") : 0;
+                      const om = rw + ls;
+                      if (!isComputer) {
+                        totalOM += om;
+                        grandTotalMax += fullMarks;
+                      }
+                      const percent = fullMarks > 0 ? (om / fullMarks) * 100 : 0;
+                      const { grade, gp } = getGradeAndGP(percent);
+                      if (grade === "NG") hasNG = true;
+                      return { hasW, hasO, rw, ls, om, percent, gp, grade };
+                    });
+
+                    const finalPercentage = grandTotalMax > 0 ? (totalOM / grandTotalMax) * 100 : 0;
+                    let { grade: finalGrade, gp: finalGPA } = getGradeAndGP(finalPercentage);
+                    if (hasNG) finalGPA = 0;
+                    const remarks = getRemarks(finalGrade);
+                    
+                    return { student, idx, subjectResults, totalOM, grandTotalMax, finalPercentage, finalGPA, remarks, hasNG };
                   });
 
-                  const finalPercentage = grandTotalMax > 0 ? (totalOM / grandTotalMax) * 100 : 0;
-                  const { grade: finalGrade, gp: finalGPA } = getGradeAndGP(finalPercentage);
-                  const remarks = getRemarks(finalGrade);
-                  
-                  return (
-                    <tr key={student.id}>
-                      <td className="border border-black p-1">{idx + 1}</td>
-                      <td className="border border-black p-1 text-left">{student.name}</td>
-                      
-                      {subjectResults.map((res, i) => (
-                        <Fragment key={i}>
-                          {(mode === 'all' || mode === 'marks') && (
-                            <>
-                              {res.hasW && <td className="border border-black p-1">{res.rw}</td>}
-                              {res.hasO && <td className="border border-black p-1">{res.ls}</td>}
-                              <td className="border border-black p-1 font-bold">{res.om}</td>
-                              <td className="border border-black p-1">{Number.isInteger(res.percent) ? res.percent : res.percent.toFixed(2)}</td>
-                            </>
-                          )}
-                          {(mode === 'all' || mode === 'grades') && (
-                            <>
-                              <td className="border border-black p-1">{res.gp.toFixed(1)}</td>
-                              <td className="border border-black p-1 font-bold">{res.grade}</td>
-                            </>
-                          )}
-                        </Fragment>
-                      ))}
+                  const sortedGPAs = [...new Set(processedStudents.filter(s => !s.hasNG && s.finalGPA > 0).map(s => s.finalGPA))].sort((a, b) => b - a);
 
-                      {(mode === 'all' || mode === 'marks') && (
-                        <td className="border border-black p-1 font-bold">{totalOM}</td>
-                      )}
-                      {(mode === 'all' || mode === 'marks') && (
-                        <td className="border border-black p-1">{finalPercentage.toFixed(2)}</td>
-                      )}
-                      {(mode === 'all' || mode === 'grades') && (
-                        <td className="border border-black p-1 font-bold">{finalGPA.toFixed(1)}</td>
-                      )}
-                      {(mode === 'all' || mode === 'marks') && (
-                        <td className="border border-black p-1 font-bold">{studentAttendance[student.id] || ""}</td>
-                      )}
-                      <td className="border border-black p-1">{Math.floor(Math.random() * 20) + 1}</td>
-                      <td className="border border-black p-1">{remarks}</td>
-                    </tr>
-                  );
-                })}
+                  return processedStudents.map(({ student, idx, subjectResults, totalOM, grandTotalMax, finalPercentage, finalGPA, remarks, hasNG }) => {
+                    const rank = (!hasNG && finalGPA > 0) ? sortedGPAs.indexOf(finalGPA) + 1 : "-";
+                    return (
+                      <tr key={student.id}>
+                        <td className="border border-black p-1">{idx + 1}</td>
+                        <td className="border border-black p-1 text-left">{student.name}</td>
+                        
+                        {subjectResults.map((res, i) => (
+                          <Fragment key={i}>
+                            {(mode === 'all' || mode === 'marks') && (
+                              <>
+                                {res.hasW && <td className="border border-black p-1">{res.rw}</td>}
+                                {res.hasO && <td className="border border-black p-1">{res.ls}</td>}
+                                <td className="border border-black p-1 font-bold">{res.om}</td>
+                                <td className="border border-black p-1">{Number.isInteger(res.percent) ? res.percent : res.percent.toFixed(2)}</td>
+                              </>
+                            )}
+                            {(mode === 'all' || mode === 'grades') && (
+                              <>
+                                <td className="border border-black p-1">{res.gp.toFixed(1)}</td>
+                                <td className="border border-black p-1 font-bold">{res.grade}</td>
+                              </>
+                            )}
+                          </Fragment>
+                        ))}
+
+                        {(mode === 'all' || mode === 'marks') && (
+                          <td className="border border-black p-1 font-bold">{totalOM}</td>
+                        )}
+                        {(mode === 'all' || mode === 'marks') && (
+                          <td className="border border-black p-1">{finalPercentage.toFixed(2)}</td>
+                        )}
+                        {(mode === 'all' || mode === 'grades') && (
+                          <td className="border border-black p-1 font-bold">{finalGPA.toFixed(1)}</td>
+                        )}
+                        {(mode === 'all' || mode === 'marks') && (
+                          <td className="border border-black p-1 font-bold">{studentAttendance[student.id] || ""}</td>
+                        )}
+                        <td className="border border-black p-1 font-bold">{rank}</td>
+                        <td className="border border-black p-1">{remarks}</td>
+                      </tr>
+                    );
+                  });
+                })()}
               </tbody>
             </table>
           ) : isClass1to5 ? (
@@ -682,103 +694,112 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                 </tr>
               </thead>
               <tbody>
-                {students.map((student, idx) => {
-                  let totalWGP = 0;
-                  let totalCreditHours = 0;
-                  let grandTotal = 0;
-                  let hasNG = false;
+                {(() => {
+                  const processedStudents = students.map((student, idx) => {
+                    let totalWGP = 0;
+                    let totalCreditHours = 0;
+                    let grandTotal = 0;
+                    let hasNG = false;
 
-                  const subjectResults = subjects.map(sub => {
-                    const m = marks[student.id]?.[sub.id] || {};
-                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
-                    
-                    const par = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
-                    const pw = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
-                    const t1 = parseFloat(m.firstTerm || "0");
-                    const t2 = parseFloat(m.secondTerm || "0");
-                    const prTotal = par + pw + t1 + t2; // Internal marks out of 50 (or 25 for computer)
-                    const thTotal = parseFloat(m.written || "0"); // Written marks out of 50 (or 25 for computer)
+                    const subjectResults = subjects.map(sub => {
+                      const m = marks[student.id]?.[sub.id] || {};
+                      const isComputer = sub.subject_name.toLowerCase().includes("computer");
+                      
+                      const par = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
+                      const pw = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
+                      const t1 = parseFloat(m.firstTerm || "0");
+                      const t2 = parseFloat(m.secondTerm || "0");
+                      const prTotal = par + pw + t1 + t2; // Internal marks out of 50 (or 25 for computer)
+                      const thTotal = parseFloat(m.written || "0"); // Written marks out of 50 (or 25 for computer)
 
-                    // Correct PR/TH values based on subject
-                    const prMax = isComputer ? 25 : 50;
-                    const thMax = isComputer ? 25 : 50;
+                      // Correct PR/TH values based on subject
+                      const prMax = isComputer ? 25 : 50;
+                      const thMax = isComputer ? 25 : 50;
 
-                    const prPercent = (prTotal / prMax) * 100;
-                    const thPercent = (thTotal / thMax) * 100;
+                      const prPercent = (prTotal / prMax) * 100;
+                      const thPercent = (thTotal / thMax) * 100;
 
-                    const prGradeGP = getGradeAndGP(prPercent);
-                    const thGradeGP = getGradeAndGP(thPercent);
+                      const prGradeGP = getGradeAndGP(prPercent);
+                      const thGradeGP = getGradeAndGP(thPercent);
 
-                    const isOptional = sub.subject_name.toLowerCase().includes("opt");
-                    const subjectCredit = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : (isComputer ? 2 : 5));
-                    const halfCredit = subjectCredit / 2;
-                    const thWGP = thGradeGP.gp * halfCredit;
-                    const prWGP = prGradeGP.gp * halfCredit;
-                    
-                    let subjTotalWGP = thWGP + prWGP;
-                    let subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : subjTotalWGP / subjectCredit;
-                    
-                    const subjTotalMarks = prTotal + thTotal;
-                    
-                    let subjFinalGrade = getGradeAndGP((subjTotalMarks / (isComputer ? 50 : 100)) * 100).grade;
+                      const isOptional = sub.subject_name.toLowerCase().includes("opt");
+                      const subjectCredit = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : (isComputer ? 2 : 5));
+                      const halfCredit = subjectCredit / 2;
+                      const thWGP = thGradeGP.gp * halfCredit;
+                      const prWGP = prGradeGP.gp * halfCredit;
+                      
+                      let subjTotalWGP = thWGP + prWGP;
+                      let subjTotalGP = isComputer ? (thGradeGP.gp + prGradeGP.gp) / 2 : subjTotalWGP / subjectCredit;
+                      
+                      const subjTotalMarks = prTotal + thTotal;
+                      
+                      let subjFinalGrade = getGradeAndGP((subjTotalMarks / (isComputer ? 50 : 100)) * 100).grade;
 
-                    if (t1 < 2 || t2 < 2 || thGradeGP.grade === "NG" || prGradeGP.grade === "NG") {
-                      subjTotalGP = 0;
-                      subjFinalGrade = "NG";
-                    }
+                      if (t1 < 2 || t2 < 2 || thGradeGP.grade === "NG" || prGradeGP.grade === "NG") {
+                        subjTotalGP = 0;
+                        subjFinalGrade = "NG";
+                      }
 
-                    if (subjTotalGP === 0 || subjFinalGrade === "NG") {
-                      hasNG = true;
-                    }
+                      if (subjTotalGP === 0 || subjFinalGrade === "NG") {
+                        hasNG = true;
+                      }
 
-                    if (!isComputer) {
-                      totalWGP += subjTotalWGP; 
-                      totalCreditHours += subjectCredit;
-                      grandTotal += subjTotalMarks;
-                    }
+                      if (!isComputer) {
+                        totalWGP += subjTotalWGP; 
+                        totalCreditHours += subjectCredit;
+                        grandTotal += subjTotalMarks;
+                      }
 
-                    return { prTotal, thTotal, prGradeGP, thGradeGP, thWGP, prWGP, subjTotalWGP, subjTotalGP, subjFinalGrade, subjTotalMarks, isComputer };
+                      return { prTotal, thTotal, prGradeGP, thGradeGP, thWGP, prWGP, subjTotalWGP, subjTotalGP, subjFinalGrade, subjTotalMarks, isComputer };
+                    });
+
+                    let finalGPA = totalCreditHours > 0 ? totalWGP / totalCreditHours : 0;
+                    if (hasNG) finalGPA = 0;
+                    const { grade: finalGrade } = getGradeAndGP(finalGPA * 25);
+                    const remarks = getRemarks(finalGrade);
+
+                    return { student, idx, subjectResults, totalWGP, totalCreditHours, grandTotal, hasNG, finalGPA, finalGrade, remarks };
                   });
 
-                  let finalGPA = totalCreditHours > 0 ? totalWGP / totalCreditHours : 0;
-                  if (hasNG) finalGPA = 0;
-                  const { grade: finalGrade } = getGradeAndGP(finalGPA * 25);
-                  const remarks = getRemarks(finalGrade);
+                  const sortedGPAs = [...new Set(processedStudents.filter(s => !s.hasNG && s.finalGPA > 0).map(s => s.finalGPA))].sort((a, b) => b - a);
 
-                  return (
-                    <tr key={student.id} className="hover:bg-slate-50">
-                      <td className="border border-black p-1">{student.displayRollNo || idx + 1}</td>
-                      <td className="border border-black p-1 text-left">{student.name}</td>
-                      <td className="border border-black p-1"></td>
-                      <td className="border border-black p-1">{selectedClass}</td>
-                      
-                      {subjectResults.map((res, i) => (
-                        <Fragment key={i}>
-                          {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.thTotal || 0}</td>}
-                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.thGradeGP.gp.toFixed(1)}</td>}
-                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.thGradeGP.grade}</td>}
-                          {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.thWGP.toFixed(1)}</td>}
-                          
-                          {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.prTotal || 0}</td>}
-                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.prGradeGP.gp.toFixed(1)}</td>}
-                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.prGradeGP.grade}</td>}
-                          {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.prWGP.toFixed(1)}</td>}
-                          
-                          {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.subjTotalMarks || 0}</td>}
-                          {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.subjTotalWGP.toFixed(1)}</td>}
-                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.subjTotalGP.toFixed(1)}</td>}
-                          {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.subjFinalGrade}</td>}
-                        </Fragment>
-                      ))}
+                  return processedStudents.map(({ student, idx, subjectResults, totalWGP, totalCreditHours, grandTotal, hasNG, finalGPA, finalGrade, remarks }) => {
+                    const rank = (!hasNG && finalGPA > 0) ? sortedGPAs.indexOf(finalGPA) + 1 : "-";
+                    return (
+                      <tr key={student.id} className="hover:bg-slate-50">
+                        <td className="border border-black p-1">{student.displayRollNo || idx + 1}</td>
+                        <td className="border border-black p-1 text-left">{student.name}</td>
+                        <td className="border border-black p-1"></td>
+                        <td className="border border-black p-1">{selectedClass}</td>
+                        
+                        {subjectResults.map((res, i) => (
+                          <Fragment key={i}>
+                            {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.thTotal || 0}</td>}
+                            {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.thGradeGP.gp.toFixed(1)}</td>}
+                            {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.thGradeGP.grade}</td>}
+                            {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.thWGP.toFixed(1)}</td>}
+                            
+                            {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.prTotal || 0}</td>}
+                            {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.prGradeGP.gp.toFixed(1)}</td>}
+                            {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.prGradeGP.grade}</td>}
+                            {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.prWGP.toFixed(1)}</td>}
+                            
+                            {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.subjTotalMarks || 0}</td>}
+                            {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.subjTotalWGP.toFixed(1)}</td>}
+                            {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.subjTotalGP.toFixed(1)}</td>}
+                            {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.subjFinalGrade}</td>}
+                          </Fragment>
+                        ))}
 
-                      {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1 font-bold">{finalGPA.toFixed(2)}</td>}
-                      {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1 font-bold">{grandTotal || 0}</td>}
-                      <td className="border border-black p-1 font-bold">{studentAttendance[student.id] || ""}</td>
-                      <td className="border border-black p-1">{remarks}</td>
-                      <td className="border border-black p-1 font-bold">{Math.floor(Math.random() * 20) + 1}</td>
-                    </tr>
-                  );
-                })}
+                        {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1 font-bold">{finalGPA.toFixed(2)}</td>}
+                        {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1 font-bold">{grandTotal || 0}</td>}
+                        <td className="border border-black p-1 font-bold">{studentAttendance[student.id] || ""}</td>
+                        <td className="border border-black p-1">{remarks}</td>
+                        <td className="border border-black p-1 font-bold">{rank}</td>
+                      </tr>
+                    );
+                  });
+                })()}
               </tbody>
             </table>
             ) : (
@@ -855,83 +876,92 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                 </tr>
               </thead>
               <tbody>
-                {students.map((student, idx) => {
-                  let totalWGP = 0;
-                  let totalCU = 0;
-                  let grandTotal = 0;
-                  let hasNG = false;
+                {(() => {
+                  const processedStudents = students.map((student, idx) => {
+                    let totalWGP = 0;
+                    let totalCU = 0;
+                    let grandTotal = 0;
+                    let hasNG = false;
 
-                  const subjectResults = subjects.map(sub => {
-                    const isComputer = sub.subject_name.toLowerCase().includes("computer");
-                    const m = marks[student.id]?.[sub.id] || {};
-                    const par = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
-                    const pw = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
-                    const term = parseFloat(m.termExam || "0");
-                    const total = par + pw + term;
-                    
-                    const percent = (total / 50) * 100;
-                    const { grade, gp } = getGradeAndGP(percent);
-                    const isOptional = sub.subject_name.toLowerCase().includes("opt");
-                    const subjectCredit = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : 4);
-                    const wgp = gp * subjectCredit;
+                    const subjectResults = subjects.map(sub => {
+                      const isComputer = sub.subject_name.toLowerCase().includes("computer");
+                      const m = marks[student.id]?.[sub.id] || {};
+                      const par = (parseFloat(m.attendance || "0") + parseFloat(m.activity || "0"));
+                      const pw = (parseFloat(m.project16 || "0") + parseFloat(m.project20 || "0"));
+                      const term = parseFloat(m.termExam || "0");
+                      const total = par + pw + term;
+                      
+                      const percent = (total / 50) * 100;
+                      const { grade, gp } = getGradeAndGP(percent);
+                      const isOptional = sub.subject_name.toLowerCase().includes("opt");
+                      const subjectCredit = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : 4);
+                      const wgp = gp * subjectCredit;
 
-                    if (gp === 0 || grade === "NG") {
-                      hasNG = true;
-                    }
+                      if (gp === 0 || grade === "NG") {
+                        hasNG = true;
+                      }
 
-                    if (!isComputer) {
-                      totalWGP += wgp;
-                      totalCU += subjectCredit;
-                      grandTotal += total;
-                    }
+                      if (!isComputer) {
+                        totalWGP += wgp;
+                        totalCU += subjectCredit;
+                        grandTotal += total;
+                      }
 
-                    return { par, pw, term, total, gp, grade, wgp };
+                      return { par, pw, term, total, gp, grade, wgp };
+                    });
+
+                    let finalGPA = totalCU > 0 ? totalWGP / totalCU : 0;
+                    if (hasNG) finalGPA = 0;
+                    const { grade: finalGrade } = getGradeAndGP(finalGPA * 25);
+                    const remarks = getRemarks(finalGrade);
+
+                    return { student, idx, subjectResults, totalWGP, totalCU, grandTotal, hasNG, finalGPA, remarks };
                   });
 
-                  let finalGPA = totalCU > 0 ? totalWGP / totalCU : 0;
-                  if (hasNG) finalGPA = 0;
-                  const { grade: finalGrade } = getGradeAndGP(finalGPA * 25);
-                  const remarks = getRemarks(finalGrade);
+                  const sortedGPAs = [...new Set(processedStudents.filter(s => !s.hasNG && s.finalGPA > 0).map(s => s.finalGPA))].sort((a, b) => b - a);
 
-                  return (
-                    <tr key={student.id} className="hover:bg-slate-50">
-                      <td className="border border-black p-1">{student.displayRollNo || `HSI00${idx + 1}`}</td>
-                      <td className="border border-black p-1 text-left">{student.name}</td>
-                      
-                      {subjectResults.map((res, i) => (
-                        <Fragment key={i}>
-                          {(mode === 'all' || mode === 'marks') && (
-                            <>
-                              <td className="border border-black p-1">{res.par || ""}</td>
-                              <td className="border border-black p-1">{res.pw || ""}</td>
-                              <td className="border border-black p-1">{res.term || ""}</td>
-                              <td className="border border-black p-1">{res.total || ""}</td>
-                            </>
-                          )}
-                          {(mode === 'all' || mode === 'grades') && (
-                            <>
-                              <td className="border border-black p-1 font-bold">{res.total ? res.gp.toFixed(1) : ""}</td>
-                              <td className="border border-black p-1 font-bold">{res.total ? res.grade : ""}</td>
-                              {mode === 'all' && (
-                                <td className="border border-black p-1 font-bold">{res.total ? res.wgp : ""}</td>
-                              )}
-                            </>
-                          )}
-                        </Fragment>
-                      ))}
+                  return processedStudents.map(({ student, idx, subjectResults, totalWGP, totalCU, grandTotal, hasNG, finalGPA, remarks }) => {
+                    const rank = (!hasNG && finalGPA > 0) ? sortedGPAs.indexOf(finalGPA) + 1 : "-";
+                    return (
+                      <tr key={student.id} className="hover:bg-slate-50">
+                        <td className="border border-black p-1">{student.displayRollNo || `HSI00${idx + 1}`}</td>
+                        <td className="border border-black p-1 text-left">{student.name}</td>
+                        
+                        {subjectResults.map((res, i) => (
+                          <Fragment key={i}>
+                            {(mode === 'all' || mode === 'marks') && (
+                              <>
+                                <td className="border border-black p-1">{res.par || ""}</td>
+                                <td className="border border-black p-1">{res.pw || ""}</td>
+                                <td className="border border-black p-1">{res.term || ""}</td>
+                                <td className="border border-black p-1">{res.total || ""}</td>
+                              </>
+                            )}
+                            {(mode === 'all' || mode === 'grades') && (
+                              <>
+                                <td className="border border-black p-1 font-bold">{res.total ? res.gp.toFixed(1) : ""}</td>
+                                <td className="border border-black p-1 font-bold">{res.total ? res.grade : ""}</td>
+                                {mode === 'all' && (
+                                  <td className="border border-black p-1 font-bold">{res.total ? res.wgp : ""}</td>
+                                )}
+                              </>
+                            )}
+                          </Fragment>
+                        ))}
 
-                      {(mode === 'all' || mode === 'grades') && (
-                        <td className="border border-black p-1 font-bold">{totalWGP > 0 ? finalGPA.toFixed(2) : ""}</td>
-                      )}
-                      {(mode === 'all' || mode === 'marks') && (
-                        <td className="border border-black p-1 font-bold">{grandTotal || ""}</td>
-                      )}
-                      <td className="border border-black p-1 font-bold">{totalWGP > 0 ? (studentAttendance[student.id] || "") : ""}</td>
-                      <td className="border border-black p-1 font-bold">{totalWGP > 0 ? Math.floor(Math.random() * 20) + 1 : ""}</td>
-                      <td className="border border-black p-1">{totalWGP > 0 ? remarks : ""}</td>
-                    </tr>
-                  );
-                })}
+                        {(mode === 'all' || mode === 'grades') && (
+                          <td className="border border-black p-1 font-bold">{totalWGP > 0 ? finalGPA.toFixed(2) : ""}</td>
+                        )}
+                        {(mode === 'all' || mode === 'marks') && (
+                          <td className="border border-black p-1 font-bold">{grandTotal || ""}</td>
+                        )}
+                        <td className="border border-black p-1 font-bold">{totalWGP > 0 ? (studentAttendance[student.id] || "") : ""}</td>
+                        <td className="border border-black p-1 font-bold">{totalWGP > 0 ? rank : ""}</td>
+                        <td className="border border-black p-1">{totalWGP > 0 ? remarks : ""}</td>
+                      </tr>
+                    );
+                  });
+                })()}
               </tbody>
             </table>
             )

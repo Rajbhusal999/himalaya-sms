@@ -46,7 +46,7 @@ export default function GradeSheet() {
     try {
       const { data: studentsData, error: studentsError } = await supabase
         .from("students")
-        .select("id, name, roll_no, class")
+        .select("id, name, roll_no, class, iemis_code")
         .eq("class", selectedClass)
         .order("name");
 
@@ -370,7 +370,9 @@ export default function GradeSheet() {
             </tr>
             <tr>
               <td className="border border-black p-1">Students Name :</td>
-              <td className="border border-black p-1 font-bold text-center" colSpan={3}>{student.name}</td>
+              <td className="border border-black p-1 font-bold text-center">{student.name}</td>
+              <td className="border border-black p-1 w-20">IEMIS No :</td>
+              <td className="border border-black p-1 font-bold w-16 text-center">{student.iemis_code || ""}</td>
             </tr>
           </tbody>
         </table>
