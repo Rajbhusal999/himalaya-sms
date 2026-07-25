@@ -195,6 +195,46 @@ export default function ManageStudents() {
     }
   };
 
+  const handleAutoAssignRollNumbers = async () => {
+    const targetStudents = selectedClass === "All Classes" 
+      ? students 
+      : students.filter(s => String(s.class) === selectedClass);
+      
+    if (targetStudents.length === 0) return alert("No students found to update.");
+    
+    const msg = selectedClass === "All Classes" 
+      ? "Are you sure you want to re-assign roll numbers alphabetically for ALL students across ALL classes?"
+      : `Are you sure you want to re-assign roll numbers alphabetically for Class ${selectedClass}?`;
+      
+    if (!confirm(msg)) return;
+    
+    setLoading(true);
+    try {
+      const classCounters: Record<string, number> = {};
+      const updates = targetStudents.map(student => {
+        if (!classCounters[student.class]) classCounters[student.class] = 0;
+        classCounters[student.class]++;
+        return {
+          id: student.id,
+          roll_no: classCounters[student.class]
+        };
+      });
+
+      // Update in DB
+      for (const update of updates) {
+        const { error } = await supabase.from("students").update({ roll_no: update.roll_no }).eq("id", update.id);
+        if (error) throw error;
+      }
+      
+      alert("Roll numbers assigned successfully!");
+      fetchStudents();
+    } catch (err: any) {
+      alert("Error assigning roll numbers: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       {/* Header Actions */}
@@ -258,6 +298,15 @@ export default function ManageStudents() {
           </button>
 
           <button
+            onClick={handleAutoAssignRollNumbers}
+            className="flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg hover:bg-indigo-200 transition-colors text-sm font-medium"
+            title="Sorts students alphabetically by name and assigns Roll Numbers 1, 2, 3..."
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Auto Roll No
+          </button>
+
+          <button
             onClick={exportToExcel}
             className="flex items-center px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors text-sm font-medium"
           >
@@ -291,7 +340,7 @@ export default function ManageStudents() {
           <thead className="sticky top-0 bg-white shadow-sm z-10">
             <tr className="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider bg-slate-100">
               <th className="px-4 py-3 font-medium">S.N</th>
-              <th className="px-4 py-3 font-medium">Symbol No</th>
+              <th className="px-4 py-3 font-medium">Roll No</th>
               <th className="px-4 py-3 font-medium">IEMIS Code</th>
               <th className="px-4 py-3 font-medium">Student Id</th>
               <th className="px-4 py-3 font-medium">FullName</th>
@@ -323,7 +372,7 @@ export default function ManageStudents() {
               filteredStudents.map((student, index) => (
                 <tr key={student.id} className="hover:bg-slate-50 transition-colors text-sm">
                   <td className="px-4 py-3 text-slate-600">{index + 1}</td>
-                  <td className="px-4 py-3 text-brand-600 font-medium">{student.symbol_number || "-"}</td>
+                  <td className="px-4 py-3 text-brand-600 font-medium">{student.roll_no || "-"}</td>
                   <td className="px-4 py-3 text-slate-900">{student.iemis_code || "-"}</td>
                   <td className="px-4 py-3 text-brand-600 font-medium">{student.student_id_string || "-"}</td>
                   <td className="px-4 py-3 font-semibold text-slate-800">{student.name}</td>
