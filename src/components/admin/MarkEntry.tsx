@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { Folder, ChevronRight, GraduationCap, Save, RefreshCw } from "lucide-react";
+import { Folder, ChevronRight, GraduationCap, Save, RefreshCw, Trash2 } from "lucide-react";
 import { validateSession } from "@/app/actions/auth";
 
 const CATEGORIES = [
@@ -265,6 +265,39 @@ export default function MarkEntry() {
     } catch (err: any) {
       console.error("Save marks error:", err);
       alert("Failed to save marks: " + (err.message || JSON.stringify(err)));
+    }
+  };
+
+  const handleDeleteMarks = async () => {
+    if (!selectedSubject) {
+      alert("Please select a specific subject to delete marks.");
+      return;
+    }
+
+    const subjectName = subjects.find(s => s.id === selectedSubject)?.subject_name;
+    if (!confirm(`Are you sure you want to delete ALL marks for ${subjectName} in Class ${selectedClass} for ${selectedTerm} ${selectedYear}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const studentIds = students.map(s => s.id);
+      if (studentIds.length === 0) return;
+
+      const { error } = await supabase
+        .from("marks")
+        .delete()
+        .in("student_id", studentIds)
+        .eq("subject_id", selectedSubject)
+        .eq("term", selectedTerm)
+        .eq("academic_year", selectedYear);
+
+      if (error) throw error;
+
+      alert("Marks deleted successfully!");
+      loadData();
+    } catch (err: any) {
+      console.error("Delete marks error:", err);
+      alert("Failed to delete marks: " + (err.message || JSON.stringify(err)));
     }
   };
 
@@ -639,7 +672,14 @@ export default function MarkEntry() {
           )}
 
           {students.length > 0 && subjects.length > 0 && (
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-end gap-4">
+              <button 
+                onClick={handleDeleteMarks}
+                className="flex items-center px-6 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Marks
+              </button>
               <button 
                 onClick={handleSaveMarks}
                 className="flex items-center px-6 py-2.5 bg-brand-600 text-white font-medium rounded-lg hover:bg-brand-700 transition-colors shadow-sm"
