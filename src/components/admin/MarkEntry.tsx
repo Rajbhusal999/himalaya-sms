@@ -27,6 +27,7 @@ export default function MarkEntry() {
   const [students, setStudents] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
   const [marks, setMarks] = useState<Record<string, Record<string, { written?: string; oral?: string; cu?: string; total?: string; attendance?: string; activity?: string; project16?: string; project20?: string; termExam?: string; firstTerm?: string; secondTerm?: string; writtenFinal?: string; }>>>({});
+  const [initialMarks, setInitialMarks] = useState<Record<string, Record<string, { written?: string; oral?: string; cu?: string; total?: string; attendance?: string; activity?: string; project16?: string; project20?: string; termExam?: string; firstTerm?: string; secondTerm?: string; writtenFinal?: string; }>>>({});
   const [loading, setLoading] = useState(false);
 
   // Helper to generate display roll number
@@ -136,8 +137,10 @@ export default function MarkEntry() {
           };
         });
         setMarks(marksMap);
+        setInitialMarks(JSON.parse(JSON.stringify(marksMap)));
       } else {
         setMarks({});
+        setInitialMarks({});
       }
 
     } catch (err: any) {
@@ -211,14 +214,19 @@ export default function MarkEntry() {
       students.forEach(student => {
         subjects.forEach(sub => {
           const m = marks[student.id]?.[sub.id] || {};
+          const initialM = initialMarks[student.id]?.[sub.id] || {};
 
-          const hasAnyValue = [
-            m.written, m.oral, m.cu, m.total,
-            m.attendance, m.activity, m.project16, m.project20,
-            m.termExam, m.firstTerm, m.secondTerm, m.writtenFinal,
-          ].some(v => v !== undefined && v !== null && v !== "");
+          const fields = [
+            'written', 'oral', 'cu', 'total',
+            'attendance', 'activity', 'project16', 'project20',
+            'termExam', 'firstTerm', 'secondTerm', 'writtenFinal'
+          ] as const;
 
-          if (!hasAnyValue) return;
+          const hasChanged = fields.some(field => (m[field] || "") !== (initialM[field] || ""));
+          if (!hasChanged) return;
+
+          const hasAnyValue = fields.some(field => m[field] !== undefined && m[field] !== null && m[field] !== "");
+          if (!hasAnyValue && Object.keys(initialM).length === 0) return;
 
           upsertRows.push({
             student_id: student.id,
@@ -262,6 +270,7 @@ export default function MarkEntry() {
 
       console.log("Saved successfully:", data);
       alert(`Marks saved successfully! (${upsertRows.length} records saved)`);
+      loadData(); // Reload data to update initialMarks
     } catch (err: any) {
       console.error("Save marks error:", err);
       alert("Failed to save marks: " + (err.message || JSON.stringify(err)));
