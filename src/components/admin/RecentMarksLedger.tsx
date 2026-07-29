@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { History, RefreshCw, Search } from "lucide-react";
+import { History, RefreshCw, Search, Trash2 } from "lucide-react";
 
 export default function RecentMarksLedger() {
   const [marks, setMarks] = useState<any[]>([]);
@@ -40,6 +40,25 @@ export default function RecentMarksLedger() {
   useEffect(() => {
     fetchMarks();
   }, []);
+
+  const handleDeleteMark = async (markId: string) => {
+    if (!confirm("Are you sure you want to delete this mark entry? This action cannot be undone.")) return;
+
+    try {
+      const { error } = await supabase
+        .from('marks')
+        .delete()
+        .eq('id', markId);
+
+      if (error) throw error;
+      
+      alert("Mark entry deleted successfully.");
+      fetchMarks();
+    } catch (err: any) {
+      console.error("Error deleting mark:", err.message);
+      alert("Failed to delete mark: " + err.message);
+    }
+  };
 
   const filteredMarks = marks.filter(m => {
     if (!searchTerm) return true;
@@ -99,6 +118,7 @@ export default function RecentMarksLedger() {
                 <th className="px-6 py-4 font-medium">Entered By</th>
                 <th className="px-6 py-4 font-medium">Date / Time</th>
                 <th className="px-6 py-4 font-medium text-right">Marks</th>
+                <th className="px-6 py-4 font-medium text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -166,11 +186,20 @@ export default function RecentMarksLedger() {
                         return '-';
                       })()}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <button 
+                        onClick={() => handleDeleteMark(mark.id)}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                        title="Delete Mark"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                     No mark entries found matching your search.
                   </td>
                 </tr>
