@@ -125,15 +125,19 @@ export default function RecentMarksLedger() {
                       {mark.teachers ? `${mark.teachers.first_name} ${mark.teachers.last_name}` : 'Admin'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-slate-500 text-sm">
-                      {mark.updated_at ? (
-                         <span className="text-amber-600 font-medium" title={new Date(mark.updated_at).toLocaleString()}>
-                           {new Date(mark.updated_at).toLocaleDateString()} {new Date(mark.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} (Edited)
-                         </span>
-                      ) : (
-                         <span title={new Date(mark.created_at).toLocaleString()}>
-                           {new Date(mark.created_at).toLocaleDateString()} {new Date(mark.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                         </span>
-                      )}
+                      {(() => {
+                        const createdAt = mark.created_at ? new Date(mark.created_at) : null;
+                        const updatedAt = mark.updated_at ? new Date(mark.updated_at) : null;
+                        const isEdited = createdAt && updatedAt && (updatedAt.getTime() - createdAt.getTime() > 5000);
+                        const displayDate = updatedAt || createdAt || new Date();
+                        
+                        return (
+                          <span className={isEdited ? "text-amber-600 font-medium" : ""} title={displayDate.toLocaleString()}>
+                            {displayDate.toLocaleDateString()} {displayDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {isEdited && " (Edited)"}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-slate-800">
                       {(() => {
