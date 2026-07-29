@@ -8,6 +8,7 @@ export default function RecentMarksLedger() {
   const [marks, setMarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedMarks, setSelectedMarks] = useState<Set<string>>(new Set());
 
   const fetchMarks = async () => {
     setLoading(true);
@@ -53,10 +54,35 @@ export default function RecentMarksLedger() {
       if (error) throw error;
       
       alert("Mark entry deleted successfully.");
+      // Also remove from selection if selected
+      const newSelection = new Set(selectedMarks);
+      newSelection.delete(markId);
+      setSelectedMarks(newSelection);
       fetchMarks();
     } catch (err: any) {
       console.error("Error deleting mark:", err.message);
       alert("Failed to delete mark: " + err.message);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedMarks.size === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedMarks.size} mark entries? This action cannot be undone.`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('marks')
+        .delete()
+        .in('id', Array.from(selectedMarks));
+
+      if (error) throw error;
+      
+      alert(`${selectedMarks.size} mark entries deleted successfully.`);
+      setSelectedMarks(new Set());
+      fetchMarks();
+    } catch (err: any) {
+      console.error("Error deleting marks:", err.message);
+      alert("Failed to delete marks: " + err.message);
     }
   };
 
@@ -70,6 +96,24 @@ export default function RecentMarksLedger() {
     
     return studentName.includes(term) || className.includes(term) || subjectName.includes(term) || teacherName.includes(term);
   });
+
+  const toggleSelection = (id: string) => {
+    const newSelection = new Set(selectedMarks);
+    if (newSelection.has(id)) {
+      newSelection.delete(id);
+    } else {
+      newSelection.add(id);
+    }
+    setSelectedMarks(newSelection);
+  };
+
+  const toggleAll = () => {
+    if (selectedMarks.size === filteredMarks.length && filteredMarks.length > 0) {
+      setSelectedMarks(new Set());
+    } else {
+      setSelectedMarks(new Set(filteredMarks.map(m => m.id)));
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -96,6 +140,15 @@ export default function RecentMarksLedger() {
                 className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-slate-50 text-slate-900 text-sm w-full md:w-64"
               />
             </div>
+            {selectedMarks.size > 0 && (
+              <button 
+                onClick={handleBulkDelete}
+                className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Selected ({selectedMarks.size})
+              </button>
+            )}
             <button 
               onClick={fetchMarks}
               className="p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors"
@@ -112,6 +165,14 @@ export default function RecentMarksLedger() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider">
+                <th className="px-6 py-4 font-medium w-12 text-center">
+                  <input 
+                    type="checkbox" 
+                    checked={filteredMarks.length > 0 && selectedMarks.size === filteredMarks.length}
+                    onChange={toggleAll}
+                    className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                  />
+                </th>
                 <th className="px-6 py-4 font-medium">Student</th>
                 <th className="px-6 py-4 font-medium">Class</th>
                 <th className="px-6 py-4 font-medium">Subject</th>
@@ -124,7 +185,7 @@ export default function RecentMarksLedger() {
             <tbody className="divide-y divide-slate-100">
               {loading && marks.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={8} className="px-6 py-12 text-center">
                     <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-brand-600"></div>
                     <p className="mt-2 text-slate-500">Loading history...</p>
                   </td>
@@ -132,6 +193,14 @@ export default function RecentMarksLedger() {
               ) : filteredMarks.length > 0 ? (
                 filteredMarks.map((mark, i) => (
                   <tr key={mark.id || i} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 text-center">
+                      <input 
+                        type="checkbox"
+                        checked={selectedMarks.has(mark.id)}
+                        onChange={() => toggleSelection(mark.id)}
+                        className="rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-slate-900 font-medium">
                       {mark.students?.name} <span className="text-slate-400 text-sm ml-2">Roll: {mark.students?.roll_no}</span>
                     </td>
@@ -199,7 +268,7 @@ export default function RecentMarksLedger() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
                     No mark entries found matching your search.
                   </td>
                 </tr>
