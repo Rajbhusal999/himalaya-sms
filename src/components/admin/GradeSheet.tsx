@@ -190,17 +190,7 @@ export default function GradeSheet() {
     const subjectResults = subjects.map(sub => {
       const isComputer = sub.subject_name.toLowerCase().includes("computer");
       const m = marks[student.id]?.[sub.id] || {};
-      const isOptional = sub.subject_name.toLowerCase().includes("opt");
-      let creditHour = 4;
-      if (isClass6to8) {
-        if (selectedTerm === "Final") {
-          creditHour = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : (isComputer ? 2 : 5));
-        } else {
-          creditHour = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : (isComputer ? 0 : 4));
-        }
-      } else if (isClass1to5) {
-        creditHour = sub.credit_hour !== null ? sub.credit_hour : (isOptional ? 0 : 4);
-      }
+      let creditHour = sub.credit_hour !== null ? Number(sub.credit_hour) : 0;
 
       let subjTotalGP = 0;
       let subjFinalGrade = "NG";
