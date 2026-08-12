@@ -232,7 +232,7 @@ export default function NumberLedger() {
       <style>{`
         @media print {
           @page {
-            size: A4 portrait;
+            size: A4 landscape;
             margin: 5mm;
           }
           body {
