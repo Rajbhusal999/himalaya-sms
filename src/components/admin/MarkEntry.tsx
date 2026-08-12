@@ -523,7 +523,7 @@ export default function MarkEntry() {
                       {subjects.map(sub => (
                         <th key={sub.id} className="border border-black px-2 py-2 min-w-[100px] text-xs font-bold">
                           <div>{sub.subject_name}</div>
-                          <div className="text-[10px] font-normal text-slate-500 mt-0.5">(Out of 10)</div>
+                          <div className="text-[10px] font-normal text-slate-500 mt-0.5">(Out of 50)</div>
                         </th>
                       ))}
                       <th className="border border-black px-3 py-2 w-20 bg-slate-100 font-bold">Total</th>
@@ -555,14 +555,14 @@ export default function MarkEntry() {
                               studentTotal += val;
                               validCount++;
                             }
-                            const isFailed = !isNaN(val) && val < 3.6;
+                            const isFailed = !isNaN(val) && val < 18;
 
                             return (
                               <td key={sub.id} className={`border border-black p-0 ${isFailed ? 'bg-red-50' : ''}`}>
                                 <input 
                                   type="number"
                                   min="0"
-                                  max="10"
+                                  max="50"
                                   step="0.1"
                                   value={valStr}
                                   onChange={(e) => handleMarkChange(student.id, sub.id, 'termExam', e.target.value)}

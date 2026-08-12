@@ -9,8 +9,8 @@ const ALLOWED_CLASSES = ["6", "7", "8"];
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
 const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2083 + i).toString());
 
-const FULL_MARK = 10;
-const PASS_MARK = 3.6; // 36% of 10
+const FULL_MARK = 50;
+const PASS_MARK = 18; // 36% of 50
 
 export default function NumberLedger() {
   const [selectedClass, setSelectedClass] = useState<string>("6");
