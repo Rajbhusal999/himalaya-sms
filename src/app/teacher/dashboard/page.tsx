@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, LogOut, User, GraduationCap, MessageSquare } from "lucide-react";
+import { BookOpen, LogOut, User, GraduationCap, MessageSquare, ClipboardCheck } from "lucide-react";
 import MarkEntry from "@/components/admin/MarkEntry";
 import StaffChat from "@/components/chat/StaffChat";
+import ManageAttendance from "@/components/admin/ManageAttendance";
 import { validateSession, clearSession } from "@/app/actions/auth";
 
 export default function TeacherDashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [teacherName, setTeacherName] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"marks" | "chat">("marks");
+  const [activeTab, setActiveTab] = useState<"marks" | "chat" | "attendance">("marks");
 
   useEffect(() => {
     const checkSession = async () => {
@@ -39,15 +40,15 @@ export default function TeacherDashboard() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab");
-    if (tab === "marks" || tab === "chat") {
-      setActiveTab(tab);
+    if (tab === "marks" || tab === "chat" || tab === "attendance") {
+      setActiveTab(tab as "marks" | "chat" | "attendance");
     }
 
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       const currentTab = params.get("tab") || "marks";
-      if (currentTab === "marks" || currentTab === "chat") {
-        setActiveTab(currentTab);
+      if (currentTab === "marks" || currentTab === "chat" || currentTab === "attendance") {
+        setActiveTab(currentTab as "marks" | "chat" | "attendance");
       }
     };
 
@@ -55,7 +56,7 @@ export default function TeacherDashboard() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  const handleTabClick = (tab: "marks" | "chat") => {
+  const handleTabClick = (tab: "marks" | "chat" | "attendance") => {
     setActiveTab(tab);
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
@@ -136,6 +137,17 @@ export default function TeacherDashboard() {
             <MessageSquare className="w-4 h-4" />
             Staff Chat
           </button>
+          <button
+            onClick={() => handleTabClick("attendance")}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+              activeTab === "attendance"
+                ? "bg-brand-600 text-white shadow-md shadow-brand-500/30"
+                : "bg-white text-slate-600 border border-slate-200 hover:border-brand-300 hover:text-brand-600"
+            }`}
+          >
+            <ClipboardCheck className="w-4 h-4" />
+            Exam Attendance
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -147,6 +159,10 @@ export default function TeacherDashboard() {
 
         {activeTab === "chat" && teacherName && (
           <StaffChat senderName={teacherName} senderRole="teacher" />
+        )}
+
+        {activeTab === "attendance" && (
+          <ManageAttendance />
         )}
       </main>
     </div>
