@@ -14,6 +14,7 @@ import MarkEntry from "@/components/admin/MarkEntry";
 import MarkLedger from "@/components/admin/MarkLedger";
 import Ledger from "@/components/admin/Ledger";
 import GradeLedger from "@/components/admin/GradeLedger";
+import NumberLedger from "@/components/admin/NumberLedger";
 import GradeSheet from "@/components/admin/GradeSheet";
 import ReportsDashboard from "@/components/admin/ReportsDashboard";
 import ManageNews from "@/components/admin/ManageNews";
@@ -260,6 +261,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "grade-ledger") {
       return <GradeLedger />;
+    }
+
+    if (activeTab === "number-ledger") {
+      return <NumberLedger />;
     }
 
     if (activeTab === "grade-sheet") {
@@ -628,6 +633,17 @@ export default function AdminDashboard() {
             >
               <BookMarked className="w-5 h-5 mr-3" />
               Mark Ledger
+            </button>
+            <button
+              onClick={() => handleTabClick("number-ledger")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "number-ledger" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <FileSpreadsheet className="w-5 h-5 mr-3" />
+              Number Ledger
             </button>
             <button
               onClick={() => handleTabClick("grade-ledger")}
