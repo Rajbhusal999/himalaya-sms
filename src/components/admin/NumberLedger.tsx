@@ -329,31 +329,31 @@ export default function NumberLedger() {
           </div>
         ) : (
           <div className="overflow-x-auto border border-black">
-            <table className="w-full text-center border-collapse text-sm text-black">
+            <table className="w-full text-center border-collapse text-[11px] text-black">
               <thead>
-                <tr className="bg-slate-100 font-bold border-b border-black">
-                  <th className="border border-black px-2 py-2 w-16">Roll No.</th>
-                  <th className="border border-black px-4 py-2 min-w-[180px] text-left">Student Name</th>
+                <tr className="bg-slate-100 font-bold border-b border-black text-[11px]">
+                  <th className="border border-black px-1.5 py-1 w-12 text-center">Roll No.</th>
+                  <th className="border border-black px-2 py-1 min-w-[140px] text-left">Student Name</th>
                   
                   {subjects.map(sub => (
-                    <th key={sub.id} className="border border-black px-3 py-2 min-w-[90px] font-bold">
+                    <th key={sub.id} className="border border-black px-1.5 py-1 min-w-[65px] font-bold leading-tight text-center">
                       {sub.subject_name}
                     </th>
                   ))}
 
-                  <th className="border border-black px-3 py-2 w-20 bg-slate-200">Total</th>
-                  <th className="border border-black px-3 py-2 w-24 bg-slate-200">Percentage</th>
-                  <th className="border border-black px-2 py-2 w-16 bg-slate-200">Rank</th>
-                  <th className="border border-black px-3 py-2 w-24 bg-slate-200">Remarks</th>
+                  <th className="border border-black px-1.5 py-1 w-14 bg-slate-200 text-center">Total</th>
+                  <th className="border border-black px-1.5 py-1 w-16 bg-slate-200 text-center">Percentage</th>
+                  <th className="border border-black px-1 py-1 w-12 bg-slate-200 text-center">Rank</th>
+                  <th className="border border-black px-1.5 py-1 w-16 bg-slate-200 text-center">Remarks</th>
                 </tr>
               </thead>
               <tbody>
                 {processedStudents.map((item) => (
-                  <tr key={item.student.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="border border-black px-2 py-2 font-medium">
+                  <tr key={item.student.id} className="hover:bg-slate-50 transition-colors h-7">
+                    <td className="border border-black px-1 py-1 font-medium text-center">
                       {item.student.roll_no || item.idx + 1}
                     </td>
-                    <td className="border border-black px-4 py-2 text-left font-medium whitespace-nowrap">
+                    <td className="border border-black px-2 py-1 text-left font-medium whitespace-nowrap">
                       {item.student.name}
                     </td>
 
@@ -363,7 +363,7 @@ export default function NumberLedger() {
                       return (
                         <td 
                           key={sub.id} 
-                          className={`border border-black px-3 py-2 font-medium ${
+                          className={`border border-black px-1 py-1 font-semibold text-center ${
                             isFailed ? "bg-red-100 text-red-700 font-bold border-red-400" : ""
                           }`}
                         >
@@ -372,16 +372,16 @@ export default function NumberLedger() {
                       );
                     })}
 
-                    <td className="border border-black px-3 py-2 font-bold bg-slate-50">
+                    <td className="border border-black px-1 py-1 font-bold bg-slate-50 text-center">
                       {item.validCount > 0 ? fmtNum(item.studentTotal) : "-"}
                     </td>
-                    <td className="border border-black px-3 py-2 font-bold bg-slate-50">
+                    <td className="border border-black px-1 py-1 font-bold bg-slate-50 text-center">
                       {item.validCount > 0 ? fmtNum(item.percentage) + "%" : "-"}
                     </td>
-                    <td className="border border-black px-2 py-2 font-bold bg-slate-50">
+                    <td className="border border-black px-1 py-1 font-bold bg-slate-50 text-center">
                       {item.rank}
                     </td>
-                    <td className={`border border-black px-3 py-2 text-xs font-bold ${
+                    <td className={`border border-black px-1 py-1 text-[10px] font-bold text-center ${
                       item.remarks === "FAIL" 
                         ? "text-red-700 bg-red-100 font-black" 
                         : item.remarks === "PASS" 

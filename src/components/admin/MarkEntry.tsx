@@ -379,18 +379,18 @@ export default function MarkEntry() {
         <div className="font-bold text-center border-b border-black py-2.5 bg-slate-100 text-slate-800">
           Class {selectedClass} - Number Entry Only ({selectedTerm} {selectedYear})
         </div>
-        <table className="w-full text-center border-collapse text-sm text-black">
+        <table className="w-full text-center border-collapse text-[11px] text-black">
           <thead>
-            <tr className="bg-slate-50 font-bold border-b border-black">
-              <th className="border border-black px-2 py-2 w-24">Symbol No.</th>
-              <th className="border border-black px-4 py-2 min-w-[180px] text-left">Student Name</th>
+            <tr className="bg-slate-50 font-bold border-b border-black text-[11px]">
+              <th className="border border-black px-1.5 py-1 w-20">Symbol No.</th>
+              <th className="border border-black px-2 py-1 min-w-[140px] text-left">Student Name</th>
               {subjects.map(sub => (
-                <th key={sub.id} className="border border-black px-2 py-2 min-w-[100px] text-xs font-bold">
+                <th key={sub.id} className="border border-black px-1.5 py-1 min-w-[65px] font-bold text-center leading-tight">
                   <div>{sub.subject_name}</div>
-                  <div className="text-[10px] font-normal text-slate-500 mt-0.5">(Out of 50)</div>
+                  <div className="text-[9px] font-normal text-slate-500 mt-0.5">(Out of 50)</div>
                 </th>
               ))}
-              <th className="border border-black px-3 py-2 w-20 bg-slate-100 font-bold">Total</th>
+              <th className="border border-black px-1.5 py-1 w-16 bg-slate-100 font-bold">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -401,7 +401,7 @@ export default function MarkEntry() {
               return (
                 <tr 
                   key={student.id} 
-                  className={focusedStudentId === student.id ? "bg-blue-100" : "hover:bg-slate-50"}
+                  className={`h-7 ${focusedStudentId === student.id ? "bg-blue-100" : "hover:bg-slate-50"}`}
                   onFocus={() => setFocusedStudentId(student.id)}
                   onBlur={(e) => {
                     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
@@ -409,8 +409,8 @@ export default function MarkEntry() {
                     }
                   }}
                 >
-                  <td className="border border-black px-2 py-1 font-medium">{student.displayRollNo}</td>
-                  <td className="border border-black px-4 py-1 text-left font-medium whitespace-nowrap">{student.name}</td>
+                  <td className="border border-black px-1 py-1 font-medium">{student.displayRollNo}</td>
+                  <td className="border border-black px-2 py-1 text-left font-medium whitespace-nowrap">{student.name}</td>
                   
                   {subjects.map(sub => {
                     const valStr = marks[student.id]?.[sub.id]?.termExam || "";
@@ -431,7 +431,7 @@ export default function MarkEntry() {
                           value={valStr}
                           onChange={(e) => handleMarkChange(student.id, sub.id, 'termExam', e.target.value)}
                           placeholder="-"
-                          className={`w-full h-full p-2 text-center bg-transparent focus:bg-blue-50 focus:outline-none font-semibold ${
+                          className={`w-full h-full p-1 text-center bg-transparent focus:bg-blue-50 focus:outline-none font-semibold text-[11px] ${
                             isFailed ? 'text-red-700 font-bold' : 'text-slate-800'
                           }`}
                         />
@@ -439,7 +439,7 @@ export default function MarkEntry() {
                     );
                   })}
                   
-                  <td className="border border-black px-2 py-1 font-bold bg-slate-100">
+                  <td className="border border-black px-1 py-1 font-bold bg-slate-100">
                     {validCount > 0 ? (Number.isInteger(studentTotal) ? studentTotal : studentTotal.toFixed(2)) : "-"}
                   </td>
                 </tr>
