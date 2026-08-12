@@ -10,7 +10,8 @@ const CATEGORIES = [
   { id: "kg", name: "KG", classes: ["KG"], color: "bg-purple-100 text-purple-600 border-purple-200" },
   { id: "1-3", name: "Class 1 to 3", classes: ["1", "2", "3"], color: "bg-blue-100 text-blue-600 border-blue-200" },
   { id: "4-5", name: "Class 4 & 5", classes: ["4", "5"], color: "bg-emerald-100 text-emerald-600 border-emerald-200" },
-  { id: "6-8", name: "Class 6 to 8", classes: ["6", "7", "8"], color: "bg-amber-100 text-amber-600 border-amber-200" }
+  { id: "6-8", name: "Class 6 to 8 (Detailed CAS)", classes: ["6", "7", "8"], color: "bg-amber-100 text-amber-600 border-amber-200" },
+  { id: "6-8-numbers", name: "Class 6 to 8 (Number Only)", classes: ["6", "7", "8"], color: "bg-orange-100 text-orange-600 border-orange-200" }
 ];
 
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
