@@ -40,7 +40,7 @@ export default function ManageAttendance() {
         .from("students")
         .select("id, name, roll_no")
         .eq("class", selectedClass)
-        .order("roll_no");
+        .order("name");
 
       if (studentsError) throw studentsError;
 
@@ -212,10 +212,10 @@ export default function ManageAttendance() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {students.length > 0 ? (
-                  students.map((student) => (
+                  students.map((student, idx) => (
                     <tr key={student.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4 font-medium text-slate-600 w-24">
-                        {student.roll_no}
+                        {(student.roll_no && student.roll_no > 0) ? student.roll_no : idx + 1}
                       </td>
                       <td className="px-6 py-4 font-medium text-slate-800">
                         {student.name}
