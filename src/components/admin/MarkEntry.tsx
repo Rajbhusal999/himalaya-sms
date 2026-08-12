@@ -283,7 +283,7 @@ export default function MarkEntry() {
           const fields = [
             'written', 'oral', 'cu', 'total',
             'attendance', 'activity', 'project16', 'project20',
-            'firstTerm', 'secondTerm', 'writtenFinal'
+            'termExam', 'firstTerm', 'secondTerm', 'writtenFinal'
           ] as const;
 
           const hasChanged = fields.some(field => (m[field] || "") !== (initialM[field] || ""));
@@ -303,6 +303,7 @@ export default function MarkEntry() {
             activity: parseVal(m.activity),
             project16: parseVal(m.project16),
             project20: parseVal(m.project20),
+            term_exam: parseVal(m.termExam),
             first_term: parseVal(m.firstTerm),
             second_term: parseVal(m.secondTerm),
             written_final: parseVal(m.writtenFinal),
