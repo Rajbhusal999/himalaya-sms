@@ -245,6 +245,20 @@ export default function NumberLedger() {
 
   return (
     <div className="space-y-6">
+      <style>{`
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 5mm;
+          }
+          body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            background: white !important;
+          }
+        }
+      `}</style>
+
       {/* Header & Filter Controls */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 print:hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
