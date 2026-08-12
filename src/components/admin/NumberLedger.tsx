@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import * as XLSX from "xlsx";
 import { Printer, Download, BookOpen, RefreshCw } from "lucide-react";
@@ -8,6 +8,9 @@ import { Printer, Download, BookOpen, RefreshCw } from "lucide-react";
 const ALLOWED_CLASSES = ["6", "7", "8"];
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
 const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2083 + i).toString());
+
+const FULL_MARK = 10;
+const PASS_MARK = 3.6; // 36% of 10
 
 export default function NumberLedger() {
   const [selectedClass, setSelectedClass] = useState<string>("6");
@@ -38,7 +41,7 @@ export default function NumberLedger() {
     if (!selectedClass) return;
     setLoading(true);
     try {
-      // 1. Fetch Students for selected class
+      // 1. Fetch Students
       const { data: studentsData, error: studentsError } = await supabase
         .from("students")
         .select("id, name, roll_no, class")
@@ -53,7 +56,7 @@ export default function NumberLedger() {
       }));
       setStudents(formattedStudents);
 
-      // 2. Fetch Subjects for selected class & filter zero credit hours
+      // 2. Fetch Subjects & filter zero credit hours
       const { data: subjectsData, error: subjectsError } = await supabase
         .from("subjects")
         .select("*")
@@ -81,7 +84,7 @@ export default function NumberLedger() {
       subjectsList.sort((a, b) => getSubjectRank(a.subject_name) - getSubjectRank(b.subject_name));
       setSubjects(subjectsList);
 
-      // 3. Fetch Marks from Supabase database
+      // 3. Fetch Marks
       const studentIds = formattedStudents.map((s: any) => s.id);
       if (studentIds.length > 0) {
         const { data: marksData, error: marksError } = await supabase
@@ -138,11 +141,12 @@ export default function NumberLedger() {
     return null;
   };
 
-  // Process rows for ledger rendering
+  // Process rows for ledger rendering & PASS/FAIL rules (< 36% fails subject & student)
   const processedStudents = (() => {
     const studentList = students.map((student, idx) => {
       let studentTotal = 0;
       let validCount = 0;
+      let hasFailed = false;
 
       const subjectMarks: Record<string, number | null> = {};
 
@@ -154,13 +158,20 @@ export default function NumberLedger() {
         if (val !== null) {
           studentTotal += val;
           validCount++;
+          // Less than 36% (3.6 out of 10) is a FAIL
+          if (val < PASS_MARK) {
+            hasFailed = true;
+          }
         }
       });
 
-      // Max total assumption for terminal exams: 10 per subject (or full mark)
-      const maxTotal = subjects.length * 10;
+      const maxTotal = subjects.length * FULL_MARK;
       const percentage = maxTotal > 0 ? (studentTotal / maxTotal) * 100 : 0;
-      const remarks = validCount > 0 ? "PASSED" : "NOT GRADED";
+
+      let remarks = "NOT GRADED";
+      if (validCount > 0) {
+        remarks = hasFailed ? "FAIL" : "PASS";
+      }
 
       return {
         student,
@@ -168,20 +179,25 @@ export default function NumberLedger() {
         subjectMarks,
         studentTotal,
         validCount,
+        hasFailed,
         percentage,
         remarks
       };
     });
 
-    // Calculate Rank based on Total marks (descending)
-    const sortedTotals = [
-      ...new Set(studentList.filter(s => s.validCount > 0 && s.studentTotal > 0).map(s => s.studentTotal))
+    // Rank is assigned only among students who PASSED all subjects
+    const passedTotals = [
+      ...new Set(
+        studentList
+          .filter(s => s.validCount > 0 && !s.hasFailed && s.studentTotal > 0)
+          .map(s => s.studentTotal)
+      )
     ].sort((a, b) => b - a);
 
     return studentList.map(item => {
       const rank =
-        item.validCount > 0 && item.studentTotal > 0
-          ? sortedTotals.indexOf(item.studentTotal) + 1
+        item.validCount > 0 && !item.hasFailed && item.studentTotal > 0
+          ? passedTotals.indexOf(item.studentTotal) + 1
           : "-";
       return { ...item, rank };
     });
@@ -238,7 +254,7 @@ export default function NumberLedger() {
               Number Ledger
             </h2>
             <p className="text-sm text-slate-500 mt-1">
-              Terminal examination number ledger (Class 6, 7 & 8 only).
+              Terminal examination number ledger (Class 6, 7 & 8 only). Pass mark is 36% (3.6/10).
             </p>
           </div>
 
@@ -345,8 +361,14 @@ export default function NumberLedger() {
 
                     {subjects.map(sub => {
                       const markVal = item.subjectMarks[sub.id];
+                      const isFailed = markVal !== null && markVal < PASS_MARK;
                       return (
-                        <td key={sub.id} className="border border-black px-3 py-2">
+                        <td 
+                          key={sub.id} 
+                          className={`border border-black px-3 py-2 font-medium ${
+                            isFailed ? "bg-red-100 text-red-700 font-bold border-red-400" : ""
+                          }`}
+                        >
                           {markVal !== null ? fmtNum(markVal) : "-"}
                         </td>
                       );
@@ -361,7 +383,13 @@ export default function NumberLedger() {
                     <td className="border border-black px-2 py-2 font-bold bg-slate-50">
                       {item.rank}
                     </td>
-                    <td className="border border-black px-3 py-2 text-xs font-semibold">
+                    <td className={`border border-black px-3 py-2 text-xs font-bold ${
+                      item.remarks === "FAIL" 
+                        ? "text-red-700 bg-red-100 font-black" 
+                        : item.remarks === "PASS" 
+                        ? "text-emerald-700 bg-emerald-50" 
+                        : "text-slate-500"
+                    }`}>
                       {item.remarks}
                     </td>
                   </tr>
