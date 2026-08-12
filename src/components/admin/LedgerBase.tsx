@@ -591,7 +591,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                                 <td className="border border-black p-1 font-bold">{res.om ? res.grade : ""}</td>
                                 <td className="border border-black p-1 font-bold">{res.om ? res.gp.toFixed(1) : ""}</td>
                                 {mode === 'all' && (
-                                  <td className="border border-black p-1 font-bold">{res.om ? Math.round(res.wgp) : ""}</td>
+                                  <td className="border border-black p-1 font-bold">{res.om ? fmtNum(res.wgp) : ""}</td>
                                 )}
                               </>
                             )}
@@ -599,7 +599,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         ))}
 
                         {(mode === 'all' || mode === 'marks') && (
-                          <td className="border border-black p-1 font-bold bg-slate-100">{totalWGP > 0 ? grandTotalOM : ""}</td>
+                          <td className="border border-black p-1 font-bold bg-slate-100">{totalWGP > 0 ? fmtNum(grandTotalOM) : ""}</td>
                         )}
                         {(mode === 'all' || mode === 'marks') && (
                           <td className="border border-black p-1 font-bold bg-slate-100">{totalWGP > 0 ? overallPercent.toFixed(2) + "%" : ""}</td>
@@ -943,7 +943,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                                 <td className="border border-black p-1 font-bold">{res.total ? res.gp.toFixed(1) : ""}</td>
                                 <td className="border border-black p-1 font-bold">{res.total ? res.grade : ""}</td>
                                 {mode === 'all' && (
-                                  <td className="border border-black p-1 font-bold">{res.total ? res.wgp : ""}</td>
+                                  <td className="border border-black p-1 font-bold">{res.total ? fmtNum(res.wgp) : ""}</td>
                                 )}
                               </>
                             )}
@@ -954,7 +954,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                           <td className="border border-black p-1 font-bold">{totalWGP > 0 ? finalGPA.toFixed(2) : ""}</td>
                         )}
                         {(mode === 'all' || mode === 'marks') && (
-                          <td className="border border-black p-1 font-bold">{grandTotal || ""}</td>
+                          <td className="border border-black p-1 font-bold">{grandTotal ? fmtNum(grandTotal) : ""}</td>
                         )}
                         <td className="border border-black p-1 font-bold">{totalWGP > 0 ? (studentAttendance[student.id] || "") : ""}</td>
                         <td className="border border-black p-1 font-bold">{totalWGP > 0 ? rank : ""}</td>
