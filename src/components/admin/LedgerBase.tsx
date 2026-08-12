@@ -11,6 +11,7 @@ type LedgerMode = "all" | "marks" | "grades";
 interface LedgerBaseProps {
   mode: LedgerMode;
   title: string;
+  allowedClasses?: string[];
 }
 
 const CATEGORIES = [
@@ -24,7 +25,7 @@ const CATEGORIES = [
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
 const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2083 + i).toString());
 
-export default function LedgerBase({ mode, title }: LedgerBaseProps) {
+export default function LedgerBase({ mode, title, allowedClasses }: LedgerBaseProps) {
   const fmtNum = (num: any) => { if (num === "" || num === null || num === undefined) return ""; const n = Number(num); if (isNaN(n)) return num; return Number.isInteger(n) ? n : Number(n.toFixed(2)); };
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<string>(EXAM_TERMS[0]);
@@ -281,7 +282,10 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
             className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 bg-white text-slate-900"
           >
             <option value="" disabled>Select Class</option>
-            {CATEGORIES.flatMap(c => c.classes).map(cls => (
+            {(allowedClasses 
+              ? CATEGORIES.flatMap(c => c.classes).filter(cls => allowedClasses.includes(cls))
+              : CATEGORIES.flatMap(c => c.classes)
+            ).map(cls => (
               <option key={cls} value={cls}>{cls.match(/^\d+$/) ? `Class ${cls}` : cls}</option>
             ))}
           </select>
