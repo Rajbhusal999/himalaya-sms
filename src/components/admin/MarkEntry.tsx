@@ -10,8 +10,7 @@ const CATEGORIES = [
   { id: "kg", name: "KG", classes: ["KG"], color: "bg-purple-100 text-purple-600 border-purple-200" },
   { id: "1-3", name: "Class 1 to 3", classes: ["1", "2", "3"], color: "bg-blue-100 text-blue-600 border-blue-200" },
   { id: "4-5", name: "Class 4 & 5", classes: ["4", "5"], color: "bg-emerald-100 text-emerald-600 border-emerald-200" },
-  { id: "6-8", name: "Class 6 to 8 (Detailed CAS)", classes: ["6", "7", "8"], color: "bg-amber-100 text-amber-600 border-amber-200" },
-  { id: "6-8-numbers", name: "Class 6 to 8 (Number Only)", classes: ["6", "7", "8"], color: "bg-orange-100 text-orange-600 border-orange-200" }
+  { id: "6-8", name: "Class 6 to 8", classes: ["6", "7", "8"], color: "bg-amber-100 text-amber-600 border-amber-200" }
 ];
 
 const EXAM_TERMS = ["First Term", "Second Term", "Final"];
@@ -357,7 +356,7 @@ export default function MarkEntry() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-bold text-slate-800">
-                {CATEGORIES.find(c => c.id === selectedCategory)?.name} - Select Class
+                {CATEGORIES.find(c => c.id === selectedCategory)?.name} - Select Mark Entry Type & Class
               </h3>
             </div>
             <button 
@@ -367,6 +366,47 @@ export default function MarkEntry() {
               &larr; Back to Categories
             </button>
           </div>
+
+          {selectedCategory === "6-8" && (
+            <div className="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <label className="block text-xs font-bold text-slate-600 uppercase mb-3">Choose Mark Entry Format for Class 6 to 8:</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div 
+                  onClick={() => setEntryMode("numbers")}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    entryMode === "numbers" 
+                      ? "border-orange-500 bg-orange-50/60 shadow-sm" 
+                      : "border-slate-200 bg-white hover:border-orange-300"
+                  }`}
+                >
+                  <div className="font-bold text-slate-800 text-base flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-orange-500"></span>
+                    Number Entry Only (1st / 2nd Term)
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                    Quickly enter terminal exam numbers out of 10 for all subjects in a single spreadsheet grid.
+                  </p>
+                </div>
+
+                <div 
+                  onClick={() => setEntryMode("full")}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    entryMode === "full" 
+                      ? "border-amber-500 bg-amber-50/60 shadow-sm" 
+                      : "border-slate-200 bg-white hover:border-amber-300"
+                  }`}
+                >
+                  <div className="font-bold text-slate-800 text-base flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-amber-500"></span>
+                    Detailed CAS & Exam Matrix
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                    Enter attendance (2), activity (2), project (36), and terminal/written exam marks.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {CATEGORIES.find(c => c.id === selectedCategory)?.classes.map((cls) => (
               <div 
