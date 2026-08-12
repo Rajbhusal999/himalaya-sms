@@ -720,7 +720,7 @@ export default function MarkEntry() {
                 &larr; Back to Classes
               </button>
               <h3 className="text-xl font-bold text-slate-800">
-                Class {selectedClass} - Mark Entry ({entryMode === "numbers" ? "Number Entry Only" : "Detailed CAS"})
+                Class {selectedClass} - Mark Entry
               </h3>
               <p className="text-sm text-slate-500 mt-1">Enter marks for students in this class.</p>
             </div>
@@ -766,36 +766,6 @@ export default function MarkEntry() {
               </button>
             </div>
           </div>
-
-          {["6", "7", "8"].includes(selectedClass || "") && (
-            <div className="mb-4 flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-200">
-              <div className="text-sm font-semibold text-slate-700">Entry Mode:</div>
-              <div className="flex items-center gap-2 bg-slate-200 p-1 rounded-md">
-                <button
-                  type="button"
-                  onClick={() => setEntryMode("full")}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${
-                    entryMode === "full" 
-                      ? "bg-white text-brand-700 shadow-sm" 
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  Detailed CAS & Exam
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEntryMode("numbers")}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${
-                    entryMode === "numbers" 
-                      ? "bg-white text-brand-700 shadow-sm" 
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  Number Entry Only (Terminal Exam)
-                </button>
-              </div>
-            </div>
-          )}
           
           {loading ? (
             <div className="flex justify-center items-center h-48">
