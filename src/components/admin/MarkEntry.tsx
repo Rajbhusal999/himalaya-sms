@@ -695,47 +695,6 @@ export default function MarkEntry() {
             </button>
           </div>
 
-          {["6-8", "6-8-numbers"].includes(selectedCategory) && (
-            <div className="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
-              <label className="block text-xs font-bold text-slate-600 uppercase mb-3">Choose Mark Entry Format for Class 6 to 8:</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div 
-                  onClick={() => setEntryMode("numbers")}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    entryMode === "numbers" 
-                      ? "border-orange-500 bg-orange-50/60 shadow-sm" 
-                      : "border-slate-200 bg-white hover:border-orange-300"
-                  }`}
-                >
-                  <div className="font-bold text-slate-800 text-base flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-orange-500"></span>
-                    Number Entry Only (1st / 2nd Term)
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                    Quickly enter terminal exam numbers out of 50 for all subjects in a single spreadsheet grid.
-                  </p>
-                </div>
-
-                <div 
-                  onClick={() => setEntryMode("full")}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    entryMode === "full" 
-                      ? "border-amber-500 bg-amber-50/60 shadow-sm" 
-                      : "border-slate-200 bg-white hover:border-amber-300"
-                  }`}
-                >
-                  <div className="font-bold text-slate-800 text-base flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-                    Detailed CAS & Exam Matrix
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                    Enter attendance (2), activity (2), project (36), and terminal/written exam marks.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {CATEGORIES.find(c => c.id === selectedCategory)?.classes.map((cls) => (
               <div 
