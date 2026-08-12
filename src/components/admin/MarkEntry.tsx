@@ -66,6 +66,10 @@ export default function MarkEntry() {
         .order("subject_name");
 
       let subjectsList = subjectsData || [];
+      if (selectedCategory === "6-8-numbers" || entryMode === "numbers") {
+        subjectsList = subjectsList.filter(sub => sub.credit_hour !== null && Number(sub.credit_hour) > 0);
+      }
+
       if (["1", "2", "3"].includes(selectedClass)) {
         const getSubjectRank = (name: string) => {
           const lower = name.toLowerCase();
