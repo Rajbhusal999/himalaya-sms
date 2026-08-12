@@ -107,33 +107,53 @@ export default function MarkEntry() {
 
       const studentIds = (studentsData || []).map((s: any) => s.id);
       if (studentIds.length > 0) {
-        const { data: marksData, error: marksError } = await supabase
-          .from("marks")
-          .select("*")
-          .in("student_id", studentIds)
-          .eq("term", selectedTerm)
-          .eq("academic_year", selectedYear);
-
-        if (marksError) throw marksError;
-
         const marksMap: Record<string, Record<string, any>> = {};
-        (marksData || []).forEach((m: any) => {
-          if (!marksMap[m.student_id]) marksMap[m.student_id] = {};
-          marksMap[m.student_id][m.subject_id] = {
-            written: m.written?.toString() ?? "",
-            oral: m.oral?.toString() ?? "",
-            cu: m.cu?.toString() ?? "",
-            total: m.total?.toString() ?? "",
-            attendance: m.attendance?.toString() ?? "",
-            activity: m.activity?.toString() ?? "",
-            project16: m.project16?.toString() ?? "",
-            project20: m.project20?.toString() ?? "",
-            termExam: m.term_exam?.toString() ?? "",
-            firstTerm: m.first_term?.toString() ?? "",
-            secondTerm: m.second_term?.toString() ?? "",
-            writtenFinal: m.written_final?.toString() ?? "",
-          };
-        });
+
+        if (selectedCategory === "6-8-numbers" || entryMode === "numbers") {
+          const { data: numMarksData, error: numMarksError } = await supabase
+            .from("number_ledger_marks")
+            .select("*")
+            .in("student_id", studentIds)
+            .eq("term", selectedTerm)
+            .eq("academic_year", selectedYear);
+
+          if (numMarksError) throw numMarksError;
+
+          (numMarksData || []).forEach((m: any) => {
+            if (!marksMap[m.student_id]) marksMap[m.student_id] = {};
+            marksMap[m.student_id][m.subject_id] = {
+              termExam: m.mark?.toString() ?? ""
+            };
+          });
+        } else {
+          const { data: marksData, error: marksError } = await supabase
+            .from("marks")
+            .select("*")
+            .in("student_id", studentIds)
+            .eq("term", selectedTerm)
+            .eq("academic_year", selectedYear);
+
+          if (marksError) throw marksError;
+
+          (marksData || []).forEach((m: any) => {
+            if (!marksMap[m.student_id]) marksMap[m.student_id] = {};
+            marksMap[m.student_id][m.subject_id] = {
+              written: m.written?.toString() ?? "",
+              oral: m.oral?.toString() ?? "",
+              cu: m.cu?.toString() ?? "",
+              total: m.total?.toString() ?? "",
+              attendance: m.attendance?.toString() ?? "",
+              activity: m.activity?.toString() ?? "",
+              project16: m.project16?.toString() ?? "",
+              project20: m.project20?.toString() ?? "",
+              termExam: m.term_exam?.toString() ?? "",
+              firstTerm: m.first_term?.toString() ?? "",
+              secondTerm: m.second_term?.toString() ?? "",
+              writtenFinal: m.written_final?.toString() ?? "",
+            };
+          });
+        }
+
         setMarks(marksMap);
         setInitialMarks(JSON.parse(JSON.stringify(marksMap)));
       } else {
@@ -204,13 +224,53 @@ export default function MarkEntry() {
 
   const handleSaveMarks = async () => {
     try {
-      const upsertRows: any[] = [];
       const parseVal = (v: any) => (v !== undefined && v !== null && v !== "" ? parseFloat(v) : null);
       const session = await validateSession();
       const currentTeacherId = session?.user_id || null;
 
-      const isNumberOnlyMode = entryMode === "numbers" && ["6", "7", "8"].includes(selectedClass || "");
+      const isNumberOnlyMode = (selectedCategory === "6-8-numbers" || entryMode === "numbers") && ["6", "7", "8"].includes(selectedClass || "");
 
+      if (isNumberOnlyMode) {
+        const numberRows: any[] = [];
+        students.forEach(student => {
+          subjects.forEach(sub => {
+            const m = marks[student.id]?.[sub.id] || {};
+            const initialM = initialMarks[student.id]?.[sub.id] || {};
+
+            if ((m.termExam || "") !== (initialM.termExam || "")) {
+              numberRows.push({
+                student_id: student.id,
+                subject_id: sub.id,
+                term: selectedTerm,
+                academic_year: selectedYear,
+                mark: parseVal(m.termExam),
+                teacher_id: currentTeacherId || null,
+                updated_at: new Date().toISOString(),
+              });
+            }
+          });
+        });
+
+        if (numberRows.length === 0) {
+          alert("No marks to save. Please enter some marks first.");
+          return;
+        }
+
+        const { error } = await supabase
+          .from("number_ledger_marks")
+          .upsert(numberRows, { onConflict: "student_id,subject_id,term,academic_year" });
+
+        if (error) {
+          console.error("Number Ledger upsert error:", error);
+          throw error;
+        }
+
+        alert(`Number Ledger marks saved successfully! (${numberRows.length} records)`);
+        loadData();
+        return;
+      }
+
+      const upsertRows: any[] = [];
       students.forEach(student => {
         subjects.forEach(sub => {
           const m = marks[student.id]?.[sub.id] || {};
@@ -219,14 +279,11 @@ export default function MarkEntry() {
           const fields = [
             'written', 'oral', 'cu', 'total',
             'attendance', 'activity', 'project16', 'project20',
-            'termExam', 'firstTerm', 'secondTerm', 'writtenFinal'
+            'firstTerm', 'secondTerm', 'writtenFinal'
           ] as const;
 
           const hasChanged = fields.some(field => (m[field] || "") !== (initialM[field] || ""));
           if (!hasChanged) return;
-
-          const hasAnyValue = fields.some(field => m[field] !== undefined && m[field] !== null && m[field] !== "");
-          if (!hasAnyValue && Object.keys(initialM).length === 0) return;
 
           upsertRows.push({
             student_id: student.id,
@@ -234,18 +291,17 @@ export default function MarkEntry() {
             term: selectedTerm,
             academic_year: selectedYear,
             teacher_id: currentTeacherId || null,
-            written: isNumberOnlyMode ? parseVal(initialM.written) : parseVal(m.written),
-            oral: isNumberOnlyMode ? parseVal(initialM.oral) : parseVal(m.oral),
-            cu: isNumberOnlyMode ? parseVal(initialM.cu) : parseVal(m.cu),
-            total: isNumberOnlyMode ? parseVal(initialM.total) : parseVal(m.total),
-            attendance: isNumberOnlyMode ? parseVal(initialM.attendance) : parseVal(m.attendance),
-            activity: isNumberOnlyMode ? parseVal(initialM.activity) : parseVal(m.activity),
-            project16: isNumberOnlyMode ? parseVal(initialM.project16) : parseVal(m.project16),
-            project20: isNumberOnlyMode ? parseVal(initialM.project20) : parseVal(m.project20),
-            term_exam: parseVal(m.termExam),
-            first_term: isNumberOnlyMode ? parseVal(initialM.firstTerm) : parseVal(m.firstTerm),
-            second_term: isNumberOnlyMode ? parseVal(initialM.secondTerm) : parseVal(m.secondTerm),
-            written_final: isNumberOnlyMode ? parseVal(initialM.writtenFinal) : parseVal(m.writtenFinal),
+            written: parseVal(m.written),
+            oral: parseVal(m.oral),
+            cu: parseVal(m.cu),
+            total: parseVal(m.total),
+            attendance: parseVal(m.attendance),
+            activity: parseVal(m.activity),
+            project16: parseVal(m.project16),
+            project20: parseVal(m.project20),
+            first_term: parseVal(m.firstTerm),
+            second_term: parseVal(m.secondTerm),
+            written_final: parseVal(m.writtenFinal),
             updated_at: new Date().toISOString(),
           });
         });
@@ -256,10 +312,9 @@ export default function MarkEntry() {
         return;
       }
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("marks")
-        .upsert(upsertRows, { onConflict: "student_id,subject_id,term,academic_year" })
-        .select();
+        .upsert(upsertRows, { onConflict: "student_id,subject_id,term,academic_year" });
 
       if (error) {
         console.error("Supabase upsert error:", error);
@@ -275,13 +330,15 @@ export default function MarkEntry() {
   };
 
   const handleDeleteMarks = async () => {
-    if (!selectedSubject) {
+    const isNumberOnly = selectedCategory === "6-8-numbers" || entryMode === "numbers";
+    if (!selectedSubject && !isNumberOnly) {
       alert("Please select a specific subject to delete marks.");
       return;
     }
 
-    const subjectName = subjects.find(s => s.id === selectedSubject)?.subject_name;
-    if (!confirm(`Are you sure you want to delete ALL marks for ${subjectName} in Class ${selectedClass} for ${selectedTerm} ${selectedYear}? This action cannot be undone.`)) {
+    const targetTable = isNumberOnly ? "number_ledger_marks" : "marks";
+    const subjectName = subjects.find(s => s.id === selectedSubject)?.subject_name || "All Subjects";
+    if (!confirm(`Are you sure you want to delete marks for ${subjectName} in Class ${selectedClass} (${selectedTerm} ${selectedYear})?`)) {
       return;
     }
 
@@ -289,14 +346,18 @@ export default function MarkEntry() {
       const studentIds = students.map(s => s.id);
       if (studentIds.length === 0) return;
 
-      const { error } = await supabase
-        .from("marks")
+      let query = supabase
+        .from(targetTable)
         .delete()
         .in("student_id", studentIds)
-        .eq("subject_id", selectedSubject)
         .eq("term", selectedTerm)
         .eq("academic_year", selectedYear);
 
+      if (selectedSubject && targetTable === "marks") {
+        query = query.eq("subject_id", selectedSubject);
+      }
+
+      const { error } = await query;
       if (error) throw error;
 
       alert("Marks deleted successfully!");

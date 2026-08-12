@@ -84,11 +84,11 @@ export default function NumberLedger() {
       subjectsList.sort((a, b) => getSubjectRank(a.subject_name) - getSubjectRank(b.subject_name));
       setSubjects(subjectsList);
 
-      // 3. Fetch Marks
+      // 3. Fetch Marks from dedicated number_ledger_marks table
       const studentIds = formattedStudents.map((s: any) => s.id);
       if (studentIds.length > 0) {
         const { data: marksData, error: marksError } = await supabase
-          .from("marks")
+          .from("number_ledger_marks")
           .select("*")
           .in("student_id", studentIds)
           .eq("term", selectedTerm)
@@ -117,11 +117,11 @@ export default function NumberLedger() {
     loadData();
   }, [selectedClass, selectedTerm, selectedYear]);
 
-  // Extract ONLY numbers entered for Number Ledger (term_exam field)
+  // Extract ONLY numbers from dedicated number_ledger_marks table
   const getTermMark = (m: any): number | null => {
     if (!m) return null;
     const has = (v: any) => v !== undefined && v !== null && v !== "" && !isNaN(Number(v));
-    if (has(m.term_exam)) return Number(m.term_exam);
+    if (has(m.mark)) return Number(m.mark);
     return null;
   };
 
@@ -142,7 +142,7 @@ export default function NumberLedger() {
         if (val !== null) {
           studentTotal += val;
           validCount++;
-          // Less than 36% (3.6 out of 10) is a FAIL
+          // Less than 36% (18 out of 50) is a FAIL
           if (val < PASS_MARK) {
             hasFailed = true;
           }
@@ -252,7 +252,7 @@ export default function NumberLedger() {
               Number Ledger
             </h2>
             <p className="text-sm text-slate-500 mt-1">
-              Terminal examination number ledger (Class 6, 7 & 8 only). Pass mark is 36% (3.6/10).
+              Terminal examination number ledger (Class 6, 7 & 8 only). Pass mark is 36% (18/50).
             </p>
           </div>
 
