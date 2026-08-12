@@ -231,16 +231,21 @@ export default function RecentMarksLedger() {
                     <td className="px-6 py-4 whitespace-nowrap text-right font-bold text-slate-800">
                       {(() => {
                         const has = (val: any) => val !== null && val !== undefined && val !== '';
+                        const formatNum = (val: any) => {
+                          const n = Number(val);
+                          if (isNaN(n)) return val;
+                          return Number.isInteger(n) ? n.toString() : n.toFixed(2);
+                        };
                         
-                        if (has(mark.total)) return mark.total;
-                        if (has(mark.written_final)) return mark.written_final;
-                        if (has(mark.term_exam)) return mark.term_exam;
+                        if (has(mark.total)) return formatNum(mark.total);
+                        if (has(mark.written_final)) return formatNum(mark.written_final);
+                        if (has(mark.term_exam)) return formatNum(mark.term_exam);
                         if (has(mark.written)) {
                           let t = Number(mark.written);
                           if (has(mark.oral)) t += Number(mark.oral);
-                          return t.toString();
+                          return formatNum(t);
                         }
-                        if (has(mark.cu)) return `CU: ${mark.cu}`;
+                        if (has(mark.cu)) return `CU: ${formatNum(mark.cu)}`;
                         
                         let sum = 0;
                         let hasMarks = false;
@@ -250,7 +255,7 @@ export default function RecentMarksLedger() {
                             hasMarks = true;
                           }
                         });
-                        if (hasMarks) return sum.toString();
+                        if (hasMarks) return formatNum(sum);
                         
                         return '-';
                       })()}

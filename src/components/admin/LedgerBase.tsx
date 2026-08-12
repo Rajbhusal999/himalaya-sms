@@ -25,6 +25,7 @@ const EXAM_TERMS = ["First Term", "Second Term", "Final"];
 const ACADEMIC_YEARS = Array.from({ length: 9 }, (_, i) => (2083 + i).toString());
 
 export default function LedgerBase({ mode, title }: LedgerBaseProps) {
+  const fmtNum = (num: any) => { if (num === "" || num === null || num === undefined) return ""; const n = Number(num); if (isNaN(n)) return num; return Number.isInteger(n) ? n : Number(n.toFixed(2)); };
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [selectedTerm, setSelectedTerm] = useState<string>(EXAM_TERMS[0]);
   const [selectedYear, setSelectedYear] = useState<string>(ACADEMIC_YEARS[0]);
@@ -427,9 +428,9 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                           <Fragment key={i}>
                             {(mode === 'all' || mode === 'marks') && (
                               <>
-                                {res.hasW && <td className="border border-black p-1">{res.rw}</td>}
-                                {res.hasO && <td className="border border-black p-1">{res.ls}</td>}
-                                <td className="border border-black p-1 font-bold">{res.om}</td>
+                                {res.hasW && <td className="border border-black p-1">{fmtNum(res.rw)}</td>}
+                                {res.hasO && <td className="border border-black p-1">{fmtNum(res.ls)}</td>}
+                                <td className="border border-black p-1 font-bold">{fmtNum(res.om)}</td>
                                 <td className="border border-black p-1">{Number.isInteger(res.percent) ? res.percent : res.percent.toFixed(2)}</td>
                               </>
                             )}
@@ -443,7 +444,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         ))}
 
                         {(mode === 'all' || mode === 'marks') && (
-                          <td className="border border-black p-1 font-bold">{totalOM}</td>
+                          <td className="border border-black p-1 font-bold">{fmtNum(totalOM)}</td>
                         )}
                         {(mode === 'all' || mode === 'marks') && (
                           <td className="border border-black p-1">{finalPercentage.toFixed(2)}</td>
@@ -577,10 +578,10 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         {subjectResults.map((res, i) => (
                           <Fragment key={i}>
                             {(mode === 'all' || mode === 'marks') && (
-                              <td className="border border-black p-1 font-bold">{res.cu || ""}</td>
+                              <td className="border border-black p-1 font-bold">{fmtNum(res.cu) || ""}</td>
                             )}
                             {(mode === 'all' || mode === 'marks') && (
-                              <td className="border border-black p-1 font-bold">{res.om || ""}</td>
+                              <td className="border border-black p-1 font-bold">{fmtNum(res.om) || ""}</td>
                             )}
                             {(mode === 'all' || mode === 'marks') && (
                               <td className="border border-black p-1 font-bold">{res.om ? res.percent.toFixed(2) : ""}</td>
@@ -775,17 +776,17 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         
                         {subjectResults.map((res, i) => (
                           <Fragment key={i}>
-                            {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.thTotal || 0}</td>}
+                            {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{fmtNum(res.thTotal) || 0}</td>}
                             {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.thGradeGP.gp.toFixed(1)}</td>}
                             {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.thGradeGP.grade}</td>}
                             {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.thWGP.toFixed(1)}</td>}
                             
-                            {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.prTotal || 0}</td>}
+                            {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{fmtNum(res.prTotal) || 0}</td>}
                             {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.prGradeGP.gp.toFixed(1)}</td>}
                             {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.prGradeGP.grade}</td>}
                             {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.prWGP.toFixed(1)}</td>}
                             
-                            {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{res.subjTotalMarks || 0}</td>}
+                            {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1">{fmtNum(res.subjTotalMarks) || 0}</td>}
                             {mode === 'all' && !res.isComputer && <td className="border border-black p-1">{res.subjTotalWGP.toFixed(1)}</td>}
                             {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.subjTotalGP.toFixed(1)}</td>}
                             {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1">{res.subjFinalGrade}</td>}
@@ -793,7 +794,7 @@ export default function LedgerBase({ mode, title }: LedgerBaseProps) {
                         ))}
 
                         {(mode === 'all' || mode === 'grades') && <td className="border border-black p-1 font-bold">{finalGPA.toFixed(2)}</td>}
-                        {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1 font-bold">{grandTotal || 0}</td>}
+                        {(mode === 'all' || mode === 'marks') && <td className="border border-black p-1 font-bold">{fmtNum(grandTotal) || 0}</td>}
                         <td className="border border-black p-1 font-bold">{studentAttendance[student.id] || ""}</td>
                         <td className="border border-black p-1">{remarks}</td>
                         <td className="border border-black p-1 font-bold">{rank}</td>
