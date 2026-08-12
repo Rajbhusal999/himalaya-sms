@@ -209,6 +209,8 @@ export default function MarkEntry() {
       const session = await validateSession();
       const currentTeacherId = session?.user_id || null;
 
+      const isNumberOnlyMode = entryMode === "numbers" && ["6", "7", "8"].includes(selectedClass || "");
+
       students.forEach(student => {
         subjects.forEach(sub => {
           const m = marks[student.id]?.[sub.id] || {};
@@ -232,18 +234,18 @@ export default function MarkEntry() {
             term: selectedTerm,
             academic_year: selectedYear,
             teacher_id: currentTeacherId || null,
-            written: parseVal(m.written),
-            oral: parseVal(m.oral),
-            cu: parseVal(m.cu),
-            total: parseVal(m.total),
-            attendance: parseVal(m.attendance),
-            activity: parseVal(m.activity),
-            project16: parseVal(m.project16),
-            project20: parseVal(m.project20),
+            written: isNumberOnlyMode ? parseVal(initialM.written) : parseVal(m.written),
+            oral: isNumberOnlyMode ? parseVal(initialM.oral) : parseVal(m.oral),
+            cu: isNumberOnlyMode ? parseVal(initialM.cu) : parseVal(m.cu),
+            total: isNumberOnlyMode ? parseVal(initialM.total) : parseVal(m.total),
+            attendance: isNumberOnlyMode ? parseVal(initialM.attendance) : parseVal(m.attendance),
+            activity: isNumberOnlyMode ? parseVal(initialM.activity) : parseVal(m.activity),
+            project16: isNumberOnlyMode ? parseVal(initialM.project16) : parseVal(m.project16),
+            project20: isNumberOnlyMode ? parseVal(initialM.project20) : parseVal(m.project20),
             term_exam: parseVal(m.termExam),
-            first_term: parseVal(m.firstTerm),
-            second_term: parseVal(m.secondTerm),
-            written_final: parseVal(m.writtenFinal),
+            first_term: isNumberOnlyMode ? parseVal(initialM.firstTerm) : parseVal(m.firstTerm),
+            second_term: isNumberOnlyMode ? parseVal(initialM.secondTerm) : parseVal(m.secondTerm),
+            written_final: isNumberOnlyMode ? parseVal(initialM.writtenFinal) : parseVal(m.writtenFinal),
             updated_at: new Date().toISOString(),
           });
         });

@@ -117,27 +117,11 @@ export default function NumberLedger() {
     loadData();
   }, [selectedClass, selectedTerm, selectedYear]);
 
-  // Extract ONLY 1st / 2nd term exam marks (excluding participation and practical marks)
+  // Extract ONLY numbers entered for Number Ledger (term_exam field)
   const getTermMark = (m: any): number | null => {
     if (!m) return null;
     const has = (v: any) => v !== undefined && v !== null && v !== "" && !isNaN(Number(v));
-
-    if (selectedTerm === "First Term") {
-      if (has(m.term_exam)) return Number(m.term_exam);
-      if (has(m.first_term)) return Number(m.first_term);
-      if (has(m.written)) return Number(m.written);
-    } else if (selectedTerm === "Second Term") {
-      if (has(m.term_exam)) return Number(m.term_exam);
-      if (has(m.second_term)) return Number(m.second_term);
-      if (has(m.written)) return Number(m.written);
-    } else {
-      // Final Term
-      if (has(m.first_term) || has(m.second_term)) {
-        return Number(m.first_term || 0) + Number(m.second_term || 0);
-      }
-      if (has(m.term_exam)) return Number(m.term_exam);
-      if (has(m.written)) return Number(m.written);
-    }
+    if (has(m.term_exam)) return Number(m.term_exam);
     return null;
   };
 
