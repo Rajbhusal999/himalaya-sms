@@ -7,6 +7,8 @@ import { supabase } from "@/lib/supabase/client";
 import { Mail, Lock, LogIn, ArrowLeft, AlertCircle, ShieldCheck } from "lucide-react";
 import { setSession, clearSession } from "@/app/actions/auth";
 
+import { verifyAdminPassword } from "@/lib/authCrypto";
+
 export default function AdminLogin() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -25,27 +27,40 @@ export default function AdminLogin() {
     setLoading(true);
     setError(null);
 
-    // Hardcoded check for Admin credentials as requested
-    if (email === "himalayabasicschool01@gmail.com" && password === "RJAryan@986107") {
-      // Simulate network request
-      await new Promise(r => setTimeout(r, 800));
+    try {
+      // Fetch admin email from admin_profile table
+      const { data: profile } = await supabase
+        .from("admin_profile")
+        .select("email")
+        .eq("id", "default_admin")
+        .single();
 
-      const sessionId = crypto.randomUUID();
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 1);
+      const validEmail = profile?.email?.trim().toLowerCase() || "himalayabasicschool01@gmail.com";
+      const inputEmail = email.trim().toLowerCase();
 
-      await supabase.from("active_sessions").insert([{
-        id: sessionId,
-        role: "admin",
-        expires_at: expiresAt.toISOString(),
-      }]);
+      // Verify SHA-256 password hash stored in Supabase
+      const isPasswordValid = await verifyAdminPassword(password);
 
-      await setSession(sessionId, expiresAt);
+      if ((inputEmail === validEmail || inputEmail === "himalayabasicschool01@gmail.com") && isPasswordValid) {
+        const sessionId = crypto.randomUUID();
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 1);
 
-      router.replace("/admin/dashboard");
-    } else {
-      await new Promise(r => setTimeout(r, 800));
-      setError("Invalid admin credentials. Please try again.");
+        await supabase.from("active_sessions").insert([{
+          id: sessionId,
+          role: "admin",
+          expires_at: expiresAt.toISOString(),
+        }]);
+
+        await setSession(sessionId, expiresAt);
+        router.replace("/admin/dashboard");
+      } else {
+        setError("Invalid admin email or password. Please try again.");
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error("Authentication error:", err);
+      setError("Failed to authenticate with database.");
       setLoading(false);
     }
   };
