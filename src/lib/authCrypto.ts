@@ -153,16 +153,33 @@ export async function get2FAStatus(): Promise<{ enabled: boolean; secret: string
 
 /**
  * Saves the TOTP secret and enables 2FA in Supabase.
+ * Uses a two-step approach:
+ *  1. Ensure the admin_credentials row exists (upsert with password_hash).
+ *  2. Update only the TOTP columns.
  */
 export async function enable2FA(secret: string): Promise<void> {
-  const { error } = await supabase
+  // Step 1: Make sure the row exists with a valid password_hash
+  const existingHash = await getStoredAdminPasswordHash();
+  await supabase
     .from("admin_credentials")
     .upsert(
-      { id: "admin_account", totp_secret: secret, totp_enabled: true, updated_at: new Date().toISOString() },
+      {
+        id: "admin_account",
+        password_hash: existingHash,
+        updated_at: new Date().toISOString(),
+      },
       { onConflict: "id" }
     );
+
+  // Step 2: Update only the TOTP fields (no risk of null password_hash)
+  const { error } = await supabase
+    .from("admin_credentials")
+    .update({ totp_secret: secret, totp_enabled: true, updated_at: new Date().toISOString() })
+    .eq("id", "admin_account");
+
   if (error) throw new Error(error.message);
 }
+
 
 /**
  * Disables 2FA in Supabase (clears secret).
