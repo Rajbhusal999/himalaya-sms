@@ -18,10 +18,12 @@ import {
   UserX,
   BookOpen
 } from "lucide-react";
+import NepaliDatePicker from "@/components/common/NepaliDatePicker";
+import { getCurrentBsDate, formatBsDateDisplay } from "@/lib/nepaliDate";
 
 export type ProxyClass = {
   id: string;
-  date: string;
+  date: string; // YYYY-MM-DD in B.S.
   class_name: string;
   section: string;
   period: string;
@@ -80,9 +82,9 @@ export default function ManageProxyClass() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ProxyClass | null>(null);
   
-  // Form State
+  // Form State (Defaulting date to current Nepali B.S. Date)
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
+    date: getCurrentBsDate(),
     class_name: "Class 1",
     section: "A",
     period: "1st Period (10:00 - 10:45 AM)",
@@ -114,15 +116,12 @@ export default function ManageProxyClass() {
   const fetchProxyClasses = async () => {
     setLoading(true);
     try {
-      // Try fetching from Supabase DB first
       const { data, error } = await supabase
         .from("proxy_classes")
         .select("*")
         .order("date", { ascending: false });
 
       if (error) {
-        // Table might not exist in Supabase yet, fallback to localStorage
-        console.warn("Supabase proxy_classes table fetch failed, using local storage fallback:", error.message);
         loadFromLocalStorage();
       } else if (data) {
         setProxyList(data);
@@ -156,7 +155,7 @@ export default function ManageProxyClass() {
   const openAddModal = () => {
     setEditingItem(null);
     setFormData({
-      date: new Date().toISOString().split('T')[0],
+      date: getCurrentBsDate(),
       class_name: "Class 1",
       section: "A",
       period: DEFAULT_PERIODS[0],
@@ -174,7 +173,7 @@ export default function ManageProxyClass() {
   const openEditModal = (item: ProxyClass) => {
     setEditingItem(item);
     setFormData({
-      date: item.date,
+      date: item.date || getCurrentBsDate(),
       class_name: item.class_name,
       section: item.section || "A",
       period: item.period,
@@ -204,7 +203,7 @@ export default function ManageProxyClass() {
     setSaving(true);
     const payload = {
       id: editingItem ? editingItem.id : `proxy_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-      date: formData.date,
+      date: formData.date, // Saved in BS Date string YYYY-MM-DD
       class_name: formData.class_name,
       section: formData.section,
       period: formData.period,
@@ -219,7 +218,6 @@ export default function ManageProxyClass() {
     };
 
     try {
-      // Try updating Supabase
       if (editingItem) {
         await supabase.from("proxy_classes").update(payload).eq("id", editingItem.id);
       } else {
@@ -229,7 +227,6 @@ export default function ManageProxyClass() {
       console.warn("Supabase save attempt skipped or failed, saving locally.");
     }
 
-    // Always update local state & localStorage for immediate smooth responsiveness
     let updatedList: ProxyClass[];
     if (editingItem) {
       updatedList = proxyList.map(p => p.id === editingItem.id ? payload : p);
@@ -280,7 +277,8 @@ export default function ManageProxyClass() {
       item.proxy_teacher_name.toLowerCase().includes(searchLower) ||
       item.class_name.toLowerCase().includes(searchLower) ||
       item.subject_name.toLowerCase().includes(searchLower) ||
-      (item.reason && item.reason.toLowerCase().includes(searchLower));
+      (item.reason && item.reason.toLowerCase().includes(searchLower)) ||
+      (item.date && item.date.includes(searchLower));
 
     const matchesDate = !filterDate || item.date === filterDate;
     const matchesStatus = filterStatus === "All" || item.status === filterStatus;
@@ -289,10 +287,11 @@ export default function ManageProxyClass() {
     return matchesSearch && matchesDate && matchesStatus && matchesClass;
   });
 
-  // Helper teacher name formatter
   const formatTeacherName = (t: Teacher) => {
     return `${t.first_name} ${t.middle_name ? t.middle_name + " " : ""}${t.last_name}`;
   };
+
+  const todayBs = getCurrentBsDate();
 
   return (
     <div className="space-y-6">
@@ -306,7 +305,7 @@ export default function ManageProxyClass() {
               <h2 className="text-2xl font-bold">Proxy Class Management</h2>
             </div>
             <p className="text-blue-100 text-sm max-w-2xl">
-              Assign substitute teachers when regular teachers are absent. Track, manage, and optimize daily class coverage seamlessly.
+              Assign substitute teachers according to the <span className="font-semibold text-yellow-300">Nepali B.S. Calendar</span>. Track and manage class substitutions easily.
             </p>
           </div>
 
@@ -326,9 +325,9 @@ export default function ManageProxyClass() {
             <div className="text-2xl font-black mt-1">{proxyList.length}</div>
           </div>
           <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-            <span className="text-xs uppercase text-blue-200 font-semibold tracking-wider">Today's Proxies</span>
+            <span className="text-xs uppercase text-blue-200 font-semibold tracking-wider">Today ({todayBs} BS)</span>
             <div className="text-2xl font-black mt-1">
-              {proxyList.filter(p => p.date === new Date().toISOString().split('T')[0]).length}
+              {proxyList.filter(p => p.date === todayBs).length}
             </div>
           </div>
           <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
@@ -354,27 +353,25 @@ export default function ManageProxyClass() {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search teacher, class, subject, reason..."
+              placeholder="Search teacher, class, subject, date (e.g. 2083-06-13)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-900"
             />
           </div>
 
-          {/* Date Filter */}
+          {/* Date Filter Component */}
           <div className="relative">
-            <input
-              type="date"
+            <NepaliDatePicker
               value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-700"
+              onChange={(bsDate) => setFilterDate(bsDate)}
             />
             {filterDate && (
               <button 
                 onClick={() => setFilterDate("")} 
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 bg-slate-100 rounded px-1"
+                className="absolute right-1 top-1 text-[10px] text-red-500 hover:text-red-700 bg-red-50 rounded px-1 border border-red-200"
               >
-                Clear
+                Clear Date Filter
               </button>
             )}
           </div>
@@ -383,7 +380,7 @@ export default function ManageProxyClass() {
           <select
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-700"
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-700 self-end"
           >
             <option value="All">All Classes</option>
             {DEFAULT_CLASSES.map(cls => (
@@ -392,7 +389,7 @@ export default function ManageProxyClass() {
           </select>
 
           {/* Status Filter */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-end">
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
@@ -420,8 +417,8 @@ export default function ManageProxyClass() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-100 border-b border-slate-200 text-xs text-slate-600 uppercase tracking-wider whitespace-nowrap">
-                <th className="px-4 py-3 font.semibold">S.N</th>
-                <th className="px-4 py-3 font-semibold">Date</th>
+                <th className="px-4 py-3 font-semibold">S.N</th>
+                <th className="px-4 py-3 font-semibold">Nepali Date (B.S.)</th>
                 <th className="px-4 py-3 font-semibold">Class & Section</th>
                 <th className="px-4 py-3 font-semibold">Period / Time</th>
                 <th className="px-4 py-3 font-semibold">Absent Teacher</th>
@@ -444,10 +441,12 @@ export default function ManageProxyClass() {
                 filteredList.map((item, index) => (
                   <tr key={item.id} className="hover:bg-blue-50/40 transition-colors text-sm whitespace-nowrap">
                     <td className="px-4 py-3 text-slate-500 font-medium">{index + 1}</td>
-                    <td className="px-4 py-3 text-slate-800 font-medium">
+                    <td className="px-4 py-3 font-bold text-slate-900">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                        {item.date}
+                        <span className="bg-blue-50 text-blue-900 px-2 py-0.5 rounded border border-blue-200">
+                          {formatBsDateDisplay(item.date)} B.S.
+                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-3 font-bold text-slate-900">
@@ -532,7 +531,7 @@ export default function ManageProxyClass() {
         </div>
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Add / Edit Modal with Nepali B.S. Date Picker */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full border border-slate-200 overflow-hidden transform transition-all animate-in fade-in zoom-in duration-200">
@@ -554,19 +553,15 @@ export default function ManageProxyClass() {
 
             {/* Modal Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-4 text-slate-800 text-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Date */}
-                <div>
-                  <label className="block font-medium text-slate-700 mb-1">Date *</label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
-                </div>
+              {/* Nepali Date Picker Field */}
+              <NepaliDatePicker
+                label="Date (Nepali BS Calendar)"
+                required
+                value={formData.date}
+                onChange={(bsDate) => setFormData({ ...formData, date: bsDate })}
+              />
 
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {/* Class */}
                 <div>
                   <label className="block font-medium text-slate-700 mb-1">Class *</label>
@@ -602,7 +597,7 @@ export default function ManageProxyClass() {
                   <select
                     value={formData.period}
                     onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
                   >
                     {DEFAULT_PERIODS.map(p => (
                       <option key={p} value={p}>{p}</option>

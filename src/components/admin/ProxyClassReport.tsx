@@ -17,6 +17,8 @@ import {
   RefreshCw
 } from "lucide-react";
 import { ProxyClass } from "./ManageProxyClass";
+import NepaliDatePicker from "@/components/common/NepaliDatePicker";
+import { formatBsDateDisplay } from "@/lib/nepaliDate";
 
 const LOCAL_STORAGE_KEY = "shbs_proxy_classes";
 
@@ -67,7 +69,7 @@ export default function ProxyClassReport() {
     fetchProxyData();
   }, []);
 
-  // Filtered data
+  // Filtered data (matching Nepali B.S. Date string values like 2083-06-13)
   const filteredList = proxyList.filter(item => {
     const matchesFromDate = !fromDate || item.date >= fromDate;
     const matchesToDate = !toDate || item.date <= toDate;
@@ -121,7 +123,7 @@ export default function ProxyClassReport() {
       return;
     }
 
-    const headers = ["S.N", "Date", "Class", "Section", "Period", "Absent Teacher", "Proxy Teacher", "Subject", "Reason", "Status"];
+    const headers = ["S.N", "Nepali Date (B.S.)", "Class", "Section", "Period", "Absent Teacher", "Proxy Teacher", "Subject", "Reason", "Status"];
     const rows = filteredList.map((item, i) => [
       i + 1,
       `"${item.date}"`,
@@ -139,7 +141,7 @@ export default function ProxyClassReport() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Proxy_Class_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `Proxy_Class_Report_BS_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -160,7 +162,7 @@ export default function ProxyClassReport() {
               <h2 className="text-2xl font-bold">Proxy Class Reports & Analytics</h2>
             </div>
             <p className="text-purple-100 text-sm max-w-2xl">
-              Generate detailed reports, analyze teacher substitution workload, print official logs, and export data.
+              Generate detailed reports based on the <span className="font-semibold text-yellow-300">Nepali B.S. Calendar</span>, analyze teacher substitution workload, and print official logs.
             </p>
           </div>
 
@@ -214,44 +216,50 @@ export default function ProxyClassReport() {
         <h1 className="text-2xl font-bold uppercase text-slate-900">SHREE HIMALAYA BASIC SCHOOL</h1>
         <p className="text-sm text-slate-600">Damak-9, Jhapa, Nepal | School Management System</p>
         <h2 className="text-lg font-bold underline mt-3 uppercase tracking-wider text-slate-800">
-          Proxy Class Attendance & Workload Report
+          Proxy Class Attendance & Workload Report (B.S. Calendar)
         </h2>
-        <p className="text-xs text-slate-500 mt-1">Generated on: {new Date().toLocaleString()}</p>
+        <p className="text-xs text-slate-500 mt-1">Generated Date: {new Date().toLocaleString()}</p>
       </div>
 
       {/* Filter Bar - hidden in print */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 print:hidden">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 flex-1">
-            {/* From Date */}
+            {/* From Date (Nepali BS) */}
             <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1">From Date</label>
-              <input
-                type="date"
+              <NepaliDatePicker
+                label="From Date (BS)"
                 value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                onChange={(bsDate) => setFromDate(bsDate)}
               />
+              {fromDate && (
+                <button onClick={() => setFromDate("")} className="text-[10px] text-red-500 hover:underline mt-0.5">
+                  Clear From Date
+                </button>
+              )}
             </div>
 
-            {/* To Date */}
+            {/* To Date (Nepali BS) */}
             <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1">To Date</label>
-              <input
-                type="date"
+              <NepaliDatePicker
+                label="To Date (BS)"
                 value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                onChange={(bsDate) => setToDate(bsDate)}
               />
+              {toDate && (
+                <button onClick={() => setToDate("")} className="text-[10px] text-red-500 hover:underline mt-0.5">
+                  Clear To Date
+                </button>
+              )}
             </div>
 
             {/* Teacher filter */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1">Filter Teacher</label>
+            <div className="self-end">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Filter Teacher</label>
               <select
                 value={selectedTeacher}
                 onChange={(e) => setSelectedTeacher(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="All">All Teachers</option>
                 {uniqueTeachers.map(t => (
@@ -261,12 +269,12 @@ export default function ProxyClassReport() {
             </div>
 
             {/* Status filter */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1">Status</label>
+            <div className="self-end">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="All">All Statuses</option>
                 <option value="Assigned">Assigned</option>
@@ -320,7 +328,7 @@ export default function ProxyClassReport() {
               <thead>
                 <tr className="bg-slate-100 print:bg-slate-200 border-b border-slate-200 text-xs text-slate-700 uppercase tracking-wider whitespace-nowrap">
                   <th className="px-4 py-3 font-bold">S.N</th>
-                  <th className="px-4 py-3 font-bold">Date</th>
+                  <th className="px-4 py-3 font-bold">Nepali Date (B.S.)</th>
                   <th className="px-4 py-3 font-bold">Class & Sec</th>
                   <th className="px-4 py-3 font-bold">Period</th>
                   <th className="px-4 py-3 font-bold">Absent Teacher</th>
@@ -341,7 +349,11 @@ export default function ProxyClassReport() {
                   filteredList.map((item, index) => (
                     <tr key={item.id} className="hover:bg-slate-50 text-xs whitespace-nowrap">
                       <td className="px-4 py-3 text-slate-500 font-medium">{index + 1}</td>
-                      <td className="px-4 py-3 text-slate-800 font-medium">{item.date}</td>
+                      <td className="px-4 py-3 text-slate-900 font-bold">
+                        <span className="bg-purple-50 text-purple-900 px-2 py-0.5 rounded border border-purple-200">
+                          {formatBsDateDisplay(item.date)} B.S.
+                        </span>
+                      </td>
                       <td className="px-4 py-3 font-bold text-slate-900">
                         {item.class_name} ({item.section || 'A'})
                       </td>
