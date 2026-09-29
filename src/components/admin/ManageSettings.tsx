@@ -60,7 +60,10 @@ export default function ManageSettings() {
   const [disableSaving, setDisableSaving] = useState(false);
 
   // Active Sessions state
-  type SessionRow = { id: string; role: string; created_at: string; expires_at: string; user_agent: string | null; };
+  type SessionRow = {
+    id: string; role: string; created_at: string; expires_at: string;
+    user_agent: string | null; ip_address: string | null; city: string | null; country: string | null;
+  };
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [sessionsLoading, setSessionsLoading] = useState(true);
@@ -121,7 +124,7 @@ export default function ManageSettings() {
         const [{ data }, sessionId] = await Promise.all([
           supabase
             .from("active_sessions")
-            .select("id, role, created_at, expires_at, user_agent")
+            .select("id, role, created_at, expires_at, user_agent, ip_address, city, country")
             .eq("role", "admin")
             .gt("expires_at", new Date().toISOString())
             .order("created_at", { ascending: false }),
@@ -707,11 +710,30 @@ export default function ManageSettings() {
                           <p className={`font-semibold text-sm truncate ${isCurrent ? "text-slate-900" : "text-slate-700"}`}>
                             {label}
                           </p>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {relativeTime(session.created_at)}
+                          {/* Location row */}
+                          <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 flex-wrap">
+                            {session.city || session.country ? (
+                              <span className="flex items-center gap-1">
+                                <svg className="w-3 h-3 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+                                  <circle cx="12" cy="10" r="3"/>
+                                </svg>
+                                <span className="font-medium text-slate-600">
+                                  {[session.city, session.country].filter(Boolean).join(", ")}
+                                </span>
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 italic">Location unavailable</span>
+                            )}
+                            {" · "}
+                            <span className="text-slate-400">{relativeTime(session.created_at)}</span>
                             {" · "}
                             <span className="text-slate-400">Expires {new Date(session.expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                           </p>
+                          {/* IP address */}
+                          {session.ip_address && (
+                            <p className="text-xs text-slate-400 mt-0.5 font-mono">{session.ip_address}</p>
+                          )}
                         </div>
                         {isCurrent ? (
                           <span className="text-xs font-bold text-brand-600 bg-brand-100 px-2.5 py-1 rounded-full shrink-0">

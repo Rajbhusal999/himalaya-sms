@@ -35,11 +35,30 @@ export default function AdminLogin() {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 1);
 
+    // Fetch IP + geolocation (free, no permission needed)
+    let ipAddress: string | null = null;
+    let city: string | null = null;
+    let country: string | null = null;
+    try {
+      const geoRes = await fetch("https://ipapi.co/json/", { cache: "no-store" });
+      if (geoRes.ok) {
+        const geo = await geoRes.json();
+        ipAddress = geo.ip ?? null;
+        city = geo.city ?? null;
+        country = geo.country_name ?? null;
+      }
+    } catch {
+      // Geolocation is best-effort — don't block login if it fails
+    }
+
     await supabase.from("active_sessions").insert([{
       id: sessionId,
       role: "admin",
       expires_at: expiresAt.toISOString(),
-      user_agent: navigator.userAgent,   // ← store device/browser info
+      user_agent: navigator.userAgent,
+      ip_address: ipAddress,
+      city,
+      country,
     }]);
 
     await setSession(sessionId, expiresAt);
