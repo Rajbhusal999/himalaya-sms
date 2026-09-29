@@ -18,7 +18,6 @@ import { ProxyClass } from "./ManageProxyClass";
 import NepaliDatePicker from "@/components/common/NepaliDatePicker";
 import { formatBsDateDisplay } from "@/lib/nepaliDate";
 
-const LOCAL_STORAGE_KEY = "shbs_proxy_classes";
 const PROXY_RATE_PER_CLASS = 70; // NRs. 70 per proxy class attended
 
 type AssignedSlot = {
@@ -52,28 +51,15 @@ export default function ProxyClassReport() {
         .select("*")
         .order("date", { ascending: false });
 
-      if (!error && data) {
+      if (error) {
+        console.error("Error fetching proxy classes from Supabase:", error);
+      } else if (data) {
         setProxyList(data);
-      } else {
-        loadLocalStorage();
       }
     } catch (e) {
-      loadLocalStorage();
+      console.error("Error fetching proxy classes:", e);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadLocalStorage = () => {
-    const local = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (local) {
-      try {
-        setProxyList(JSON.parse(local));
-      } catch (e) {
-        setProxyList([]);
-      }
-    } else {
-      setProxyList([]);
     }
   };
 

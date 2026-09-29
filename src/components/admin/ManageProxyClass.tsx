@@ -76,8 +76,6 @@ const DEFAULT_PERIODS = [
   "6th Period (03:10 - 04:00 PM)"
 ];
 
-const LOCAL_STORAGE_KEY = "shbs_proxy_classes";
-
 export default function ManageProxyClass() {
   const [proxyList, setProxyList] = useState<ProxyClass[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -121,7 +119,7 @@ export default function ManageProxyClass() {
     }
   };
 
-  // Load proxy classes
+  // Load proxy classes from Supabase
   const fetchProxyClasses = async () => {
     setLoading(true);
     try {
@@ -131,28 +129,14 @@ export default function ManageProxyClass() {
         .order("date", { ascending: false });
 
       if (error) {
-        loadFromLocalStorage();
+        console.error("Error fetching proxy classes from Supabase:", error);
       } else if (data) {
         setProxyList(data);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
       }
     } catch (err) {
-      loadFromLocalStorage();
+      console.error("Error fetching proxy classes:", err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadFromLocalStorage = () => {
-    const localData = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (localData) {
-      try {
-        setProxyList(JSON.parse(localData));
-      } catch (e) {
-        setProxyList([]);
-      }
-    } else {
-      setProxyList([]);
     }
   };
 
@@ -212,7 +196,7 @@ export default function ManageProxyClass() {
     setSaving(true);
     const payload = {
       id: editingItem ? editingItem.id : `proxy_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-      date: formData.date, // Saved in BS Date string YYYY-MM-DD
+      date: formData.date,
       class_name: formData.class_name,
       period: formData.period,
       absent_teacher_id: formData.absent_teacher_id,
@@ -228,39 +212,31 @@ export default function ManageProxyClass() {
 
     try {
       if (editingItem) {
-        await supabase.from("proxy_classes").update(payload).eq("id", editingItem.id);
+        const { error } = await supabase.from("proxy_classes").update(payload).eq("id", editingItem.id);
+        if (error) throw error;
       } else {
-        await supabase.from("proxy_classes").insert([payload]);
+        const { error } = await supabase.from("proxy_classes").insert([payload]);
+        if (error) throw error;
       }
-    } catch (err) {
-      console.warn("Supabase save attempt skipped or failed, saving locally.");
+      await fetchProxyClasses();
+    } catch (err: any) {
+      alert("Failed to save proxy class assignment to Supabase: " + (err.message || err));
+    } finally {
+      setSaving(false);
+      setIsModalOpen(false);
     }
-
-    let updatedList: ProxyClass[];
-    if (editingItem) {
-      updatedList = proxyList.map(p => p.id === editingItem.id ? payload : p);
-    } else {
-      updatedList = [payload, ...proxyList];
-    }
-
-    setProxyList(updatedList);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedList));
-    setSaving(false);
-    setIsModalOpen(false);
   };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this proxy class assignment?")) return;
 
     try {
-      await supabase.from("proxy_classes").delete().eq("id", id);
-    } catch (e) {
-      console.warn("Supabase delete failed, removing locally.");
+      const { error } = await supabase.from("proxy_classes").delete().eq("id", id);
+      if (error) throw error;
+      await fetchProxyClasses();
+    } catch (e: any) {
+      alert("Failed to delete proxy class from Supabase: " + (e.message || e));
     }
-
-    const updated = proxyList.filter(item => item.id !== id);
-    setProxyList(updated);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
   };
 
   // Filtering
