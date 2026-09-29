@@ -1,36 +1,99 @@
-import { useState } from "react";
-import { Save, User, Bell, Lock, Globe, Key, Shield, Smartphone, Laptop, History } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { Save, User, Bell, Lock, Globe, Key, Shield, Smartphone, Laptop, History, CheckCircle, RefreshCw } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function ManageSettings() {
   const [activeTab, setActiveTab] = useState("profile");
+  
+  // Admin Profile state (Saved to Supabase admin_profile table)
+  const [firstName, setFirstName] = useState("Himalaya Basic");
+  const [lastName, setLastName] = useState("School");
+  const [email, setEmail] = useState("himalayabasicschool01@gmail.com");
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Security state
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Fetch admin profile from Supabase
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("admin_profile")
+          .select("*")
+          .eq("id", "default_admin")
+          .single();
+
+        if (data && !error) {
+          if (data.first_name) setFirstName(data.first_name);
+          if (data.last_name) setLastName(data.last_name);
+          if (data.email) setEmail(data.email);
+        }
+      } catch (err) {
+        console.error("Error fetching admin profile from Supabase:", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      const payload = {
+        id: "default_admin",
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from("admin_profile")
+        .upsert(payload, { onConflict: "id" });
+
+      if (error) throw error;
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 4000);
+    } catch (err: any) {
+      alert("Failed to save profile settings to Supabase: " + (err.message || err));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div className="flex border-b border-slate-200">
         <button 
           onClick={() => setActiveTab("profile")}
-          className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "profile" ? "border-brand-600 text-brand-600" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "profile" ? "border-brand-600 text-brand-600 font-bold" : "border-transparent text-slate-500 hover:text-slate-700"}`}
         >
           <User className="w-4 h-4" /> Profile
         </button>
         <button 
           onClick={() => setActiveTab("notifications")}
-          className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "notifications" ? "border-brand-600 text-brand-600" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "notifications" ? "border-brand-600 text-brand-600 font-bold" : "border-transparent text-slate-500 hover:text-slate-700"}`}
         >
           <Bell className="w-4 h-4" /> Notifications
         </button>
         <button 
           onClick={() => setActiveTab("security")}
-          className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "security" ? "border-brand-600 text-brand-600" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "security" ? "border-brand-600 text-brand-600 font-bold" : "border-transparent text-slate-500 hover:text-slate-700"}`}
         >
           <Lock className="w-4 h-4" /> Security
         </button>
         <button 
           onClick={() => setActiveTab("system")}
-          className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "system" ? "border-brand-600 text-brand-600" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "system" ? "border-brand-600 text-brand-600 font-bold" : "border-transparent text-slate-500 hover:text-slate-700"}`}
         >
           <Globe className="w-4 h-4" /> System
         </button>
@@ -38,26 +101,65 @@ export default function ManageSettings() {
 
       <div className="p-8">
         {activeTab === "profile" && (
-          <div className="max-w-2xl space-y-6">
+          <form onSubmit={handleSaveProfile} className="max-w-2xl space-y-6">
             <h2 className="text-xl font-bold text-slate-800 mb-4">Profile Settings</h2>
-            <div className="grid grid-cols-2 gap-6">
+
+            {saveSuccess && (
+              <div className="p-3.5 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-sm font-bold flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                Profile settings updated and saved to Supabase successfully!
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
-                <input type="text" defaultValue="Admin" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500" />
+                <label className="block text-sm font-bold text-slate-700 mb-1">First Name</label>
+                <input 
+                  type="text" 
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Himalaya Basic"
+                  className="w-full px-4 py-2.5 border-2 border-blue-400 bg-blue-50/20 text-blue-700 font-bold rounded-xl focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-none transition-all text-sm" 
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
-                <input type="text" defaultValue="User" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500" />
+                <label className="block text-sm font-bold text-slate-700 mb-1">Last Name</label>
+                <input 
+                  type="text" 
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="School"
+                  className="w-full px-4 py-2.5 border-2 border-blue-400 bg-blue-50/20 text-blue-700 font-bold rounded-xl focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-none transition-all text-sm" 
+                />
               </div>
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-                <input type="email" defaultValue="admin@himalaya.edu.np" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500" />
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-slate-700 mb-1">Email Address</label>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@himalaya.edu.np"
+                  className="w-full px-4 py-2.5 border-2 border-blue-400 bg-blue-50/20 text-blue-700 font-bold rounded-xl focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-none transition-all text-sm" 
+                />
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium">
-              <Save className="w-4 h-4" /> Save Changes
+            
+            <button 
+              type="submit"
+              disabled={saving}
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-bold shadow-md disabled:opacity-50"
+            >
+              {saving ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" /> Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" /> Save Changes
+                </>
+              )}
             </button>
-          </div>
+          </form>
         )}
         {activeTab === "notifications" && (
           <div className="max-w-2xl space-y-6">
@@ -194,12 +296,12 @@ export default function ManageSettings() {
             <div className="grid grid-cols-1 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">School Name</label>
-                <input type="text" defaultValue="Shree Himalaya Basic School" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500" />
+                <input type="text" defaultValue="Shree Himalaya Basic School" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-blue-700 font-bold" />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Active Academic Year</label>
-                <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-white" defaultValue="2026/2027">
+                <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-white text-blue-700 font-bold" defaultValue="2026/2027">
                   <option value="2025/2026">2025/2026</option>
                   <option value="2026/2027">2026/2027 (Current)</option>
                   <option value="2027/2028">2027/2028</option>
