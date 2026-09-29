@@ -137,10 +137,13 @@ export default function ProxyClassReport() {
     }
   });
 
-  const teacherWorkloadList = Array.from(teacherWorkloadMap.entries()).map(([teacherName, stats]) => ({
-    teacherName,
-    ...stats
-  })).sort((a, b) => b.proxyCount - a.proxyCount);
+  const teacherWorkloadList = Array.from(teacherWorkloadMap.entries())
+    .map(([teacherName, stats]) => ({
+      teacherName,
+      ...stats
+    }))
+    .filter(row => row.proxyCount > 0)
+    .sort((a, b) => b.proxyCount - a.proxyCount);
 
   const totalSchoolAmount = filteredList.length * PROXY_RATE_PER_CLASS;
   const selectedTeacherStats = selectedTeacher !== "All" ? teacherWorkloadMap.get(selectedTeacher) : null;
