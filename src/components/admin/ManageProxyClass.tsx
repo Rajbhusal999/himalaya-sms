@@ -53,14 +53,13 @@ const DEFAULT_CLASSES = [
 ];
 
 const DEFAULT_PERIODS = [
-  "1st Period (10:00 - 10:45 AM)",
-  "2nd Period (10:45 - 11:30 AM)",
-  "3rd Period (11:30 - 12:15 PM)",
-  "4th Period (12:15 - 01:00 PM)",
-  "Tiffin Break (01:00 - 01:30 PM)",
-  "5th Period (01:30 - 02:15 PM)",
-  "6th Period (02:15 - 03:00 PM)",
-  "7th Period (03:00 - 03:45 PM)"
+  "1st Period (10:10 - 11:05 AM)",
+  "2nd Period (11:05 - 12:00 PM)",
+  "3rd Period (12:00 - 12:55 PM)",
+  "4th Period (12:55 - 01:50 PM)",
+  "Tiffin Break (01:50 - 02:20 PM)",
+  "5th Period (02:20 - 03:10 PM)",
+  "6th Period (03:10 - 04:00 PM)"
 ];
 
 const LOCAL_STORAGE_KEY = "shbs_proxy_classes";
@@ -82,7 +81,7 @@ export default function ManageProxyClass() {
   const [formData, setFormData] = useState({
     date: getCurrentBsDate(),
     class_name: "Class 1",
-    period: "1st Period (10:00 - 10:45 AM)",
+    period: "1st Period (10:10 - 11:05 AM)",
     absent_teacher_id: "",
     absent_teacher_name: "",
     proxy_teacher_id: "",
