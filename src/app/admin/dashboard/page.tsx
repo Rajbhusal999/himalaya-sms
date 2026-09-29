@@ -23,6 +23,8 @@ import ManageSettings from "@/components/admin/ManageSettings";
 import StaffChat from "@/components/chat/StaffChat";
 import ManageRatings from "@/components/admin/ManageRatings";
 import RecentMarksLedger from "@/components/admin/RecentMarksLedger";
+import ManageProxyClass from "@/components/admin/ManageProxyClass";
+import ProxyClassReport from "@/components/admin/ProxyClassReport";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -46,7 +48,10 @@ import {
   X,
   Megaphone,
   MessageSquare,
-  Star
+  Star,
+  UserCheck,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { validateSession, clearSession } from "@/app/actions/auth";
 
@@ -58,6 +63,7 @@ type Stat = {
 export default function AdminDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isProxyOpen, setIsProxyOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [stats, setStats] = useState({
@@ -96,12 +102,18 @@ export default function AdminDashboard() {
     const tab = params.get("tab");
     if (tab) {
       setActiveTab(tab);
+      if (tab === "proxy-manage" || tab === "proxy-report") {
+        setIsProxyOpen(true);
+      }
     }
 
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       const currentTab = params.get("tab") || "overview";
       setActiveTab(currentTab);
+      if (currentTab === "proxy-manage" || currentTab === "proxy-report") {
+        setIsProxyOpen(true);
+      }
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -293,6 +305,14 @@ export default function AdminDashboard() {
 
     if (activeTab === "ratings") {
       return <ManageRatings />;
+    }
+
+    if (activeTab === "proxy-manage") {
+      return <ManageProxyClass />;
+    }
+
+    if (activeTab === "proxy-report") {
+      return <ProxyClassReport />;
     }
 
     return (
@@ -700,6 +720,58 @@ export default function AdminDashboard() {
               <ClipboardCheck className="w-5 h-5 mr-3" />
               Admissions
             </button>
+
+            {/* Proxy Class Management Dropdown Button */}
+            <div>
+              <button
+                onClick={() => {
+                  const nextState = !isProxyOpen;
+                  setIsProxyOpen(nextState);
+                  if (nextState && activeTab !== "proxy-manage" && activeTab !== "proxy-report") {
+                    handleTabClick("proxy-manage");
+                  }
+                }}
+                className={`w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                  activeTab === "proxy-manage" || activeTab === "proxy-report"
+                    ? "bg-brand-800 text-white font-semibold"
+                    : "text-brand-200 hover:bg-brand-900 hover:text-white"
+                }`}
+              >
+                <div className="flex items-center">
+                  <UserCheck className="w-5 h-5 mr-3 text-blue-400" />
+                  <span>Proxy Class Management</span>
+                </div>
+                {isProxyOpen ? <ChevronDown className="w-4 h-4 text-brand-300" /> : <ChevronRight className="w-4 h-4 text-brand-300" />}
+              </button>
+
+              {isProxyOpen && (
+                <div className="ml-5 pl-3 border-l-2 border-brand-700/60 mt-1 space-y-1">
+                  <button
+                    onClick={() => handleTabClick("proxy-manage")}
+                    className={`w-full flex items-center px-3 py-2 text-xs font-semibold rounded-md transition-colors ${
+                      activeTab === "proxy-manage"
+                        ? "bg-brand-700 text-white shadow-sm"
+                        : "text-brand-200 hover:bg-brand-900 hover:text-white"
+                    }`}
+                  >
+                    <UserCheck className="w-3.5 h-3.5 mr-2.5 text-blue-300" />
+                    Proxy Class Manage
+                  </button>
+
+                  <button
+                    onClick={() => handleTabClick("proxy-report")}
+                    className={`w-full flex items-center px-3 py-2 text-xs font-semibold rounded-md transition-colors ${
+                      activeTab === "proxy-report"
+                        ? "bg-brand-700 text-white shadow-sm"
+                        : "text-brand-200 hover:bg-brand-900 hover:text-white"
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5 mr-2.5 text-purple-300" />
+                    Report
+                  </button>
+                </div>
+              )}
+            </div>
           </nav>
 
           <div className="px-4 mt-8 mb-2 text-xs font-semibold text-brand-400 uppercase tracking-wider">
@@ -786,7 +858,9 @@ export default function AdminDashboard() {
             <span className="font-bold text-lg text-slate-800">Admin Portal</span>
           </div>
           <div className="hidden md:flex items-center">
-            <h1 className="text-xl font-semibold text-slate-800 capitalize">{activeTab}</h1>
+            <h1 className="text-xl font-semibold text-slate-800 capitalize">
+              {activeTab === "proxy-manage" ? "Proxy Class Management" : activeTab === "proxy-report" ? "Proxy Class Report" : activeTab.replace("-", " ")}
+            </h1>
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative">
