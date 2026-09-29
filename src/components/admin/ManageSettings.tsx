@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Save, User, Bell, Lock, Globe, Key, Shield, Smartphone, Laptop, History, CheckCircle, RefreshCw, AlertCircle, QrCode, X, ShieldCheck, ShieldOff, Copy, Monitor, Tablet, Trash2 } from "lucide-react";
+import { Save, User, Bell, Lock, Globe, Key, Shield, Smartphone, Laptop, History, CheckCircle, RefreshCw, AlertCircle, QrCode, X, ShieldCheck, ShieldOff, Copy, Monitor, Tablet, Trash2, TriangleAlert } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import {
   verifyAdminPassword,
@@ -65,6 +65,13 @@ export default function ManageSettings() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [revokingId, setRevokingId] = useState<string | null>(null);
+
+  // System Settings state (school_settings table)
+  const [systemSchoolName, setSystemSchoolName] = useState("Shree Himalaya Basic School");
+  const [systemAcademicYear, setSystemAcademicYear] = useState("2026/2027");
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [systemSaving, setSystemSaving] = useState(false);
+  const [systemSaveSuccess, setSystemSaveSuccess] = useState(false);
 
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -131,6 +138,27 @@ export default function ManageSettings() {
     fetchSessions();
   }, []);
 
+  // Fetch system settings from Supabase
+  useEffect(() => {
+    const fetchSystemSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("school_settings")
+          .select("*")
+          .eq("id", "default")
+          .single();
+        if (data && !error) {
+          if (data.school_name) setSystemSchoolName(data.school_name);
+          if (data.active_academic_year) setSystemAcademicYear(data.active_academic_year);
+          setMaintenanceMode(data.maintenance_mode ?? false);
+        }
+      } catch (err) {
+        console.error("Error fetching system settings:", err);
+      }
+    };
+    fetchSystemSettings();
+  }, []);
+
   /** Parse a user-agent string into a friendly label */
   const parseDevice = (ua: string | null): { label: string; icon: "laptop" | "smartphone" | "tablet" | "monitor" } => {
     if (!ua) return { label: "Unknown Device", icon: "monitor" };
@@ -174,6 +202,32 @@ export default function ManageSettings() {
       console.error("Failed to revoke session:", err);
     } finally {
       setRevokingId(null);
+    }
+  };
+
+  const handleSaveSystemSettings = async () => {
+    setSystemSaving(true);
+    setSystemSaveSuccess(false);
+    try {
+      const { error } = await supabase
+        .from("school_settings")
+        .upsert(
+          {
+            id: "default",
+            school_name: systemSchoolName,
+            active_academic_year: systemAcademicYear,
+            maintenance_mode: maintenanceMode,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "id" }
+        );
+      if (error) throw error;
+      setSystemSaveSuccess(true);
+      setTimeout(() => setSystemSaveSuccess(false), 4000);
+    } catch (err: any) {
+      alert("Failed to save system settings: " + (err.message || err));
+    } finally {
+      setSystemSaving(false);
     }
   };
 
@@ -687,32 +741,90 @@ export default function ManageSettings() {
         {activeTab === "system" && (
           <div className="max-w-2xl space-y-6">
             <h2 className="text-xl font-bold text-slate-800 mb-4">System Preferences</h2>
+
+            {systemSaveSuccess && (
+              <div className="p-3.5 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-sm font-bold flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                System settings saved to Supabase successfully!
+              </div>
+            )}
+
             <div className="grid grid-cols-1 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">School Name</label>
-                <input type="text" defaultValue="Shree Himalaya Basic School" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-blue-700 font-bold" />
+                <input
+                  type="text"
+                  value={systemSchoolName}
+                  onChange={(e) => setSystemSchoolName(e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-blue-700 font-bold"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Active Academic Year</label>
-                <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-white text-blue-700 font-bold" defaultValue="2026/2027">
+                <select
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 bg-white text-blue-700 font-bold"
+                  value={systemAcademicYear}
+                  onChange={(e) => setSystemAcademicYear(e.target.value)}
+                >
                   <option value="2025/2026">2025/2026</option>
                   <option value="2026/2027">2026/2027 (Current)</option>
                   <option value="2027/2028">2027/2028</option>
                 </select>
               </div>
-              <div className="flex items-center justify-between p-4 border border-amber-200 rounded-xl bg-amber-50">
-                <div>
-                  <h4 className="font-semibold text-amber-800">Maintenance Mode</h4>
-                  <p className="text-sm text-amber-700 mt-1">When enabled, the public website will show a "Under Construction" page.</p>
+
+              {/* Maintenance Mode Toggle */}
+              <div className={`flex items-start justify-between p-5 border-2 rounded-xl transition-all ${
+                maintenanceMode
+                  ? "border-amber-400 bg-amber-50"
+                  : "border-slate-200 bg-slate-50/50"
+              }`}>
+                <div className="flex-1 pr-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <TriangleAlert className={`w-4 h-4 ${maintenanceMode ? "text-amber-600" : "text-slate-400"}`} />
+                    <h4 className={`font-bold text-sm ${maintenanceMode ? "text-amber-800" : "text-slate-800"}`}>
+                      Maintenance Mode
+                      {maintenanceMode && (
+                        <span className="ml-2 text-xs font-bold text-amber-700 bg-amber-200 px-2 py-0.5 rounded-full">🔴 ACTIVE</span>
+                      )}
+                    </h4>
+                  </div>
+                  <p className={`text-sm mt-1 ${maintenanceMode ? "text-amber-700" : "text-slate-500"}`}>
+                    {maintenanceMode
+                      ? "Public website is currently showing the Under Construction page. Admin panel remains accessible."
+                      : "When enabled, the public website will show an \"Under Construction\" page. Admin panel stays accessible."}
+                  </p>
+                  {maintenanceMode && (
+                    <a
+                      href="/maintenance"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 text-xs text-amber-700 underline hover:text-amber-900 font-medium"
+                    >
+                      Preview maintenance page →
+                    </a>
+                  )}
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={maintenanceMode}
+                    onChange={(e) => setMaintenanceMode(e.target.checked)}
+                  />
+                  <div className="w-12 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
                 </label>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium mt-6">
-              <Save className="w-4 h-4" /> Save System Settings
+
+            <button
+              onClick={handleSaveSystemSettings}
+              disabled={systemSaving}
+              className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors font-bold mt-6 shadow-md disabled:opacity-50"
+            >
+              {systemSaving
+                ? <><RefreshCw className="w-4 h-4 animate-spin" /> Saving...</>
+                : <><Save className="w-4 h-4" /> Save System Settings</>
+              }
             </button>
           </div>
         )}
