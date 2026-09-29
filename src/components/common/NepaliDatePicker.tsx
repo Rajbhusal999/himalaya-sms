@@ -81,7 +81,7 @@ export default function NepaliDatePicker({
         </label>
       )}
 
-      <div className="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-300 focus-within:ring-2 focus-within:ring-blue-500">
+      <div className="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-lg border border-slate-300 focus-within:ring-2 focus-within:ring-blue-500 max-w-full overflow-x-auto min-w-0">
         <CalendarIcon className="w-4 h-4 text-blue-600 flex-shrink-0 ml-1" />
         
         {/* Year Dropdown */}

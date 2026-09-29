@@ -323,9 +323,9 @@ export default function ManageProxyClass() {
 
       {/* Filter and Control Bar */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
           {/* Search */}
-          <div className="relative sm:col-span-2">
+          <div className="relative lg:col-span-4">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
@@ -337,7 +337,7 @@ export default function ManageProxyClass() {
           </div>
 
           {/* Date Filter Component */}
-          <div className="relative">
+          <div className="relative lg:col-span-5 min-w-0">
             <NepaliDatePicker
               value={filterDate}
               onChange={(bsDate) => setFilterDate(bsDate)}
@@ -345,7 +345,7 @@ export default function ManageProxyClass() {
             {filterDate && (
               <button
                 onClick={() => setFilterDate("")}
-                className="absolute right-1 top-1 text-[10px] text-red-500 hover:text-red-700 bg-red-50 rounded px-1 border border-red-200"
+                className="absolute right-1 top-1 text-[10px] text-red-500 hover:text-red-700 bg-red-50 rounded px-1 border border-red-200 z-10"
               >
                 Clear Date Filter
               </button>
@@ -353,11 +353,11 @@ export default function ManageProxyClass() {
           </div>
 
           {/* Class Filter */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 lg:col-span-3 items-center">
             <select
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-700"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-700 font-medium bg-white"
             >
               <option value="All">All Classes</option>
               {DEFAULT_CLASSES.map(cls => (
@@ -366,7 +366,7 @@ export default function ManageProxyClass() {
             </select>
             <button
               onClick={fetchProxyClasses}
-              className="p-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-slate-600"
+              className="p-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-slate-600 shrink-0"
               title="Refresh List"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
