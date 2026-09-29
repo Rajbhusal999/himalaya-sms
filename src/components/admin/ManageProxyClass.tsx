@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { 
-  Plus, 
-  Search, 
-  RefreshCw, 
-  Trash2, 
-  Edit, 
-  UserCheck, 
-  Calendar, 
-  Clock, 
+import {
+  Plus,
+  Search,
+  RefreshCw,
+  Trash2,
+  Edit,
+  UserCheck,
+  Calendar,
+  Clock,
   AlertCircle,
   UserX,
   BookOpen
@@ -47,9 +47,22 @@ type Subject = {
 };
 
 const DEFAULT_CLASSES = [
-  "Nursery", "KG", 
-  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5", 
+  "Nursery", "KG",
+  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
   "Class 6", "Class 7", "Class 8"
+];
+
+const DEFAULT_SUBJECTS = [
+  "English",
+  "Mathematics",
+  "Nepali",
+  "Science",
+  "Social Studies",
+  "HPC",
+  "Our Bharatpur, Our Pride",
+  "Computer",
+  "Extra English",
+  "Serofero"
 ];
 
 const DEFAULT_PERIODS = [
@@ -72,11 +85,11 @@ export default function ManageProxyClass() {
   const [search, setSearch] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [filterClass, setFilterClass] = useState("All");
-  
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ProxyClass | null>(null);
-  
+
   // Form State (Defaulting date to current Nepali B.S. Date)
   const [formData, setFormData] = useState({
     date: getCurrentBsDate(),
@@ -86,7 +99,7 @@ export default function ManageProxyClass() {
     absent_teacher_name: "",
     proxy_teacher_id: "",
     proxy_teacher_name: "",
-    subject_name: "",
+    subject_name: DEFAULT_SUBJECTS[0],
     reason: "",
     status: "Assigned" as const
   });
@@ -156,7 +169,7 @@ export default function ManageProxyClass() {
       absent_teacher_name: teachers[0] ? `${teachers[0].first_name} ${teachers[0].last_name}` : "",
       proxy_teacher_id: teachers[1]?.id || teachers[0]?.id || "",
       proxy_teacher_name: teachers[1] ? `${teachers[1].first_name} ${teachers[1].last_name}` : "",
-      subject_name: subjects[0]?.subject_name || "English",
+      subject_name: DEFAULT_SUBJECTS[0],
       reason: "Sick Leave",
       status: "Assigned"
     });
@@ -248,7 +261,7 @@ export default function ManageProxyClass() {
   // Filtering
   const filteredList = proxyList.filter(item => {
     const searchLower = search.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       item.absent_teacher_name.toLowerCase().includes(searchLower) ||
       item.proxy_teacher_name.toLowerCase().includes(searchLower) ||
       item.class_name.toLowerCase().includes(searchLower) ||
@@ -330,8 +343,8 @@ export default function ManageProxyClass() {
               onChange={(bsDate) => setFilterDate(bsDate)}
             />
             {filterDate && (
-              <button 
-                onClick={() => setFilterDate("")} 
+              <button
+                onClick={() => setFilterDate("")}
                 className="absolute right-1 top-1 text-[10px] text-red-500 hover:text-red-700 bg-red-50 rounded px-1 border border-red-200"
               >
                 Clear Date Filter
@@ -482,7 +495,7 @@ export default function ManageProxyClass() {
                   {editingItem ? "Edit Proxy Class Assignment" : "Assign Proxy Class"}
                 </h3>
               </div>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-blue-200 hover:text-white hover:bg-white/10 p-1.5 rounded-lg transition-colors"
               >
@@ -609,26 +622,15 @@ export default function ManageProxyClass() {
               {/* Subject */}
               <div>
                 <label className="block font-medium text-slate-700 mb-1">Subject *</label>
-                {subjects.length > 0 ? (
-                  <select
-                    value={formData.subject_name}
-                    onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  >
-                    {subjects.map(s => (
-                      <option key={s.id} value={s.subject_name}>{s.subject_name}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    placeholder="e.g. Mathematics, English"
-                    required
-                    value={formData.subject_name}
-                    onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
-                )}
+                <select
+                  value={formData.subject_name}
+                  onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  {DEFAULT_SUBJECTS.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
               </div>
 
               {/* Reason */}
