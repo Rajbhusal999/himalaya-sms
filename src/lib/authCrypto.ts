@@ -97,11 +97,13 @@ export function generateTOTPSecret(): string {
 
 /**
  * Returns an otpauth:// URI for QR code generation.
+ * @param secret  - Base32 TOTP secret
+ * @param email   - Admin email to show as the account label in the authenticator app
  */
-export function getTOTPUri(secret: string): string {
+export function getTOTPUri(secret: string, email: string = "Admin"): string {
   const totp = new OTPAuth.TOTP({
     issuer: "Himalaya SMS",
-    label: "Admin",
+    label: email,          // ← shows the real email in Google Authenticator
     algorithm: "SHA1",
     digits: 6,
     period: 30,

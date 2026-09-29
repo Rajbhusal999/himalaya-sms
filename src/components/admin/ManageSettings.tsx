@@ -194,9 +194,9 @@ export default function ManageSettings() {
       return;
     }
 
-    // Generate a new TOTP secret and QR code
+    // Generate a new TOTP secret and QR code (using admin email as label)
     const secret = generateTOTPSecret();
-    const uri = getTOTPUri(secret);
+    const uri = getTOTPUri(secret, email); // email = admin email from profile state
     const dataUrl = await QRCode.toDataURL(uri, { width: 220, margin: 2, color: { dark: "#1e293b", light: "#ffffff" } });
 
     setPendingSecret(secret);
