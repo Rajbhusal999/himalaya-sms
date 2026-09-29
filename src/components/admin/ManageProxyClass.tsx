@@ -11,10 +11,7 @@ import {
   UserCheck, 
   Calendar, 
   Clock, 
-  CheckCircle2, 
-  XCircle, 
   AlertCircle,
-  Filter,
   UserX,
   BookOpen
 } from "lucide-react";
@@ -25,7 +22,7 @@ export type ProxyClass = {
   id: string;
   date: string; // YYYY-MM-DD in B.S.
   class_name: string;
-  section: string;
+  section?: string;
   period: string;
   absent_teacher_id?: string;
   absent_teacher_name: string;
@@ -33,7 +30,7 @@ export type ProxyClass = {
   proxy_teacher_name: string;
   subject_name: string;
   reason?: string;
-  status: "Assigned" | "Completed" | "Cancelled";
+  status: "Assigned";
   created_at?: string;
 };
 
@@ -75,7 +72,6 @@ export default function ManageProxyClass() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterDate, setFilterDate] = useState("");
-  const [filterStatus, setFilterStatus] = useState("All");
   const [filterClass, setFilterClass] = useState("All");
   
   // Modal state
@@ -86,7 +82,6 @@ export default function ManageProxyClass() {
   const [formData, setFormData] = useState({
     date: getCurrentBsDate(),
     class_name: "Class 1",
-    section: "A",
     period: "1st Period (10:00 - 10:45 AM)",
     absent_teacher_id: "",
     absent_teacher_name: "",
@@ -94,7 +89,7 @@ export default function ManageProxyClass() {
     proxy_teacher_name: "",
     subject_name: "",
     reason: "",
-    status: "Assigned" as "Assigned" | "Completed" | "Cancelled"
+    status: "Assigned" as const
   });
 
   const [saving, setSaving] = useState(false);
@@ -157,7 +152,6 @@ export default function ManageProxyClass() {
     setFormData({
       date: getCurrentBsDate(),
       class_name: "Class 1",
-      section: "A",
       period: DEFAULT_PERIODS[0],
       absent_teacher_id: teachers[0]?.id || "",
       absent_teacher_name: teachers[0] ? `${teachers[0].first_name} ${teachers[0].last_name}` : "",
@@ -175,7 +169,6 @@ export default function ManageProxyClass() {
     setFormData({
       date: item.date || getCurrentBsDate(),
       class_name: item.class_name,
-      section: item.section || "A",
       period: item.period,
       absent_teacher_id: item.absent_teacher_id || "",
       absent_teacher_name: item.absent_teacher_name,
@@ -183,7 +176,7 @@ export default function ManageProxyClass() {
       proxy_teacher_name: item.proxy_teacher_name,
       subject_name: item.subject_name,
       reason: item.reason || "",
-      status: item.status
+      status: "Assigned"
     });
     setIsModalOpen(true);
   };
@@ -205,7 +198,6 @@ export default function ManageProxyClass() {
       id: editingItem ? editingItem.id : `proxy_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       date: formData.date, // Saved in BS Date string YYYY-MM-DD
       class_name: formData.class_name,
-      section: formData.section,
       period: formData.period,
       absent_teacher_id: formData.absent_teacher_id,
       absent_teacher_name: formData.absent_teacher_name,
@@ -213,7 +205,7 @@ export default function ManageProxyClass() {
       proxy_teacher_name: formData.proxy_teacher_name,
       subject_name: formData.subject_name,
       reason: formData.reason,
-      status: formData.status,
+      status: "Assigned" as const,
       created_at: editingItem?.created_at || new Date().toISOString()
     };
 
@@ -254,21 +246,6 @@ export default function ManageProxyClass() {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
   };
 
-  const toggleStatus = async (item: ProxyClass) => {
-    const nextStatus: "Assigned" | "Completed" | "Cancelled" = 
-      item.status === "Assigned" ? "Completed" : item.status === "Completed" ? "Cancelled" : "Assigned";
-
-    const updatedItem = { ...item, status: nextStatus };
-
-    try {
-      await supabase.from("proxy_classes").update({ status: nextStatus }).eq("id", item.id);
-    } catch (e) {}
-
-    const updatedList = proxyList.map(p => p.id === item.id ? updatedItem : p);
-    setProxyList(updatedList);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedList));
-  };
-
   // Filtering
   const filteredList = proxyList.filter(item => {
     const searchLower = search.toLowerCase();
@@ -281,10 +258,9 @@ export default function ManageProxyClass() {
       (item.date && item.date.includes(searchLower));
 
     const matchesDate = !filterDate || item.date === filterDate;
-    const matchesStatus = filterStatus === "All" || item.status === filterStatus;
     const matchesClass = filterClass === "All" || item.class_name === filterClass;
 
-    return matchesSearch && matchesDate && matchesStatus && matchesClass;
+    return matchesSearch && matchesDate && matchesClass;
   });
 
   const formatTeacherName = (t: Teacher) => {
@@ -319,7 +295,7 @@ export default function ManageProxyClass() {
         </div>
 
         {/* Quick Stats Banner inside header */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/15 text-white">
+        <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/15 text-white">
           <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
             <span className="text-xs uppercase text-blue-200 font-semibold tracking-wider">Total Proxies</span>
             <div className="text-2xl font-black mt-1">{proxyList.length}</div>
@@ -330,24 +306,12 @@ export default function ManageProxyClass() {
               {proxyList.filter(p => p.date === todayBs).length}
             </div>
           </div>
-          <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-            <span className="text-xs uppercase text-emerald-200 font-semibold tracking-wider">Completed</span>
-            <div className="text-2xl font-black mt-1 text-emerald-300">
-              {proxyList.filter(p => p.status === "Completed").length}
-            </div>
-          </div>
-          <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-            <span className="text-xs uppercase text-amber-200 font-semibold tracking-wider">Assigned / Active</span>
-            <div className="text-2xl font-black mt-1 text-amber-300">
-              {proxyList.filter(p => p.status === "Assigned").length}
-            </div>
-          </div>
         </div>
       </div>
 
       {/* Filter and Control Bar */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Search */}
           <div className="relative sm:col-span-2">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -377,28 +341,16 @@ export default function ManageProxyClass() {
           </div>
 
           {/* Class Filter */}
-          <select
-            value={filterClass}
-            onChange={(e) => setFilterClass(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-700 self-end"
-          >
-            <option value="All">All Classes</option>
-            {DEFAULT_CLASSES.map(cls => (
-              <option key={cls} value={cls}>{cls}</option>
-            ))}
-          </select>
-
-          {/* Status Filter */}
-          <div className="flex gap-2 self-end">
+          <div className="flex gap-2">
             <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              value={filterClass}
+              onChange={(e) => setFilterClass(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-700"
             >
-              <option value="All">All Statuses</option>
-              <option value="Assigned">Assigned</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
+              <option value="All">All Classes</option>
+              {DEFAULT_CLASSES.map(cls => (
+                <option key={cls} value={cls}>{cls}</option>
+              ))}
             </select>
             <button
               onClick={fetchProxyClasses}
@@ -419,7 +371,7 @@ export default function ManageProxyClass() {
               <tr className="bg-slate-100 border-b border-slate-200 text-xs text-slate-600 uppercase tracking-wider whitespace-nowrap">
                 <th className="px-4 py-3 font-semibold">S.N</th>
                 <th className="px-4 py-3 font-semibold">Nepali Date (B.S.)</th>
-                <th className="px-4 py-3 font-semibold">Class & Section</th>
+                <th className="px-4 py-3 font-semibold">Class</th>
                 <th className="px-4 py-3 font-semibold">Period / Time</th>
                 <th className="px-4 py-3 font-semibold">Absent Teacher</th>
                 <th className="px-4 py-3 font-semibold">Substitute (Proxy) Teacher</th>
@@ -450,7 +402,7 @@ export default function ManageProxyClass() {
                       </div>
                     </td>
                     <td className="px-4 py-3 font-bold text-slate-900">
-                      {item.class_name} <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">Sec {item.section || 'A'}</span>
+                      {item.class_name}
                     </td>
                     <td className="px-4 py-3 text-slate-700 text-xs">
                       <div className="flex items-center gap-1">
@@ -480,22 +432,10 @@ export default function ManageProxyClass() {
                       {item.reason || "-"}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => toggleStatus(item)}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-transform active:scale-95 ${
-                          item.status === "Completed"
-                            ? "bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200"
-                            : item.status === "Cancelled"
-                            ? "bg-red-100 text-red-800 border border-red-300 hover:bg-red-200"
-                            : "bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200"
-                        }`}
-                        title="Click to toggle status"
-                      >
-                        {item.status === "Completed" && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                        {item.status === "Cancelled" && <XCircle className="w-3 h-3 text-red-600" />}
-                        {item.status === "Assigned" && <AlertCircle className="w-3 h-3 text-blue-600" />}
-                        {item.status}
-                      </button>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300">
+                        <AlertCircle className="w-3 h-3 text-blue-600" />
+                        Assigned
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -561,7 +501,7 @@ export default function ManageProxyClass() {
                 onChange={(bsDate) => setFormData({ ...formData, date: bsDate })}
               />
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Class */}
                 <div>
                   <label className="block font-medium text-slate-700 mb-1">Class *</label>
@@ -573,21 +513,6 @@ export default function ManageProxyClass() {
                     {DEFAULT_CLASSES.map(cls => (
                       <option key={cls} value={cls}>{cls}</option>
                     ))}
-                  </select>
-                </div>
-
-                {/* Section */}
-                <div>
-                  <label className="block font-medium text-slate-700 mb-1">Section</label>
-                  <select
-                    value={formData.section}
-                    onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  >
-                    <option value="A">Section A</option>
-                    <option value="B">Section B</option>
-                    <option value="C">Section C</option>
-                    <option value="All">All Sections</option>
                   </select>
                 </div>
 
@@ -682,44 +607,29 @@ export default function ManageProxyClass() {
                 </div>
               </div>
 
-              {/* Subject & Status */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-medium text-slate-700 mb-1">Subject *</label>
-                  {subjects.length > 0 ? (
-                    <select
-                      value={formData.subject_name}
-                      onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    >
-                      {subjects.map(s => (
-                        <option key={s.id} value={s.subject_name}>{s.subject_name}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type="text"
-                      placeholder="e.g. Mathematics, English"
-                      required
-                      value={formData.subject_name}
-                      onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    />
-                  )}
-                </div>
-
-                <div>
-                  <label className="block font-medium text-slate-700 mb-1">Status</label>
+              {/* Subject */}
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">Subject *</label>
+                {subjects.length > 0 ? (
                   <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"
+                    value={formData.subject_name}
+                    onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   >
-                    <option value="Assigned">Assigned</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Cancelled">Cancelled</option>
+                    {subjects.map(s => (
+                      <option key={s.id} value={s.subject_name}>{s.subject_name}</option>
+                    ))}
                   </select>
-                </div>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder="e.g. Mathematics, English"
+                    required
+                    value={formData.subject_name}
+                    onChange={(e) => setFormData({ ...formData, subject_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                )}
               </div>
 
               {/* Reason */}
@@ -758,3 +668,4 @@ export default function ManageProxyClass() {
     </div>
   );
 }
+

@@ -98,7 +98,7 @@ export default function ProxyClassReport() {
     if (item.proxy_teacher_name) {
       const current = teacherWorkloadMap.get(item.proxy_teacher_name) || { proxyCount: 0, absentCount: 0, completedCount: 0 };
       current.proxyCount += 1;
-      if (item.status === "Completed") current.completedCount += 1;
+      if ((item.status as string) === "Completed") current.completedCount += 1;
       teacherWorkloadMap.set(item.proxy_teacher_name, current);
     }
     // Absent Teacher
@@ -123,18 +123,17 @@ export default function ProxyClassReport() {
       return;
     }
 
-    const headers = ["S.N", "Nepali Date (B.S.)", "Class", "Section", "Period", "Absent Teacher", "Proxy Teacher", "Subject", "Reason", "Status"];
+    const headers = ["S.N", "Nepali Date (B.S.)", "Class", "Period", "Absent Teacher", "Proxy Teacher", "Subject", "Reason", "Status"];
     const rows = filteredList.map((item, i) => [
       i + 1,
       `"${item.date}"`,
       `"${item.class_name}"`,
-      `"${item.section || 'A'}"`,
       `"${item.period.replace(/"/g, '""')}"`,
       `"${item.absent_teacher_name}"`,
       `"${item.proxy_teacher_name}"`,
       `"${item.subject_name}"`,
       `"${item.reason || ''}"`,
-      `"${item.status}"`
+      `"${item.status || 'Assigned'}"`
     ]);
 
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
@@ -185,21 +184,15 @@ export default function ProxyClassReport() {
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/15">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/15">
           <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-            <span className="text-xs uppercase text-purple-200 font-semibold">Total Records</span>
+            <span className="text-xs uppercase text-purple-200 font-semibold">Total Proxy Records</span>
             <div className="text-2xl font-black mt-1">{filteredList.length}</div>
           </div>
           <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-            <span className="text-xs uppercase text-emerald-200 font-semibold">Completed Proxies</span>
-            <div className="text-2xl font-black mt-1 text-emerald-300">
-              {filteredList.filter(p => p.status === "Completed").length}
-            </div>
-          </div>
-          <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-            <span className="text-xs uppercase text-amber-200 font-semibold">Assigned (Pending)</span>
+            <span className="text-xs uppercase text-amber-200 font-semibold">Assigned Proxies</span>
             <div className="text-2xl font-black mt-1 text-amber-300">
-              {filteredList.filter(p => p.status === "Assigned").length}
+              {filteredList.length}
             </div>
           </div>
           <div className="bg-white/10 rounded-xl p-3 backdrop-blur-sm">
@@ -224,7 +217,7 @@ export default function ProxyClassReport() {
       {/* Filter Bar - hidden in print */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 print:hidden">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1">
             {/* From Date (Nepali BS) */}
             <div>
               <NepaliDatePicker
@@ -265,21 +258,6 @@ export default function ProxyClassReport() {
                 {uniqueTeachers.map(t => (
                   <option key={t} value={t}>{t}</option>
                 ))}
-              </select>
-            </div>
-
-            {/* Status filter */}
-            <div className="self-end">
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="All">All Statuses</option>
-                <option value="Assigned">Assigned</option>
-                <option value="Completed">Completed</option>
-                <option value="Cancelled">Cancelled</option>
               </select>
             </div>
           </div>
@@ -329,7 +307,7 @@ export default function ProxyClassReport() {
                 <tr className="bg-slate-100 print:bg-slate-200 border-b border-slate-200 text-xs text-slate-700 uppercase tracking-wider whitespace-nowrap">
                   <th className="px-4 py-3 font-bold">S.N</th>
                   <th className="px-4 py-3 font-bold">Nepali Date (B.S.)</th>
-                  <th className="px-4 py-3 font-bold">Class & Sec</th>
+                  <th className="px-4 py-3 font-bold">Class</th>
                   <th className="px-4 py-3 font-bold">Period</th>
                   <th className="px-4 py-3 font-bold">Absent Teacher</th>
                   <th className="px-4 py-3 font-bold">Proxy Substitute Teacher</th>
@@ -355,7 +333,7 @@ export default function ProxyClassReport() {
                         </span>
                       </td>
                       <td className="px-4 py-3 font-bold text-slate-900">
-                        {item.class_name} ({item.section || 'A'})
+                        {item.class_name}
                       </td>
                       <td className="px-4 py-3 text-slate-700">{item.period}</td>
                       <td className="px-4 py-3 text-red-700 font-semibold">{item.absent_teacher_name}</td>
@@ -363,12 +341,8 @@ export default function ProxyClassReport() {
                       <td className="px-4 py-3 text-blue-700 font-medium">{item.subject_name}</td>
                       <td className="px-4 py-3 text-slate-600">{item.reason || '-'}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${
-                          item.status === "Completed" ? "bg-emerald-100 text-emerald-800 border border-emerald-300" :
-                          item.status === "Cancelled" ? "bg-red-100 text-red-800 border border-red-300" :
-                          "bg-blue-100 text-blue-800 border border-blue-300"
-                        }`}>
-                          {item.status}
+                        <span className="inline-block px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
+                          Assigned
                         </span>
                       </td>
                     </tr>
