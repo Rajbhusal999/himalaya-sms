@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import * as OTPAuth from "otpauth";
 
 export const DEFAULT_ADMIN_PASSWORD = "RJAryan@986107";
 const SALT = "_shbs_secure_salt_2083";
@@ -64,4 +65,112 @@ export async function updateAdminPasswordHash(newPassword: string): Promise<bool
   }
 
   return true;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// TOTP / 2FA Helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Generates a cryptographically random Base32 TOTP secret (20 bytes → 32 Base32 chars).
+ */
+export function generateTOTPSecret(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(20));
+  // Base32 encode (RFC 4648)
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let secret = "";
+  let buffer = 0;
+  let bitsLeft = 0;
+  for (const byte of bytes) {
+    buffer = (buffer << 8) | byte;
+    bitsLeft += 8;
+    while (bitsLeft >= 5) {
+      bitsLeft -= 5;
+      secret += chars[(buffer >> bitsLeft) & 31];
+    }
+  }
+  if (bitsLeft > 0) {
+    secret += chars[(buffer << (5 - bitsLeft)) & 31];
+  }
+  return secret;
+}
+
+/**
+ * Returns an otpauth:// URI for QR code generation.
+ */
+export function getTOTPUri(secret: string): string {
+  const totp = new OTPAuth.TOTP({
+    issuer: "Himalaya SMS",
+    label: "Admin",
+    algorithm: "SHA1",
+    digits: 6,
+    period: 30,
+    secret: OTPAuth.Secret.fromBase32(secret),
+  });
+  return totp.toString();
+}
+
+/**
+ * Verifies a 6-digit TOTP token against the given secret.
+ * Allows ±1 time-step window for clock drift.
+ */
+export function verifyTOTPToken(secret: string, token: string): boolean {
+  try {
+    const totp = new OTPAuth.TOTP({
+      issuer: "Himalaya SMS",
+      label: "Admin",
+      algorithm: "SHA1",
+      digits: 6,
+      period: 30,
+      secret: OTPAuth.Secret.fromBase32(secret),
+    });
+    const delta = totp.validate({ token, window: 1 });
+    return delta !== null;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Fetches the 2FA status (enabled + secret) from Supabase.
+ */
+export async function get2FAStatus(): Promise<{ enabled: boolean; secret: string | null }> {
+  try {
+    const { data, error } = await supabase
+      .from("admin_credentials")
+      .select("totp_enabled, totp_secret")
+      .eq("id", "admin_account")
+      .single();
+
+    if (data && !error) {
+      return { enabled: data.totp_enabled ?? false, secret: data.totp_secret ?? null };
+    }
+  } catch (e) {
+    console.warn("Could not fetch 2FA status from Supabase.", e);
+  }
+  return { enabled: false, secret: null };
+}
+
+/**
+ * Saves the TOTP secret and enables 2FA in Supabase.
+ */
+export async function enable2FA(secret: string): Promise<void> {
+  const { error } = await supabase
+    .from("admin_credentials")
+    .upsert(
+      { id: "admin_account", totp_secret: secret, totp_enabled: true, updated_at: new Date().toISOString() },
+      { onConflict: "id" }
+    );
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Disables 2FA in Supabase (clears secret).
+ */
+export async function disable2FA(): Promise<void> {
+  const { error } = await supabase
+    .from("admin_credentials")
+    .update({ totp_secret: null, totp_enabled: false, updated_at: new Date().toISOString() })
+    .eq("id", "admin_account");
+  if (error) throw new Error(error.message);
 }
