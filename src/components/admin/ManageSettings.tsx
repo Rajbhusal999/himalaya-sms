@@ -76,6 +76,13 @@ export default function ManageSettings() {
   const [systemSaving, setSystemSaving] = useState(false);
   const [systemSaveSuccess, setSystemSaveSuccess] = useState(false);
 
+  // Notification Settings state
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(true);
+  const [smsAlerts, setSmsAlerts] = useState(false);
+  const [notificationsSaving, setNotificationsSaving] = useState(false);
+  const [notificationsSaveSuccess, setNotificationsSaveSuccess] = useState(false);
+
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Fetch admin profile from Supabase
@@ -162,6 +169,27 @@ export default function ManageSettings() {
     fetchSystemSettings();
   }, []);
 
+  // Fetch notification settings from Supabase
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("admin_notification_settings")
+          .select("*")
+          .eq("id", "default_admin")
+          .single();
+        if (data && !error) {
+          setEmailNotifications(data.email_notifications ?? true);
+          setPushNotifications(data.push_notifications ?? true);
+          setSmsAlerts(data.sms_alerts ?? false);
+        }
+      } catch (err) {
+        console.error("Error fetching notification settings:", err);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
   /** Parse a user-agent string into a friendly label */
   const parseDevice = (ua: string | null): { label: string; icon: "laptop" | "smartphone" | "tablet" | "monitor" } => {
     if (!ua) return { label: "Unknown Device", icon: "monitor" };
@@ -231,6 +259,32 @@ export default function ManageSettings() {
       alert("Failed to save system settings: " + (err.message || err));
     } finally {
       setSystemSaving(false);
+    }
+  };
+
+  const handleSaveNotifications = async () => {
+    setNotificationsSaving(true);
+    setNotificationsSaveSuccess(false);
+    try {
+      const { error } = await supabase
+        .from("admin_notification_settings")
+        .upsert(
+          {
+            id: "default_admin",
+            email_notifications: emailNotifications,
+            push_notifications: pushNotifications,
+            sms_alerts: smsAlerts,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "id" }
+        );
+      if (error) throw error;
+      setNotificationsSaveSuccess(true);
+      setTimeout(() => setNotificationsSaveSuccess(false), 4000);
+    } catch (err: any) {
+      alert("Failed to save notification settings: " + (err.message || err));
+    } finally {
+      setNotificationsSaving(false);
     }
   };
 
@@ -521,26 +575,58 @@ export default function ManageSettings() {
         {activeTab === "notifications" && (
           <div className="max-w-2xl space-y-6">
             <h2 className="text-xl font-bold text-slate-800 mb-4">Notification Preferences</h2>
+            
+            {notificationsSaveSuccess && (
+              <div className="p-3.5 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-sm font-bold flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                Notification preferences saved to Supabase successfully!
+              </div>
+            )}
+
             <div className="space-y-4">
-              {[
-                { label: "Email Notifications", desc: "Receive daily summaries and critical alerts via email.", checked: true },
-                { label: "Push Notifications", desc: "Instant alerts for new admissions and teacher updates.", checked: true },
-                { label: "SMS Alerts", desc: "Receive important security codes and urgent alerts.", checked: false },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-slate-50/50">
-                  <div>
-                    <h4 className="font-semibold text-slate-800">{item.label}</h4>
-                    <p className="text-sm text-slate-500">{item.desc}</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" defaultChecked={item.checked} />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
-                  </label>
+              <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                <div>
+                  <h4 className="font-semibold text-slate-800">Email Notifications</h4>
+                  <p className="text-sm text-slate-500">Receive daily summaries and critical alerts via email.</p>
                 </div>
-              ))}
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" checked={emailNotifications} onChange={(e) => setEmailNotifications(e.target.checked)} />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                <div>
+                  <h4 className="font-semibold text-slate-800">Push Notifications</h4>
+                  <p className="text-sm text-slate-500">Instant alerts for new admissions and teacher updates.</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" checked={pushNotifications} onChange={(e) => setPushNotifications(e.target.checked)} />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                <div>
+                  <h4 className="font-semibold text-slate-800">SMS Alerts</h4>
+                  <p className="text-sm text-slate-500">Receive important security codes and urgent alerts.</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" checked={smsAlerts} onChange={(e) => setSmsAlerts(e.target.checked)} />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+                </label>
+              </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium mt-6">
-              <Save className="w-4 h-4" /> Save Preferences
+
+            <button
+              onClick={handleSaveNotifications}
+              disabled={notificationsSaving}
+              className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl hover:bg-brand-700 transition-colors font-bold mt-6 shadow-md disabled:opacity-50"
+            >
+              {notificationsSaving
+                ? <><RefreshCw className="w-4 h-4 animate-spin" /> Saving...</>
+                : <><Save className="w-4 h-4" /> Save Preferences</>
+              }
             </button>
           </div>
         )}
