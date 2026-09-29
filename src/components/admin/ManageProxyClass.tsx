@@ -31,6 +31,7 @@ export type ProxyClass = {
   subject_name: string;
   reason?: string;
   status: "Assigned";
+  approved_by?: string;
   created_at?: string;
 };
 
@@ -101,6 +102,7 @@ export default function ManageProxyClass() {
     proxy_teacher_name: "",
     subject_name: DEFAULT_SUBJECTS[0],
     reason: "",
+    approved_by: "Headmaster",
     status: "Assigned" as const
   });
 
@@ -171,6 +173,7 @@ export default function ManageProxyClass() {
       proxy_teacher_name: teachers[1] ? `${teachers[1].first_name} ${teachers[1].last_name}` : "",
       subject_name: DEFAULT_SUBJECTS[0],
       reason: "Sick Leave",
+      approved_by: "Headmaster",
       status: "Assigned"
     });
     setIsModalOpen(true);
@@ -188,6 +191,7 @@ export default function ManageProxyClass() {
       proxy_teacher_name: item.proxy_teacher_name,
       subject_name: item.subject_name,
       reason: item.reason || "",
+      approved_by: item.approved_by || "Headmaster",
       status: "Assigned"
     });
     setIsModalOpen(true);
@@ -217,6 +221,7 @@ export default function ManageProxyClass() {
       proxy_teacher_name: formData.proxy_teacher_name,
       subject_name: formData.subject_name,
       reason: formData.reason,
+      approved_by: formData.approved_by || "Headmaster",
       status: "Assigned" as const,
       created_at: editingItem?.created_at || new Date().toISOString()
     };
@@ -641,6 +646,18 @@ export default function ManageProxyClass() {
                   placeholder="e.g. Casual Leave, Sick Leave, Emergency Duty"
                   value={formData.reason}
                   onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Approved By */}
+              <div>
+                <label className="block font-medium text-slate-700 mb-1">Approved By</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Headmaster, Vice Principal, Exam Controller"
+                  value={formData.approved_by}
+                  onChange={(e) => setFormData({ ...formData, approved_by: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>

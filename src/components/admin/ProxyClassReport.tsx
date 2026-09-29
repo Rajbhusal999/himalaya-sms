@@ -152,7 +152,7 @@ export default function ProxyClassReport() {
       return;
     }
 
-    const headers = ["S.N", "Nepali Date (B.S.)", "Class", "Period", "Absent Teacher", "Proxy Teacher", "Subject", "Reason", "Status", "Allowance Amount (NRs)"];
+    const headers = ["S.N", "Date", "Class", "Period", "Absent Teacher", "Proxy Teacher", "Subject", "Reason", "Approved By"];
     const rows = filteredList.map((item, i) => [
       i + 1,
       `"${item.date}"`,
@@ -162,8 +162,7 @@ export default function ProxyClassReport() {
       `"${item.proxy_teacher_name}"`,
       `"${item.subject_name}"`,
       `"${item.reason || ''}"`,
-      `"${item.status || 'Assigned'}"`,
-      `"NRs. ${PROXY_RATE_PER_CLASS}"`
+      `"${item.approved_by || 'Headmaster'}"`
     ]);
 
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
@@ -238,10 +237,19 @@ export default function ProxyClassReport() {
 
       {/* Official Print Header - only visible when printing */}
       <div className="hidden print:block text-center border-b-2 border-slate-800 pb-4 mb-6">
-        <h1 className="text-2xl font-bold uppercase text-slate-900">SHREE HIMALAYA BASIC SCHOOL</h1>
-        <p className="text-sm text-slate-600">Damak-9, Jhapa, Nepal | School Management System</p>
-        <h2 className="text-lg font-bold underline mt-3 uppercase tracking-wider text-slate-800">
-          Proxy Class Attendance & Workload Report (Rate: NRs. 70 / Class)
+        <div className="flex items-center justify-between border-b border-slate-300 pb-3 mb-3">
+          <img src="/saraswati.png" alt="Saraswati" className="w-16 h-16 object-contain" />
+          <div className="text-center flex-1">
+            <h1 className="text-2xl font-bold uppercase text-slate-900 tracking-wide">SHREE HIMALAYA BASIC SCHOOL</h1>
+            <p className="text-sm font-bold text-slate-700">Damak-9, Jhapa, Nepal</p>
+            <p className="text-xs text-slate-500">School Management System</p>
+          </div>
+          <img src="/logo.png" alt="School Logo" className="w-16 h-16 object-contain" />
+        </div>
+        <h2 className="text-lg font-bold underline uppercase tracking-wider text-slate-800 mt-2">
+          {activeView === "detailed"
+            ? "PROXY CLASS ATTENDANCE & DETAIL REPORT"
+            : "PROXY CLASS WORKLOAD & REMUNERATION SUMMARY (RATE: NRS. 70 / CLASS)"}
         </h2>
         <p className="text-xs text-slate-500 mt-1">Generated Date: {new Date().toLocaleString()}</p>
       </div>
@@ -361,21 +369,20 @@ export default function ProxyClassReport() {
               <thead>
                 <tr className="bg-slate-100 print:bg-slate-200 border-b border-slate-200 text-xs text-slate-700 uppercase tracking-wider whitespace-nowrap">
                   <th className="px-4 py-3 font-bold">S.N</th>
-                  <th className="px-4 py-3 font-bold">Nepali Date (B.S.)</th>
+                  <th className="px-4 py-3 font-bold">Date</th>
                   <th className="px-4 py-3 font-bold">Class</th>
                   <th className="px-4 py-3 font-bold">Period</th>
                   <th className="px-4 py-3 font-bold">Absent Teacher</th>
-                  <th className="px-4 py-3 font-bold">Proxy Substitute Teacher</th>
+                  <th className="px-4 py-3 font-bold">Proxy Teacher</th>
                   <th className="px-4 py-3 font-bold">Subject</th>
                   <th className="px-4 py-3 font-bold">Reason</th>
-                  <th className="px-4 py-3 font-bold text-center">Status</th>
-                  <th className="px-4 py-3 font-bold text-right">Allowance Amount (NRs)</th>
+                  <th className="px-4 py-3 font-bold text-center">Approved By</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 print:divide-slate-300">
                 {loading ? (
                   <tr>
-                    <td colSpan={10} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={9} className="px-6 py-12 text-center text-slate-500">
                       Loading report data...
                     </td>
                   </tr>
@@ -384,7 +391,7 @@ export default function ProxyClassReport() {
                     <tr key={item.id} className="hover:bg-slate-50 text-xs whitespace-nowrap">
                       <td className="px-4 py-3 text-slate-500 font-medium">{index + 1}</td>
                       <td className="px-4 py-3 text-slate-900 font-bold">
-                        <span className="bg-purple-50 text-purple-900 px-2 py-0.5 rounded border border-purple-200">
+                        <span className="bg-purple-50 text-purple-900 px-2 py-0.5 rounded border border-purple-200 print:border-none print:bg-transparent print:p-0">
                           {formatBsDateDisplay(item.date)} B.S.
                         </span>
                       </td>
@@ -393,27 +400,22 @@ export default function ProxyClassReport() {
                       </td>
                       <td className="px-4 py-3 text-slate-700 font-medium">
                         <div className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          <Clock className="w-3.5 h-3.5 text-slate-400 print:hidden" />
                           {item.period}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-red-700 font-semibold">{item.absent_teacher_name}</td>
-                      <td className="px-4 py-3 text-blue-700 font-bold bg-blue-50/40 rounded-lg">{item.proxy_teacher_name}</td>
+                      <td className="px-4 py-3 text-blue-700 font-bold bg-blue-50/40 rounded-lg print:bg-transparent print:p-0">{item.proxy_teacher_name}</td>
                       <td className="px-4 py-3 text-blue-600 font-medium">{item.subject_name}</td>
                       <td className="px-4 py-3 text-slate-600">{item.reason || '-'}</td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
-                          Assigned
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right font-black text-emerald-700 bg-emerald-50/40">
-                        NRs. {PROXY_RATE_PER_CLASS}
+                      <td className="px-4 py-3 text-center font-bold text-slate-800">
+                        {item.approved_by || 'Headmaster'}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={10} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={9} className="px-6 py-12 text-center text-slate-500">
                       No matching proxy records found for the selected filters.
                     </td>
                   </tr>
