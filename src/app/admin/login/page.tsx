@@ -39,6 +39,7 @@ export default function AdminLogin() {
       id: sessionId,
       role: "admin",
       expires_at: expiresAt.toISOString(),
+      user_agent: navigator.userAgent,   // ← store device/browser info
     }]);
 
     await setSession(sessionId, expiresAt);

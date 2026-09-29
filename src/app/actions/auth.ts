@@ -22,7 +22,7 @@ export async function clearSession() {
   cookieStore.delete(SESSION_COOKIE_NAME);
 }
 
-export async function getSessionId() {
+export async function getSessionId(): Promise<string | null> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
   return sessionCookie?.value || null;

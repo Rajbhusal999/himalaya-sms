@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Save, User, Bell, Lock, Globe, Key, Shield, Smartphone, Laptop, History, CheckCircle, RefreshCw, AlertCircle, QrCode, X, ShieldCheck, ShieldOff, Copy } from "lucide-react";
+import { Save, User, Bell, Lock, Globe, Key, Shield, Smartphone, Laptop, History, CheckCircle, RefreshCw, AlertCircle, QrCode, X, ShieldCheck, ShieldOff, Copy, Monitor, Tablet, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import {
   verifyAdminPassword,
@@ -13,6 +13,7 @@ import {
   enable2FA,
   disable2FA,
 } from "@/lib/authCrypto";
+import { getSessionId } from "@/app/actions/auth";
 import QRCode from "qrcode";
 
 export default function ManageSettings() {
@@ -58,6 +59,13 @@ export default function ManageSettings() {
   const [disableError, setDisableError] = useState<string | null>(null);
   const [disableSaving, setDisableSaving] = useState(false);
 
+  // Active Sessions state
+  type SessionRow = { id: string; role: string; created_at: string; expires_at: string; user_agent: string | null; };
+  const [sessions, setSessions] = useState<SessionRow[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
+
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Fetch admin profile from Supabase
@@ -97,6 +105,77 @@ export default function ManageSettings() {
     };
     fetch2FA();
   }, []);
+
+  // Fetch real active sessions from Supabase
+  useEffect(() => {
+    const fetchSessions = async () => {
+      setSessionsLoading(true);
+      try {
+        const [{ data }, sessionId] = await Promise.all([
+          supabase
+            .from("active_sessions")
+            .select("id, role, created_at, expires_at, user_agent")
+            .eq("role", "admin")
+            .gt("expires_at", new Date().toISOString())
+            .order("created_at", { ascending: false }),
+          getSessionId(),
+        ]);
+        setSessions((data as SessionRow[]) || []);
+        setCurrentSessionId(sessionId);
+      } catch (err) {
+        console.error("Error fetching sessions:", err);
+      } finally {
+        setSessionsLoading(false);
+      }
+    };
+    fetchSessions();
+  }, []);
+
+  /** Parse a user-agent string into a friendly label */
+  const parseDevice = (ua: string | null): { label: string; icon: "laptop" | "smartphone" | "tablet" | "monitor" } => {
+    if (!ua) return { label: "Unknown Device", icon: "monitor" };
+    const u = ua.toLowerCase();
+    const isMobile = /mobile|android|iphone/.test(u);
+    const isTablet = /ipad|tablet/.test(u);
+    const isWindows = /windows/.test(u);
+    const isMac = /macintosh|mac os/.test(u);
+    const isLinux = /linux/.test(u);
+    const isAndroid = /android/.test(u);
+    const isIOS = /iphone|ipad/.test(u);
+    const browser = /edg/.test(u) ? "Edge" : /opr\/|opera/.test(u) ? "Opera" : /firefox/.test(u) ? "Firefox" : /chrome/.test(u) ? "Chrome" : /safari/.test(u) ? "Safari" : "Browser";
+    let os = "Unknown OS";
+    if (isWindows) os = "Windows";
+    else if (isMac) os = "macOS";
+    else if (isAndroid) os = "Android";
+    else if (isIOS) os = /ipad/.test(u) ? "iPad" : "iPhone";
+    else if (isLinux) os = "Linux";
+    const icon: "laptop" | "smartphone" | "tablet" | "monitor" = isTablet ? "tablet" : isMobile ? "smartphone" : isWindows || isMac || isLinux ? "laptop" : "monitor";
+    return { label: `${os} · ${browser}`, icon };
+  };
+
+  /** Format a timestamp as relative time */
+  const relativeTime = (iso: string): string => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "Active just now";
+    if (mins < 60) return `Active ${mins} min ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `Active ${hrs} hr${hrs > 1 ? "s" : ""} ago`;
+    const days = Math.floor(hrs / 24);
+    return `Active ${days} day${days > 1 ? "s" : ""} ago`;
+  };
+
+  const handleRevokeSession = async (sessionId: string) => {
+    setRevokingId(sessionId);
+    try {
+      await supabase.from("active_sessions").delete().eq("id", sessionId);
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+    } catch (err) {
+      console.error("Failed to revoke session:", err);
+    } finally {
+      setRevokingId(null);
+    }
+  };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -539,29 +618,68 @@ export default function ManageSettings() {
               )}
             </div>
 
-            {/* Active Sessions */}
+            {/* Active Sessions — Real data from Supabase */}
             <div className="pt-6 border-t border-slate-200">
-              <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <History className="w-5 h-5 text-brand-600" /> Active Sessions
-              </h2>
-              <div className="space-y-3">
-                <div className="flex items-center gap-4 p-3 border border-brand-200 bg-brand-50 rounded-xl">
-                  <Laptop className="w-6 h-6 text-brand-600" />
-                  <div className="flex-1">
-                    <p className="font-medium text-slate-900 text-sm">Windows PC - Chrome</p>
-                    <p className="text-xs text-slate-500">Bharatpur, Chitwan • Active now</p>
-                  </div>
-                  <span className="text-xs font-bold text-brand-600 bg-brand-100 px-2 py-1 rounded-full">Current</span>
-                </div>
-                <div className="flex items-center gap-4 p-3 border border-slate-200 rounded-xl">
-                  <Smartphone className="w-6 h-6 text-slate-400" />
-                  <div className="flex-1">
-                    <p className="font-medium text-slate-900 text-sm">Android - Chrome Mobile</p>
-                    <p className="text-xs text-slate-500">Bharatpur, Chitwan • Last active 2 hours ago</p>
-                  </div>
-                  <button className="text-xs font-medium text-red-600 hover:underline">Revoke</button>
-                </div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <History className="w-5 h-5 text-brand-600" /> Active Sessions
+                </h2>
+                <span className="text-xs text-slate-400 font-medium">{sessions.length} active session{sessions.length !== 1 ? "s" : ""}</span>
               </div>
+
+              {sessionsLoading ? (
+                <div className="flex items-center gap-2 text-slate-500 text-sm p-3">
+                  <RefreshCw className="w-4 h-4 animate-spin" /> Loading sessions...
+                </div>
+              ) : sessions.length === 0 ? (
+                <p className="text-slate-400 text-sm p-3">No active sessions found.</p>
+              ) : (
+                <div className="space-y-3">
+                  {sessions.map((session) => {
+                    const isCurrent = session.id === currentSessionId;
+                    const { label, icon } = parseDevice(session.user_agent);
+                    const DeviceIcon = icon === "smartphone" ? Smartphone : icon === "tablet" ? Tablet : icon === "monitor" ? Monitor : Laptop;
+                    return (
+                      <div
+                        key={session.id}
+                        className={`flex items-center gap-4 p-3.5 border-2 rounded-xl transition-all ${
+                          isCurrent
+                            ? "border-brand-200 bg-brand-50"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                        }`}
+                      >
+                        <DeviceIcon className={`w-6 h-6 shrink-0 ${isCurrent ? "text-brand-600" : "text-slate-400"}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className={`font-semibold text-sm truncate ${isCurrent ? "text-slate-900" : "text-slate-700"}`}>
+                            {label}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {relativeTime(session.created_at)}
+                            {" · "}
+                            <span className="text-slate-400">Expires {new Date(session.expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                          </p>
+                        </div>
+                        {isCurrent ? (
+                          <span className="text-xs font-bold text-brand-600 bg-brand-100 px-2.5 py-1 rounded-full shrink-0">
+                            Current
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleRevokeSession(session.id)}
+                            disabled={revokingId === session.id}
+                            className="flex items-center gap-1 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50 shrink-0"
+                          >
+                            {revokingId === session.id
+                              ? <><RefreshCw className="w-3 h-3 animate-spin" /> Revoking...</>
+                              : <><Trash2 className="w-3 h-3" /> Revoke</>
+                            }
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}
