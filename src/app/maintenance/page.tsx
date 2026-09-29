@@ -108,7 +108,7 @@ export default function MaintenancePage() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "1.75rem" }}>
           {[
             { icon: "📍", label: "Location", value: "Bharatpur-11, Chitwan" },
-            { icon: "📞", label: "Contact", value: "+977-056-XXXXXX" },
+            { icon: "📞", label: "Contact", value: "+977-9855065451" },
             { icon: "📧", label: "Email", value: "himalayabasicschool01@gmail.com" },
             { icon: "🕐", label: "Status", value: "Back soon" },
           ].map((item) => (
