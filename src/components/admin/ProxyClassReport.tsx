@@ -241,7 +241,7 @@ export default function ProxyClassReport() {
           <img src="/saraswati.png" alt="Saraswati" className="w-16 h-16 object-contain" />
           <div className="text-center flex-1">
             <h1 className="text-2xl font-bold uppercase text-slate-900 tracking-wide">SHREE HIMALAYA BASIC SCHOOL</h1>
-            <p className="text-sm font-bold text-slate-700">Damak-9, Jhapa, Nepal</p>
+            <p className="text-sm font-bold text-slate-700">Bharatpur-11, Chitwan, Nepal</p>
             <p className="text-xs text-slate-500">School Management System</p>
           </div>
           <img src="/logo.png" alt="School Logo" className="w-16 h-16 object-contain" />
