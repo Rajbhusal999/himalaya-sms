@@ -75,15 +75,10 @@ export default function EntryVoucher() {
 
   const filteredTopics = topics.filter(t => t.type === voucherType);
 
-  // Auto-select first topic if available when voucher type changes
+  // Reset topic when voucher type changes
   useEffect(() => {
-    if (filteredTopics.length > 0 && !filteredTopics.find(t => t.id === selectedTopicId)) {
-      setSelectedTopicId(filteredTopics[0].id);
-      setSelectedSourceType((filteredTopics[0].source_type as "सरकारी" | "आन्तरिक स्रोत") || "आन्तरिक स्रोत");
-    } else if (filteredTopics.length === 0) {
-      setSelectedTopicId("");
-    }
-  }, [voucherType, filteredTopics, selectedTopicId]);
+    setSelectedTopicId("");
+  }, [voucherType]);
 
   // Sync source type when topic changes manually
   useEffect(() => {
@@ -220,7 +215,7 @@ export default function EntryVoucher() {
               disabled={filteredTopics.length === 0}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-900 disabled:opacity-50"
             >
-              <option value="" disabled>{filteredTopics.length === 0 ? "No subtopics" : "Select..."}</option>
+              <option value="" disabled>{filteredTopics.length === 0 ? "No topics available" : "Select topic..."}</option>
               {filteredTopics.map(t => (
                 <option key={t.id} value={t.id}>{t.name}</option>
               ))}
