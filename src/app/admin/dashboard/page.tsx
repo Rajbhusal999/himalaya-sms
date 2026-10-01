@@ -25,6 +25,7 @@ import ManageRatings from "@/components/admin/ManageRatings";
 import RecentMarksLedger from "@/components/admin/RecentMarksLedger";
 import ManageProxyClass from "@/components/admin/ManageProxyClass";
 import ProxyClassReport from "@/components/admin/ProxyClassReport";
+import TeacherAttendance from "@/components/admin/TeacherAttendance";
 import { 
   LayoutDashboard, 
   CalendarClock, 
@@ -245,6 +246,10 @@ export default function AdminDashboard() {
 
     if (activeTab === "attendance") {
       return <ManageAttendance />;
+    }
+
+    if (activeTab === "teacher-attendance") {
+      return <TeacherAttendance />;
     }
 
     if (activeTab === "routine") {
@@ -609,6 +614,17 @@ export default function AdminDashboard() {
             >
               <ClipboardCheck className="w-5 h-5 mr-3" />
               Attendance
+            </button>
+            <button
+              onClick={() => handleTabClick("teacher-attendance")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "teacher-attendance" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <UserCheck className="w-5 h-5 mr-3" />
+              Teacher Attendance
             </button>
             <button
               onClick={() => handleTabClick("admit-card")}

@@ -139,3 +139,46 @@ create policy "Enable read access for anon users" on public.exam_routines for se
 create policy "Enable insert for anon users" on public.exam_routines for insert to anon with check (true);
 create policy "Enable update for anon users" on public.exam_routines for update to anon using (true);
 create policy "Enable delete for anon users" on public.exam_routines for delete to anon using (true);
+
+-- Create Proxy Classes Table
+create table public.proxy_classes (
+    id text primary key,
+    date text not null,
+    class_name text not null,
+    section text,
+    period text not null,
+    absent_teacher_id text,
+    absent_teacher_name text not null,
+    proxy_teacher_id text,
+    proxy_teacher_name text not null,
+    subject_name text not null,
+    reason text,
+    status text default 'Assigned',
+    approved_by text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS for Proxy Classes
+alter table public.proxy_classes enable row level security;
+create policy "Enable read access for anon users" on public.proxy_classes for select to anon using (true);
+create policy "Enable insert for anon users" on public.proxy_classes for insert to anon with check (true);
+create policy "Enable update for anon users" on public.proxy_classes for update to anon using (true);
+create policy "Enable delete for anon users" on public.proxy_classes for delete to anon using (true);
+
+-- Create Teacher Attendance Table
+create table public.teacher_attendance (
+    id uuid default uuid_generate_v4() primary key,
+    teacher_id uuid references public.teachers(id) on delete cascade not null,
+    date text not null,
+    status text not null,
+    remarks text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    unique(teacher_id, date)
+);
+
+-- RLS for Teacher Attendance
+alter table public.teacher_attendance enable row level security;
+create policy "Enable read access for anon users" on public.teacher_attendance for select to anon using (true);
+create policy "Enable insert for anon users" on public.teacher_attendance for insert to anon with check (true);
+create policy "Enable update for anon users" on public.teacher_attendance for update to anon using (true);
+create policy "Enable delete for anon users" on public.teacher_attendance for delete to anon using (true);
