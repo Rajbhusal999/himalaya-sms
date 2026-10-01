@@ -12,11 +12,13 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  CalendarDays
 } from "lucide-react";
 import NepaliDatePicker from "@/components/common/NepaliDatePicker";
 import { getCurrentBsDate, formatBsDateDisplay } from "@/lib/nepaliDate";
 import { useReactToPrint } from "react-to-print";
+import MonthlyTeacherAttendanceModal from "./MonthlyTeacherAttendanceModal";
 
 type Teacher = {
   id: string;
@@ -42,6 +44,7 @@ export default function TeacherAttendance() {
   const [selectedDate, setSelectedDate] = useState(getCurrentBsDate());
   const [attendanceData, setAttendanceData] = useState<Record<string, AttendanceRecord>>({});
   const [originalData, setOriginalData] = useState<Record<string, AttendanceRecord>>({});
+  const [isMonthlyModalOpen, setIsMonthlyModalOpen] = useState(false);
   
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -207,7 +210,14 @@ export default function TeacherAttendance() {
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap justify-end">
+            <button
+              onClick={() => setIsMonthlyModalOpen(true)}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl font-medium transition-all backdrop-blur-sm border border-white/20"
+            >
+              <CalendarDays className="w-4 h-4" />
+              Monthly Report
+            </button>
             <button
               onClick={handlePrint}
               className="flex items-center justify-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl font-medium transition-all backdrop-blur-sm border border-white/20"
@@ -408,6 +418,12 @@ export default function TeacherAttendance() {
           </div>
         </div>
       </div>
+
+      <MonthlyTeacherAttendanceModal 
+        isOpen={isMonthlyModalOpen}
+        onClose={() => setIsMonthlyModalOpen(false)}
+        teachers={teachers}
+      />
     </div>
   );
 }
