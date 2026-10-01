@@ -30,6 +30,7 @@ import BankNagadiKitab from "@/components/accountant/BankNagadiKitab";
 import AamdaniKhata from "@/components/accountant/AamdaniKhata";
 import KharchaKhata from "@/components/accountant/KharchaKhata";
 import VoucherList from "@/components/accountant/VoucherList";
+import NagadBankKhata from "@/components/accountant/NagadBankKhata";
 
 export default function AccountantDashboard() {
   const router = useRouter();
@@ -121,6 +122,10 @@ export default function AccountantDashboard() {
       // ── Sub-report: Kharcha Khata ──
       if (activeReport === 'kharcha-khata') {
         return <KharchaKhata onBack={handleReportBack} />;
+      }
+      // ── Sub-report: Nagad Bank Khata ──
+      if (activeReport === 'nagad-bank') {
+        return <NagadBankKhata onBack={handleReportBack} />;
       }
 
       const reports = [
