@@ -120,13 +120,12 @@ export default function BankNagadiKitab({ onBack }: Props) {
     URL.revokeObjectURL(url);
   };
 
-  // ─── Shared column header rows (reused on each page) ─────────────────────────
   const ColumnHeaders = () => (
     <>
       <tr>
         <td
           colSpan={10}
-          className="text-center font-bold border border-slate-400 bg-slate-50 py-2 text-sm"
+          className="text-center font-bold border border-slate-400 bg-slate-50 py-2 text-sm text-black"
           style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
         >
           {SCHOOL_NAME}
@@ -135,70 +134,70 @@ export default function BankNagadiKitab({ onBack }: Props) {
       <tr>
         <td
           colSpan={10}
-          className="text-center font-semibold border border-slate-400 bg-slate-50 py-1 text-xs"
+          className="text-center font-semibold border border-slate-400 bg-slate-50 py-1 text-xs text-black"
           style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
         >
           {REPORT_TITLE}
         </td>
       </tr>
       <tr><td colSpan={10} className="border-0 py-1 bg-white" /></tr>
-      <tr className="bg-slate-100 text-center text-[11px] font-bold">
+      <tr className="bg-slate-200 text-center text-[11px] font-bold text-black">
         <th
           rowSpan={2}
-          className="border border-slate-400 px-2 py-1"
+          className="border border-slate-500 px-2 py-1 text-black"
           style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
         >
           मिति
         </th>
         <th
           rowSpan={2}
-          className="border border-slate-400 px-2 py-1"
+          className="border border-slate-500 px-2 py-1 text-black"
           style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
         >
           भौचर&nbsp;नं
         </th>
         <th
           rowSpan={2}
-          className="border border-slate-400 px-3 py-1 min-w-[160px]"
+          className="border border-slate-500 px-3 py-1 min-w-[160px] text-black"
           style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
         >
           विवरण
         </th>
         <th
           colSpan={2}
-          className="border border-slate-400 px-2 py-1"
+          className="border border-slate-500 px-2 py-1 text-black"
           style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
         >
           नगद मौजदात
         </th>
         <th
           colSpan={2}
-          className="border border-slate-400 px-2 py-1"
+          className="border border-slate-500 px-2 py-1 text-black"
           style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
         >
           बैंक मौजदात
         </th>
         <th
           rowSpan={2}
-          className="border border-slate-400 px-2 py-1"
+          className="border border-slate-500 px-2 py-1 text-black"
           style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
         >
           बजेट&nbsp;खर्च<br />रकम
         </th>
         <th
           colSpan={2}
-          className="border border-slate-400 px-2 py-1"
+          className="border border-slate-500 px-2 py-1 text-black"
           style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
         >
           विविध
         </th>
       </tr>
-      <tr className="bg-slate-100 text-center text-[11px] font-bold">
+      <tr className="bg-slate-200 text-center text-[11px] font-bold text-black">
         {["डेबिट", "क्रेडिट", "डेबिट", "क्रेडिट", "डेबिट", "क्रेडिट"].map(
           (h, i) => (
             <th
               key={i}
-              className="border border-slate-400 px-2 py-1"
+              className="border border-slate-500 px-2 py-1 text-black"
               style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
             >
               {h}
@@ -215,7 +214,7 @@ export default function BankNagadiKitab({ onBack }: Props) {
       <style>{`
         @media print {
           body * { visibility: hidden !important; }
-          #bnk-print-root, #bnk-print-root * { visibility: visible !important; }
+          #bnk-print-root, #bnk-print-root * { visibility: visible !important; color: black !important; }
           #bnk-print-root { position: fixed; inset: 0; overflow: visible; }
           @page { size: A4 landscape; margin: 10mm 8mm; }
           .no-print { display: none !important; }
@@ -224,8 +223,9 @@ export default function BankNagadiKitab({ onBack }: Props) {
             page-break-inside: avoid;
           }
           .page-section:last-child { page-break-after: auto; }
-          table { border-collapse: collapse; width: 100%; font-size: 9pt; }
-          th, td { border: 1px solid #555 !important; padding: 2px 4px !important; }
+          table { border-collapse: collapse; width: 100%; font-size: 9pt; color: black; }
+          th, td { border: 1px solid #333 !important; padding: 2px 4px !important; color: black !important; }
+          th { background-color: #e2e8f0 !important; }
         }
       `}</style>
 
@@ -302,21 +302,21 @@ export default function BankNagadiKitab({ onBack }: Props) {
                       ) : (
                         pageRows.map((v) => (
                           <tr key={v.id} className="hover:bg-blue-50/20 transition-colors">
-                            <td className="border border-slate-300 px-2 py-1 whitespace-nowrap text-slate-700">{v.date}</td>
-                            <td className="border border-slate-300 px-2 py-1 text-center font-mono text-slate-700">{v.voucher_number}</td>
+                            <td className="border border-slate-400 px-2 py-1 whitespace-nowrap text-black">{v.date}</td>
+                            <td className="border border-slate-400 px-2 py-1 text-center font-mono text-black">{v.voucher_number}</td>
                             <td
-                              className="border border-slate-300 px-3 py-1 text-slate-700"
+                              className="border border-slate-400 px-3 py-1 text-black"
                               style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
                             >
                               {v.description || "—"}
                             </td>
-                            <td className="border border-slate-300 px-2 py-1 text-right font-mono text-slate-800">{fmt(v.cash_debit)}</td>
-                            <td className="border border-slate-300 px-2 py-1 text-right font-mono text-slate-800">{fmt(v.cash_credit)}</td>
-                            <td className="border border-slate-300 px-2 py-1 text-right font-mono text-slate-800">{fmt(v.bank_debit)}</td>
-                            <td className="border border-slate-300 px-2 py-1 text-right font-mono text-slate-800">{fmt(v.bank_credit)}</td>
-                            <td className="border border-slate-300 px-2 py-1 text-right font-mono text-slate-800">{fmt(v.kharcha_debit)}</td>
-                            <td className="border border-slate-300 px-2 py-1 text-right font-mono text-slate-800">{fmt(v.bibidh_debit)}</td>
-                            <td className="border border-slate-300 px-2 py-1 text-right font-mono text-slate-800">{fmt(v.bibidh_credit)}</td>
+                            <td className="border border-slate-400 px-2 py-1 text-right font-mono text-black">{fmt(v.cash_debit)}</td>
+                            <td className="border border-slate-400 px-2 py-1 text-right font-mono text-black">{fmt(v.cash_credit)}</td>
+                            <td className="border border-slate-400 px-2 py-1 text-right font-mono text-black">{fmt(v.bank_debit)}</td>
+                            <td className="border border-slate-400 px-2 py-1 text-right font-mono text-black">{fmt(v.bank_credit)}</td>
+                            <td className="border border-slate-400 px-2 py-1 text-right font-mono text-black">{fmt(v.kharcha_debit)}</td>
+                            <td className="border border-slate-400 px-2 py-1 text-right font-mono text-black">{fmt(v.bibidh_debit)}</td>
+                            <td className="border border-slate-400 px-2 py-1 text-right font-mono text-black">{fmt(v.bibidh_credit)}</td>
                           </tr>
                         ))
                       )}
@@ -324,22 +324,22 @@ export default function BankNagadiKitab({ onBack }: Props) {
                       {/* ── Page Subtotal / Grand Total Row ── */}
                       {pageRows.length > 0 && (
                         <tr
-                          className={`font-bold text-xs ${isLast ? "bg-slate-800 text-white" : "bg-amber-50 text-slate-800"}`}
+                          className={`font-bold text-xs ${isLast ? "bg-slate-700 text-white" : "bg-amber-100 text-black"}`}
                         >
                           <td
                             colSpan={3}
-                            className={`border px-3 py-1.5 text-right ${isLast ? "border-slate-600" : "border-slate-400"}`}
+                            className={`border px-3 py-1.5 text-right ${isLast ? "border-slate-600 text-white" : "border-slate-500 text-black"}`}
                             style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
                           >
                             {subtotalLabel}
                           </td>
-                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-emerald-300" : "border-slate-400 text-emerald-700"}`}>{fmt(pageCashD)}</td>
-                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-rose-300" : "border-slate-400 text-rose-600"}`}>{fmt(pageCashC)}</td>
-                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-emerald-300" : "border-slate-400 text-emerald-700"}`}>{fmt(pageBankD)}</td>
-                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-rose-300" : "border-slate-400 text-rose-600"}`}>{fmt(pageBankC)}</td>
-                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600" : "border-slate-400"}`}>{fmt(pageKharch)}</td>
-                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-emerald-300" : "border-slate-400 text-emerald-700"}`}>{fmt(pageBibD)}</td>
-                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-rose-300" : "border-slate-400 text-rose-600"}`}>{fmt(pageBibC)}</td>
+                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-white" : "border-slate-500 text-black"}`}>{fmt(pageCashD)}</td>
+                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-white" : "border-slate-500 text-black"}`}>{fmt(pageCashC)}</td>
+                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-white" : "border-slate-500 text-black"}`}>{fmt(pageBankD)}</td>
+                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-white" : "border-slate-500 text-black"}`}>{fmt(pageBankC)}</td>
+                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-white" : "border-slate-500 text-black"}`}>{fmt(pageKharch)}</td>
+                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-white" : "border-slate-500 text-black"}`}>{fmt(pageBibD)}</td>
+                          <td className={`border px-2 py-1.5 text-right font-mono ${isLast ? "border-slate-600 text-white" : "border-slate-500 text-black"}`}>{fmt(pageBibC)}</td>
                         </tr>
                       )}
                     </tbody>
