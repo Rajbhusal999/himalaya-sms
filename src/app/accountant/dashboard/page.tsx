@@ -27,6 +27,7 @@ import ManageTopics from "@/components/accountant/ManageTopics";
 import EntryVoucher from "@/components/accountant/EntryVoucher";
 import BankNagadiKitab from "@/components/accountant/BankNagadiKitab";
 import AamdaniKhata from "@/components/accountant/AamdaniKhata";
+import KharchaKhata from "@/components/accountant/KharchaKhata";
 
 export default function AccountantDashboard() {
   const router = useRouter();
@@ -114,6 +115,10 @@ export default function AccountantDashboard() {
       // ── Sub-report: Aamdani Khata ──
       if (activeReport === 'aamdani-khata') {
         return <AamdaniKhata onBack={handleReportBack} />;
+      }
+      // ── Sub-report: Kharcha Khata ──
+      if (activeReport === 'kharcha-khata') {
+        return <KharchaKhata onBack={handleReportBack} />;
       }
 
       const reports = [
