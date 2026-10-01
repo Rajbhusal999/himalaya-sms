@@ -128,7 +128,7 @@ export default function EntryVoucher() {
       grandTotalCredit += totalTopicAmount; // Income is Credit
     }
 
-    if (Math.abs(grandTotalDebit - grandTotalCredit) > 0.001) {
+    if (selectedTopicId !== "ALYA_TOPIC_ID" && Math.abs(grandTotalDebit - grandTotalCredit) > 0.001) {
       alert(`Error: The Debit and Credit amounts are not equal.\n\nTotal Debit: Rs. ${grandTotalDebit.toFixed(2)}\nTotal Credit: Rs. ${grandTotalCredit.toFixed(2)}`);
       return;
     }
