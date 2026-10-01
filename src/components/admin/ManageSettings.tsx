@@ -687,7 +687,7 @@ export default function ManageSettings() {
         {activeTab === "notifications" && (
           <div className="max-w-2xl space-y-6">
             <h2 className="text-xl font-bold text-slate-800 mb-4">Notification Preferences</h2>
-            
+
             {notificationsSaveSuccess && (
               <div className="p-3.5 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-sm font-bold flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
@@ -897,11 +897,10 @@ export default function ManageSettings() {
                     return (
                       <div
                         key={session.id}
-                        className={`flex items-center gap-4 p-3.5 border-2 rounded-xl transition-all ${
-                          isCurrent
+                        className={`flex items-center gap-4 p-3.5 border-2 rounded-xl transition-all ${isCurrent
                             ? "border-brand-200 bg-brand-50"
                             : "border-slate-200 bg-white hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <DeviceIcon className={`w-6 h-6 shrink-0 ${isCurrent ? "text-brand-600" : "text-slate-400"}`} />
                         <div className="flex-1 min-w-0">
@@ -913,8 +912,8 @@ export default function ManageSettings() {
                             {session.city || session.country ? (
                               <span className="flex items-center gap-1">
                                 <svg className="w-3 h-3 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
-                                  <circle cx="12" cy="10" r="3"/>
+                                  <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z" />
+                                  <circle cx="12" cy="10" r="3" />
                                 </svg>
                                 <span className="font-medium text-slate-600">
                                   {[session.city, session.country].filter(Boolean).join(", ")}
@@ -993,11 +992,10 @@ export default function ManageSettings() {
               </div>
 
               {/* Maintenance Mode Toggle */}
-              <div className={`flex items-start justify-between p-5 border-2 rounded-xl transition-all ${
-                maintenanceMode
+              <div className={`flex items-start justify-between p-5 border-2 rounded-xl transition-all ${maintenanceMode
                   ? "border-amber-400 bg-amber-50"
                   : "border-slate-200 bg-slate-50/50"
-              }`}>
+                }`}>
                 <div className="flex-1 pr-4">
                   <div className="flex items-center gap-2 mb-1">
                     <TriangleAlert className={`w-4 h-4 ${maintenanceMode ? "text-amber-600" : "text-slate-400"}`} />
@@ -1072,16 +1070,14 @@ export default function ManageSettings() {
                 { n: 3, label: "Enter Code" },
                 { n: 4, label: "Done" },
               ].map((s) => (
-                <div key={s.n} className={`flex-1 py-3 text-center text-xs font-bold border-b-2 transition-colors ${
-                  setupStep === s.n
+                <div key={s.n} className={`flex-1 py-3 text-center text-xs font-bold border-b-2 transition-colors ${setupStep === s.n
                     ? "border-brand-600 text-brand-600"
                     : setupStep > s.n
-                    ? "border-emerald-500 text-emerald-600"
-                    : "border-transparent text-slate-400"
-                }`}>
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-xs mr-1 ${
-                    setupStep > s.n ? "bg-emerald-500" : setupStep === s.n ? "bg-brand-600" : "bg-slate-300"
-                  }`}>{setupStep > s.n ? "✓" : s.n}</span>
+                      ? "border-emerald-500 text-emerald-600"
+                      : "border-transparent text-slate-400"
+                  }`}>
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-xs mr-1 ${setupStep > s.n ? "bg-emerald-500" : setupStep === s.n ? "bg-brand-600" : "bg-slate-300"
+                    }`}>{setupStep > s.n ? "✓" : s.n}</span>
                   {s.label}
                 </div>
               ))}

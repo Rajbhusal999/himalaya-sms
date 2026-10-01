@@ -15,7 +15,13 @@ import {
   ArrowRight,
   Calculator,
   UserCircle,
-  FolderTree
+  FolderTree,
+  BookText,
+  TrendingUp,
+  TrendingDown,
+  Landmark,
+  PieChart,
+  Scale
 } from "lucide-react";
 import ManageTopics from "@/components/accountant/ManageTopics";
 import EntryVoucher from "@/components/accountant/EntryVoucher";
@@ -89,23 +95,42 @@ export default function AccountantDashboard() {
   const renderContent = () => {
 
     if (activeTab === "report") {
+      const reports = [
+        { id: 'bank-nagadi', name: 'Bank Nagadi Kitab', np: 'बैंक नगदी किताब', icon: BookText, color: 'text-blue-600', bg: 'bg-blue-50', hover: 'hover:border-blue-500' },
+        { id: 'aamdani-khata', name: 'Aamdani Khata', np: 'आम्दानी खाता', icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50', hover: 'hover:border-emerald-500' },
+        { id: 'kharcha-khata', name: 'Kharcha Khata', np: 'खर्च खाता', icon: TrendingDown, color: 'text-rose-600', bg: 'bg-rose-50', hover: 'hover:border-rose-500' },
+        { id: 'nagad-bank', name: 'Nagad Bank Khata', np: 'नगद बैंक खाता', icon: Landmark, color: 'text-purple-600', bg: 'bg-purple-50', hover: 'hover:border-purple-500' },
+        { id: 'aaya-vyaya', name: 'Aaya Vyaya', np: 'आय व्यय', icon: PieChart, color: 'text-amber-600', bg: 'bg-amber-50', hover: 'hover:border-amber-500' },
+        { id: 'trial-balance', name: 'Trial Balance', np: 'सन्तुलन परीक्षण', icon: Scale, color: 'text-indigo-600', bg: 'bg-indigo-50', hover: 'hover:border-indigo-500' }
+      ];
+
       return (
         <div className="bg-white rounded-xl shadow-sm p-8 border border-slate-200">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
               <BarChart3 className="w-6 h-6" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-slate-800">Financial Reports</h2>
-              <p className="text-slate-500">View income, expenses, and pending dues.</p>
+              <p className="text-slate-500">Select a report to generate and view data.</p>
             </div>
           </div>
-          <div className="p-8 border-2 border-dashed border-slate-300 rounded-xl text-center bg-slate-50">
-            <BarChart3 className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-slate-700 mb-2">Reports Module</h3>
-            <p className="text-slate-500 max-w-md mx-auto">
-              This module will generate financial summaries, balance sheets, and student fee due reports. It is currently under development.
-            </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {reports.map((report) => (
+              <button
+                key={report.id}
+                type="button"
+                className={`flex flex-col items-start p-6 bg-white border-2 border-slate-100 rounded-2xl cursor-pointer transition-all hover:shadow-lg ${report.hover} group text-left w-full relative overflow-hidden`}
+              >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${report.bg} ${report.color}`}>
+                  <report.icon className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-800 group-hover:text-slate-900 mb-1">{report.name}</h3>
+                <p className="text-sm font-semibold text-slate-500">{report.np}</p>
+                <ArrowRight className={`absolute bottom-6 right-6 w-5 h-5 opacity-0 -translate-x-4 transition-all group-hover:opacity-100 group-hover:translate-x-0 ${report.color}`} />
+              </button>
+            ))}
           </div>
         </div>
       );
