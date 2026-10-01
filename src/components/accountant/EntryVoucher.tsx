@@ -145,7 +145,7 @@ export default function EntryVoucher() {
       };
 
       const { error } = await supabase.from("accounting_vouchers").insert([{
-        topic_id: selectedTopicId,
+        topic_id: selectedTopicId === "ALYA_TOPIC_ID" ? null : selectedTopicId,
         topic_type: voucherType,
         source_type: selectedSourceType,
         fiscal_year: fiscalYear,
