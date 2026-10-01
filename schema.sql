@@ -206,6 +206,7 @@ create table public.accounting_topics (
     id uuid default uuid_generate_v4() primary key,
     name text not null,
     type text not null, -- 'Income' or 'Expense'
+    source_type text default 'आन्तरिक स्रोत', -- 'सरकारी' or 'आन्तरिक स्रोत'
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

@@ -8,6 +8,7 @@ type Topic = {
   id: string;
   name: string;
   type: "Income" | "Expense";
+  source_type: "सरकारी" | "आन्तरिक स्रोत";
 };
 
 type Subtopic = {
@@ -25,6 +26,7 @@ export default function ManageTopics() {
   const [isAddingTopic, setIsAddingTopic] = useState(false);
   const [newTopicName, setNewTopicName] = useState("");
   const [newTopicType, setNewTopicType] = useState<"Income" | "Expense">("Income");
+  const [newTopicSource, setNewTopicSource] = useState<"सरकारी" | "आन्तरिक स्रोत">("आन्तरिक स्रोत");
 
   const [isAddingSubtopicFor, setIsAddingSubtopicFor] = useState<string | null>(null);
   const [newSubtopicName, setNewSubtopicName] = useState("");
@@ -56,7 +58,8 @@ export default function ManageTopics() {
     try {
       const { data, error } = await supabase.from("accounting_topics").insert([{
         name: newTopicName.trim(),
-        type: newTopicType
+        type: newTopicType,
+        source_type: newTopicSource
       }]).select();
 
       if (error) throw error;
@@ -143,7 +146,7 @@ export default function ManageTopics() {
 
       {isAddingTopic && (
         <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-5 mb-8 flex flex-col md:flex-row items-end gap-4">
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full md:w-auto">
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">Topic Name</label>
             <input
               type="text"
@@ -153,15 +156,26 @@ export default function ManageTopics() {
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800"
             />
           </div>
-          <div className="w-full md:w-48">
+          <div className="w-full md:w-36">
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">Type</label>
             <select
               value={newTopicType}
               onChange={(e) => setNewTopicType(e.target.value as "Income" | "Expense")}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-800"
             >
-              <option value="Income">Income (Revenue)</option>
+              <option value="Income">Income</option>
               <option value="Expense">Expense</option>
+            </select>
+          </div>
+          <div className="w-full md:w-48">
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Source</label>
+            <select
+              value={newTopicSource}
+              onChange={(e) => setNewTopicSource(e.target.value as "सरकारी" | "आन्तरिक स्रोत")}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-800"
+            >
+              <option value="आन्तरिक स्रोत">आन्तरिक स्रोत</option>
+              <option value="सरकारी">सरकारी</option>
             </select>
           </div>
           <div className="flex gap-2 w-full md:w-auto">
@@ -193,9 +207,12 @@ export default function ManageTopics() {
             <div key={topic.id} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col">
               <div className="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-start gap-4">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${topic.type === 'Income' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                       {topic.type}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${topic.source_type === 'सरकारी' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                      {topic.source_type}
                     </span>
                   </div>
                   <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
