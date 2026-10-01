@@ -21,13 +21,15 @@ import {
   TrendingDown,
   Landmark,
   PieChart,
-  Scale
+  Scale,
+  FileText
 } from "lucide-react";
 import ManageTopics from "@/components/accountant/ManageTopics";
 import EntryVoucher from "@/components/accountant/EntryVoucher";
 import BankNagadiKitab from "@/components/accountant/BankNagadiKitab";
 import AamdaniKhata from "@/components/accountant/AamdaniKhata";
 import KharchaKhata from "@/components/accountant/KharchaKhata";
+import VoucherList from "@/components/accountant/VoucherList";
 
 export default function AccountantDashboard() {
   const router = useRouter();
@@ -167,6 +169,10 @@ export default function AccountantDashboard() {
       return <EntryVoucher />;
     }
 
+    if (activeTab === "vouchers-list") {
+      return <VoucherList />;
+    }
+
     if (activeTab === "topics") {
       return <ManageTopics />;
     }
@@ -277,6 +283,17 @@ export default function AccountantDashboard() {
             >
               <ReceiptText className="w-5 h-5 mr-3" />
               Entry Voucher
+            </button>
+            <button
+              onClick={() => handleTabClick("vouchers-list")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "vouchers-list" 
+                  ? "bg-emerald-600 text-white" 
+                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+              }`}
+            >
+              <FileText className="w-5 h-5 mr-3" />
+              Saved Vouchers
             </button>
             <button
               onClick={() => handleTabClick("report")}
