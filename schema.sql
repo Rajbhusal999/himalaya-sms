@@ -200,3 +200,26 @@ create policy "Enable delete for anon users" on public.accountant_credentials fo
 
 -- Insert default accountant credentials
 insert into public.accountant_credentials (id, username, password) values ('default', 'accountant', 'accountant123') on conflict (id) do nothing;
+
+-- Create Accounting Topics Table
+create table public.accounting_topics (
+    id uuid default uuid_generate_v4() primary key,
+    name text not null,
+    type text not null, -- 'Income' or 'Expense'
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Create Accounting Subtopics Table
+create table public.accounting_subtopics (
+    id uuid default uuid_generate_v4() primary key,
+    topic_id uuid references public.accounting_topics(id) on delete cascade not null,
+    name text not null,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS for Accounting Topics
+alter table public.accounting_topics enable row level security;
+alter table public.accounting_subtopics enable row level security;
+
+create policy "Enable full access for anon users" on public.accounting_topics for all to anon using (true) with check (true);
+create policy "Enable full access for anon users" on public.accounting_subtopics for all to anon using (true) with check (true);

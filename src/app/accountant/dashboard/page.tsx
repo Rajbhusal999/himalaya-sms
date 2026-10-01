@@ -14,8 +14,10 @@ import {
   X,
   ArrowRight,
   Calculator,
-  UserCircle
+  UserCircle,
+  FolderTree
 } from "lucide-react";
+import ManageTopics from "@/components/accountant/ManageTopics";
 
 export default function AccountantDashboard() {
   const router = useRouter();
@@ -130,6 +132,10 @@ export default function AccountantDashboard() {
       );
     }
 
+    if (activeTab === "topics") {
+      return <ManageTopics />;
+    }
+
     return (
       <div className="space-y-8">
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -166,6 +172,19 @@ export default function AccountantDashboard() {
             <BarChart3 className="w-10 h-10 mb-4 text-blue-200" />
             <h3 className="text-xl font-bold mb-2">Financial Reports</h3>
             <p className="text-blue-100 text-sm mb-6">View day books, ledgers, and financial summary reports.</p>
+            <div className="flex items-center text-sm font-medium text-white">
+              Open Tool <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+
+          <div 
+            onClick={() => handleTabClick("topics")}
+            className="bg-gradient-to-br from-violet-600 to-violet-800 rounded-xl shadow-md text-white p-6 relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
+          >
+            <div className="absolute right-0 top-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+            <FolderTree className="w-10 h-10 mb-4 text-violet-200" />
+            <h3 className="text-xl font-bold mb-2">Topics & Categories</h3>
+            <p className="text-violet-100 text-sm mb-6">Manage accounting topics and subtopics for vouchers.</p>
             <div className="flex items-center text-sm font-medium text-white">
               Open Tool <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -234,6 +253,17 @@ export default function AccountantDashboard() {
             >
               <BarChart3 className="w-5 h-5 mr-3" />
               Reports
+            </button>
+            <button
+              onClick={() => handleTabClick("topics")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "topics" 
+                  ? "bg-emerald-600 text-white" 
+                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+              }`}
+            >
+              <FolderTree className="w-5 h-5 mr-3" />
+              Topics & Subtopics
             </button>
           </nav>
         </div>
