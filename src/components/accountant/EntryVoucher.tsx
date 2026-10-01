@@ -74,6 +74,9 @@ export default function EntryVoucher() {
   };
 
   const filteredTopics = topics.filter(t => t.type === voucherType);
+  if (voucherType === "Income") {
+    filteredTopics.push({ id: "ALYA_TOPIC_ID", name: "अ.ल्या.", type: "Income", source_type: "" } as any);
+  }
 
   // Reset topic when voucher type changes
   useEffect(() => {
@@ -82,9 +85,15 @@ export default function EntryVoucher() {
 
   // Sync source type when topic changes manually
   useEffect(() => {
+    if (selectedTopicId === "ALYA_TOPIC_ID") {
+      setSelectedSourceType("" as any);
+      return;
+    }
     const topic = topics.find(t => t.id === selectedTopicId);
     if (topic && topic.source_type) {
       setSelectedSourceType(topic.source_type as "सरकारी" | "आन्तरिक स्रोत");
+    } else if (selectedTopicId) {
+      setSelectedSourceType("आन्तरिक स्रोत");
     }
   }, [selectedTopicId, topics]);
 
@@ -224,14 +233,20 @@ export default function EntryVoucher() {
 
           <div className="lg:col-span-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Source Type</label>
-            <select
-              value={selectedSourceType}
-              onChange={(e) => setSelectedSourceType(e.target.value as "सरकारी" | "आन्तरिक स्रोत")}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-900"
-            >
-              <option value="आन्तरिक स्रोत">आन्तरिक स्रोत</option>
-              <option value="सरकारी">सरकारी</option>
-            </select>
+            {selectedTopicId === "ALYA_TOPIC_ID" ? (
+              <div className="w-full px-4 py-2 border border-slate-200 rounded-lg bg-slate-100 text-slate-400 italic text-sm">
+                Not Applicable
+              </div>
+            ) : (
+              <select
+                value={selectedSourceType}
+                onChange={(e) => setSelectedSourceType(e.target.value as "सरकारी" | "आन्तरिक स्रोत")}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-900"
+              >
+                <option value="आन्तरिक स्रोत">आन्तरिक स्रोत</option>
+                <option value="सरकारी">सरकारी</option>
+              </select>
+            )}
           </div>
 
           <div className="lg:col-span-1">
