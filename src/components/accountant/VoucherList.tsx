@@ -83,10 +83,7 @@ export default function VoucherList() {
     setLoading(false);
   };
 
-  const getTopicName = (id: string | null) => {
-    if (!id) return "अ.ल्या.";
-    return topics.find(t => t.id === id)?.name || "—";
-  };
+  const getTopicName = (id: string) => topics.find(t => t.id === id)?.name || "—";
 
   // Filtered + searched vouchers
   const filtered = vouchers.filter(v => {

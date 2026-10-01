@@ -53,13 +53,9 @@ export default function AamdaniKhata({ onBack }: Props) {
         .eq("fiscal_year", selectedFiscalYear)
         .order("date", { ascending: true })
         .order("voucher_number", { ascending: true }),
-      supabase.from("accounting_topics").select("id,name,type").eq("type", "Income"),
     ]);
-    const finalTopics = tData || [];
-    finalTopics.push({ id: "ALYA_TOPIC_ID", name: "अ.ल्या.", type: "Income" } as any);
-    
     setVouchers(vData || []);
-    setTopics(finalTopics);
+    setTopics(tData || []);
     setLoading(false);
   };
 

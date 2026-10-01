@@ -56,7 +56,20 @@ export default function EntryVoucher() {
   const fetchInitialData = async () => {
     setLoadingData(true);
     try {
-      const { data: tData } = await supabase.from("accounting_topics").select("*").order("name");
+      let { data: tData } = await supabase.from("accounting_topics").select("*").order("name");
+      
+      // Auto-seed ALYA if it doesn't exist
+      if (tData && !tData.find(t => t.name === "अ.ल्या.")) {
+        const { data: newAlya } = await supabase.from("accounting_topics").insert([{
+          name: "अ.ल्या.",
+          type: "Income"
+        }]).select();
+        
+        if (newAlya && newAlya.length > 0) {
+          tData = [...tData, newAlya[0]];
+        }
+      }
+
       const { data: sData } = await supabase.from("accounting_subtopics").select("*").order("name");
       const { data: vData } = await supabase.from("accounting_vouchers")
         .select("voucher_number")
@@ -74,9 +87,7 @@ export default function EntryVoucher() {
   };
 
   const filteredTopics = topics.filter(t => t.type === voucherType);
-  if (voucherType === "Income") {
-    filteredTopics.push({ id: "ALYA_TOPIC_ID", name: "अ.ल्या.", type: "Income", source_type: "" } as any);
-  }
+  const alyaTopicId = topics.find(t => t.name === "अ.ल्या.")?.id;
 
   // Reset topic when voucher type changes
   useEffect(() => {
@@ -85,7 +96,7 @@ export default function EntryVoucher() {
 
   // Sync source type when topic changes manually
   useEffect(() => {
-    if (selectedTopicId === "ALYA_TOPIC_ID") {
+    if (alyaTopicId && selectedTopicId === alyaTopicId) {
       setSelectedSourceType("" as any);
       return;
     }
@@ -128,7 +139,7 @@ export default function EntryVoucher() {
       grandTotalCredit += totalTopicAmount; // Income is Credit
     }
 
-    if (selectedTopicId !== "ALYA_TOPIC_ID" && Math.abs(grandTotalDebit - grandTotalCredit) > 0.001) {
+    if (selectedTopicId !== alyaTopicId && Math.abs(grandTotalDebit - grandTotalCredit) > 0.001) {
       alert(`Error: The Debit and Credit amounts are not equal.\n\nTotal Debit: Rs. ${grandTotalDebit.toFixed(2)}\nTotal Credit: Rs. ${grandTotalCredit.toFixed(2)}`);
       return;
     }
@@ -145,7 +156,7 @@ export default function EntryVoucher() {
       };
 
       const { error } = await supabase.from("accounting_vouchers").insert([{
-        topic_id: selectedTopicId === "ALYA_TOPIC_ID" ? null : selectedTopicId,
+        topic_id: selectedTopicId,
         topic_type: voucherType,
         source_type: selectedSourceType,
         fiscal_year: fiscalYear,
@@ -233,7 +244,7 @@ export default function EntryVoucher() {
 
           <div className="lg:col-span-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Source Type</label>
-            {selectedTopicId === "ALYA_TOPIC_ID" ? (
+            {alyaTopicId && selectedTopicId === alyaTopicId ? (
               <div className="w-full px-4 py-2 border border-slate-200 rounded-lg bg-slate-100 text-slate-400 italic text-sm">
                 Not Applicable
               </div>
