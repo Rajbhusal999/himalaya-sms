@@ -616,17 +616,6 @@ export default function AdminDashboard() {
               Attendance
             </button>
             <button
-              onClick={() => handleTabClick("teacher-attendance")}
-              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                activeTab === "teacher-attendance" 
-                  ? "bg-brand-800 text-white" 
-                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
-              }`}
-            >
-              <UserCheck className="w-5 h-5 mr-3" />
-              Teacher Attendance
-            </button>
-            <button
               onClick={() => handleTabClick("admit-card")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                 activeTab === "admit-card" 
@@ -843,6 +832,17 @@ export default function AdminDashboard() {
             >
               <UserCog className="w-5 h-5 mr-3" />
               Manage Teachers
+            </button>
+            <button
+              onClick={() => handleTabClick("teacher-attendance")}
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === "teacher-attendance" 
+                  ? "bg-brand-800 text-white" 
+                  : "text-brand-200 hover:bg-brand-900 hover:text-white"
+              }`}
+            >
+              <UserCheck className="w-5 h-5 mr-3" />
+              Teacher Attendance
             </button>
           </nav>
         </div>
