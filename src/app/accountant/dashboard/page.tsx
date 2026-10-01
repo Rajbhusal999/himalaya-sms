@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase/client";
 import { validateSession, clearSession } from "@/app/actions/auth";
 import {
@@ -196,11 +197,11 @@ export default function AccountantDashboard() {
       <div className="space-y-8">
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-800 mb-2">Welcome, Accountant! 👋</h1>
+            <h1 className="text-3xl font-extrabold text-slate-800 mb-2">Welcome, Accountant of Shree Himalaya Basic School! 👋</h1>
             <p className="text-slate-500 text-lg">Manage the school's finances, vouchers, and generate reports.</p>
           </div>
-          <div className="p-4 bg-emerald-50 rounded-full">
-            <UserCircle className="w-16 h-16 text-emerald-600" />
+          <div className="p-2 bg-emerald-50 rounded-full shrink-0 overflow-hidden">
+            <Image src="/logo.png" alt="School Logo" width={64} height={64} className="object-contain" />
           </div>
         </div>
 
