@@ -150,7 +150,7 @@ export default function ManageTopics() {
               value={newTopicName}
               onChange={(e) => setNewTopicName(e.target.value)}
               placeholder="e.g., Tuition Fees, Salary, Utilities"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800"
             />
           </div>
           <div className="w-full md:w-48">
@@ -158,7 +158,7 @@ export default function ManageTopics() {
             <select
               value={newTopicType}
               onChange={(e) => setNewTopicType(e.target.value as "Income" | "Expense")}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-800"
             >
               <option value="Income">Income (Revenue)</option>
               <option value="Expense">Expense</option>
@@ -244,7 +244,7 @@ export default function ManageTopics() {
                       value={newSubtopicName}
                       onChange={(e) => setNewSubtopicName(e.target.value)}
                       placeholder="Subtopic name..."
-                      className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') handleAddSubtopic(topic.id);
                         if (e.key === 'Escape') setIsAddingSubtopicFor(null);
