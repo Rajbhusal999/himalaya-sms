@@ -38,6 +38,13 @@ export default function AayaVyaya({ onBack }: Props) {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 3 custom editable rows
+  const [customRows, setCustomRows] = useState([
+    { incName: "", incTotal: "", expName: "", expTotal: "" },
+    { incName: "", incTotal: "", expName: "", expTotal: "" },
+    { incName: "", incTotal: "", expName: "", expTotal: "" },
+  ]);
+
   useEffect(() => {
     fetchData();
   }, [selectedFiscalYear]);
@@ -86,12 +93,24 @@ export default function AayaVyaya({ onBack }: Props) {
   const totalIncome = incomeData.reduce((s, t) => safeAdd(s, t.total), 0);
   const totalExpense = expenseData.reduce((s, t) => safeAdd(s, t.total), 0);
 
+  const customIncSum = customRows.reduce((s, r) => safeAdd(s, Number(r.incTotal) || 0), 0);
+  const customExpSum = customRows.reduce((s, r) => safeAdd(s, Number(r.expTotal) || 0), 0);
+
+  const finalTotalIncome = safeAdd(totalIncome, customIncSum);
+  const finalTotalExpense = safeAdd(totalExpense, customExpSum);
+
   // Align rows (max length of both sides)
   const maxRows = Math.max(incomeData.length, expenseData.length);
   const rows = Array.from({ length: maxRows }).map((_, i) => ({
     inc: incomeData[i] || null,
     exp: expenseData[i] || null,
   }));
+
+  const handleCustomChange = (index: number, field: string, value: string) => {
+    const newRows = [...customRows];
+    newRows[index] = { ...newRows[index], [field]: value };
+    setCustomRows(newRows);
+  };
 
   const handlePrint = () => window.print();
 
@@ -105,7 +124,11 @@ export default function AayaVyaya({ onBack }: Props) {
       r.exp?.total ? r.exp.total : "",
     ]);
 
-    const totalRow = ["जम्मा", totalIncome || "0", "", "जम्मा", totalExpense || "0"];
+    const customCsvRows = customRows.map(r => [
+      r.incName, r.incTotal, "", r.expName, r.expTotal
+    ]);
+
+    const totalRow = ["जम्मा", finalTotalIncome || "0", "", "जम्मा", finalTotalExpense || "0"];
 
     const csv = [
       [SCHOOL_NAME],
@@ -113,6 +136,7 @@ export default function AayaVyaya({ onBack }: Props) {
       [],
       headers,
       ...csvRows,
+      ...customCsvRows,
       [],
       totalRow,
     ].map(r => r.join(",")).join("\n");
@@ -139,6 +163,8 @@ export default function AayaVyaya({ onBack }: Props) {
           th, td { border: 1px solid #333 !important; padding: 4px 6px !important; color: black !important; }
           th { background-color: #f1f5f9 !important; }
           .total-row td { background-color: #fef08a !important; font-weight: bold !important; }
+          input { background: transparent; border: none; outline: none; width: 100%; color: black !important; }
+          input::placeholder { color: transparent; }
         }
       `}</style>
 
@@ -236,12 +262,55 @@ export default function AayaVyaya({ onBack }: Props) {
                     </td>
                   </tr>
                 )}
+                
+                {/* Custom User Rows */}
+                {customRows.map((cr, idx) => (
+                  <tr key={`custom-${idx}`} className="hover:bg-slate-50 transition-colors">
+                    <td className="border border-slate-400 px-4 py-1.5 text-right text-black" style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}>
+                      <input 
+                        type="text" 
+                        value={cr.incName} 
+                        onChange={e => handleCustomChange(idx, "incName", e.target.value)} 
+                        className="text-right w-full bg-transparent border-0 focus:ring-0 p-0 text-sm"
+                        placeholder="Type income desc..."
+                      />
+                    </td>
+                    <td className="border border-slate-400 px-4 py-1.5 text-right font-mono text-black">
+                      <input 
+                        type="number" 
+                        value={cr.incTotal} 
+                        onChange={e => handleCustomChange(idx, "incTotal", e.target.value)} 
+                        className="text-right w-full bg-transparent border-0 focus:ring-0 p-0 text-sm font-mono"
+                        placeholder="0.00"
+                      />
+                    </td>
+                    <td className="border border-slate-400 px-4 py-1.5 text-right text-black" style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}>
+                      <input 
+                        type="text" 
+                        value={cr.expName} 
+                        onChange={e => handleCustomChange(idx, "expName", e.target.value)} 
+                        className="text-right w-full bg-transparent border-0 focus:ring-0 p-0 text-sm"
+                        placeholder="Type expense desc..."
+                      />
+                    </td>
+                    <td className="border border-slate-400 px-4 py-1.5 text-right font-mono text-black">
+                      <input 
+                        type="number" 
+                        value={cr.expTotal} 
+                        onChange={e => handleCustomChange(idx, "expTotal", e.target.value)} 
+                        className="text-right w-full bg-transparent border-0 focus:ring-0 p-0 text-sm font-mono"
+                        placeholder="0.00"
+                      />
+                    </td>
+                  </tr>
+                ))}
+
                 {/* Grand Total */}
                 <tr className="total-row bg-yellow-200 font-bold text-sm text-black">
                   <td className="border border-slate-500 px-4 py-3 text-center font-bold text-black" style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}>जम्मा</td>
-                  <td className="border border-slate-500 px-4 py-3 text-right font-mono font-bold text-black">{totalIncome > 0 ? fmt(totalIncome) : "0"}</td>
+                  <td className="border border-slate-500 px-4 py-3 text-right font-mono font-bold text-black">{finalTotalIncome > 0 ? fmt(finalTotalIncome) : "0"}</td>
                   <td className="border border-slate-500 px-4 py-3 text-center font-bold text-black" style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}>जम्मा</td>
-                  <td className="border border-slate-500 px-4 py-3 text-right font-mono font-bold text-black">{totalExpense > 0 ? fmt(totalExpense) : "0"}</td>
+                  <td className="border border-slate-500 px-4 py-3 text-right font-mono font-bold text-black">{finalTotalExpense > 0 ? fmt(finalTotalExpense) : "0"}</td>
                 </tr>
               </tbody>
             </table>
