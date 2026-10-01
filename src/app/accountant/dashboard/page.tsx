@@ -87,28 +87,6 @@ export default function AccountantDashboard() {
   }
 
   const renderContent = () => {
-    if (activeTab === "entry-voucher") {
-      return (
-        <div className="bg-white rounded-xl shadow-sm p-8 border border-slate-200">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
-              <ReceiptText className="w-6 h-6" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-slate-800">Entry Voucher</h2>
-              <p className="text-slate-500">Record incoming fees and outgoing expenses.</p>
-            </div>
-          </div>
-          <div className="p-8 border-2 border-dashed border-slate-300 rounded-xl text-center bg-slate-50">
-            <Calculator className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-slate-700 mb-2">Voucher Entry Module</h3>
-            <p className="text-slate-500 max-w-md mx-auto">
-              This module will allow you to generate fee receipts, record expenses, and maintain the school ledger. It is currently under development.
-            </p>
-          </div>
-        </div>
-      );
-    }
 
     if (activeTab === "report") {
       return (
@@ -155,19 +133,6 @@ export default function AccountantDashboard() {
 
         <h2 className="text-xl font-bold text-slate-800 mt-8 mb-4">Quick Tools</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <div 
-            onClick={() => handleTabClick("entry-voucher")}
-            className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl shadow-md text-white p-6 relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
-          >
-            <div className="absolute right-0 top-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
-            <ReceiptText className="w-10 h-10 mb-4 text-emerald-200" />
-            <h3 className="text-xl font-bold mb-2">Entry Voucher</h3>
-            <p className="text-emerald-100 text-sm mb-6">Create new income/expense vouchers and manage fee entries.</p>
-            <div className="flex items-center text-sm font-medium text-white">
-              Open Tool <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
 
           <div 
             onClick={() => handleTabClick("report")}
@@ -251,9 +216,9 @@ export default function AccountantDashboard() {
               Overview
             </button>
             <button
-              onClick={() => handleTabClick("entry-voucher")}
+              onClick={() => handleTabClick("voucher")}
               className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                activeTab === "entry-voucher" 
+                activeTab === "voucher" 
                   ? "bg-emerald-600 text-white" 
                   : "text-slate-300 hover:bg-slate-800 hover:text-white"
               }`}
