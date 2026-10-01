@@ -27,8 +27,9 @@ export default function EntryVoucher() {
   const [lastVoucher, setLastVoucher] = useState<string>("");
 
   // Form states
+  const [voucherType, setVoucherType] = useState<"Income" | "Expense">("Income");
   const [selectedTopicId, setSelectedTopicId] = useState("");
-  const [selectedSubtopicId, setSelectedSubtopicId] = useState("");
+  const [selectedSourceType, setSelectedSourceType] = useState<"सरकारी" | "आन्तरिक स्रोत">("आन्तरिक स्रोत");
   const [date, setDate] = useState(getCurrentBsDate());
   const [voucherNumber, setVoucherNumber] = useState("");
   const [description, setDescription] = useState("");
@@ -69,17 +70,25 @@ export default function EntryVoucher() {
     }
   };
 
-  const selectedTopic = topics.find(t => t.id === selectedTopicId);
-  const filteredSubtopics = subtopics.filter(s => s.topic_id === selectedTopicId);
+  const filteredTopics = topics.filter(t => t.type === voucherType);
 
-  // Auto-select first subtopic if available when topic changes
+  // Auto-select first topic if available when voucher type changes
   useEffect(() => {
-    if (filteredSubtopics.length > 0 && !filteredSubtopics.find(s => s.id === selectedSubtopicId)) {
-      setSelectedSubtopicId(filteredSubtopics[0].id);
-    } else if (filteredSubtopics.length === 0) {
-      setSelectedSubtopicId("");
+    if (filteredTopics.length > 0 && !filteredTopics.find(t => t.id === selectedTopicId)) {
+      setSelectedTopicId(filteredTopics[0].id);
+      setSelectedSourceType((filteredTopics[0].source_type as "सरकारी" | "आन्तरिक स्रोत") || "आन्तरिक स्रोत");
+    } else if (filteredTopics.length === 0) {
+      setSelectedTopicId("");
     }
-  }, [selectedTopicId, filteredSubtopics, selectedSubtopicId]);
+  }, [voucherType, filteredTopics, selectedTopicId]);
+
+  // Sync source type when topic changes manually
+  useEffect(() => {
+    const topic = topics.find(t => t.id === selectedTopicId);
+    if (topic && topic.source_type) {
+      setSelectedSourceType(topic.source_type as "सरकारी" | "आन्तरिक स्रोत");
+    }
+  }, [selectedTopicId, topics]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +103,7 @@ export default function EntryVoucher() {
     try {
       const { error } = await supabase.from("accounting_vouchers").insert([{
         topic_id: selectedTopicId,
-        subtopic_id: selectedSubtopicId || null,
+        source_type: selectedSourceType,
         date,
         voucher_number: voucherNumber.trim(),
         description: description.trim(),
@@ -156,38 +165,41 @@ export default function EntryVoucher() {
           <div className="lg:col-span-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Topic</label>
             <select
-              required
-              value={selectedTopicId}
-              onChange={(e) => setSelectedTopicId(e.target.value)}
+              value={voucherType}
+              onChange={(e) => setVoucherType(e.target.value as "Income" | "Expense")}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-900"
             >
-              <option value="" disabled>Select a topic...</option>
-              {topics.map(t => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
+              <option value="Income">Income</option>
+              <option value="Expense">Expenditure</option>
             </select>
           </div>
 
           <div className="lg:col-span-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Subtopic</label>
             <select
-              value={selectedSubtopicId}
-              onChange={(e) => setSelectedSubtopicId(e.target.value)}
-              disabled={filteredSubtopics.length === 0}
+              required
+              value={selectedTopicId}
+              onChange={(e) => setSelectedTopicId(e.target.value)}
+              disabled={filteredTopics.length === 0}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-900 disabled:opacity-50"
             >
-              <option value="">{filteredSubtopics.length === 0 ? "No subtopics" : "Select..."}</option>
-              {filteredSubtopics.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+              <option value="" disabled>{filteredTopics.length === 0 ? "No subtopics" : "Select..."}</option>
+              {filteredTopics.map(t => (
+                <option key={t.id} value={t.id}>{t.name}</option>
               ))}
             </select>
           </div>
 
           <div className="lg:col-span-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Source Type</label>
-            <div className="w-full px-4 py-2 bg-slate-200 border border-slate-300 rounded-lg text-slate-600 font-medium">
-              {selectedTopic ? selectedTopic.source_type : "—"}
-            </div>
+            <select
+              value={selectedSourceType}
+              onChange={(e) => setSelectedSourceType(e.target.value as "सरकारी" | "आन्तरिक स्रोत")}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-900"
+            >
+              <option value="आन्तरिक स्रोत">आन्तरिक स्रोत</option>
+              <option value="सरकारी">सरकारी</option>
+            </select>
           </div>
 
           <div className="lg:col-span-1">

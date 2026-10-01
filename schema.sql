@@ -230,6 +230,7 @@ create table public.accounting_vouchers (
     id uuid default uuid_generate_v4() primary key,
     topic_id uuid references public.accounting_topics(id) on delete restrict not null,
     subtopic_id uuid references public.accounting_subtopics(id) on delete set null,
+    source_type text,
     date text not null,
     voucher_number text not null,
     description text,
