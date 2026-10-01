@@ -26,6 +26,7 @@ import {
 import ManageTopics from "@/components/accountant/ManageTopics";
 import EntryVoucher from "@/components/accountant/EntryVoucher";
 import BankNagadiKitab from "@/components/accountant/BankNagadiKitab";
+import AamdaniKhata from "@/components/accountant/AamdaniKhata";
 
 export default function AccountantDashboard() {
   const router = useRouter();
@@ -109,6 +110,10 @@ export default function AccountantDashboard() {
       // ── Sub-report: Bank Nagadi Kitab ──
       if (activeReport === 'bank-nagadi') {
         return <BankNagadiKitab onBack={handleReportBack} />;
+      }
+      // ── Sub-report: Aamdani Khata ──
+      if (activeReport === 'aamdani-khata') {
+        return <AamdaniKhata onBack={handleReportBack} />;
       }
 
       const reports = [

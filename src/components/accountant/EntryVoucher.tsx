@@ -35,6 +35,7 @@ export default function EntryVoucher() {
   const [voucherType, setVoucherType] = useState<"Income" | "Expense">("Income");
   const [selectedTopicId, setSelectedTopicId] = useState("");
   const [selectedSourceType, setSelectedSourceType] = useState<"सरकारी" | "आन्तरिक स्रोत">("आन्तरिक स्रोत");
+  const [fiscalYear, setFiscalYear] = useState("2083/2084");
   const [date, setDate] = useState(getCurrentBsDate());
   const [voucherNumber, setVoucherNumber] = useState("");
   const [description, setDescription] = useState("");
@@ -141,7 +142,9 @@ export default function EntryVoucher() {
 
       const { error } = await supabase.from("accounting_vouchers").insert([{
         topic_id: selectedTopicId,
+        topic_type: voucherType,
         source_type: selectedSourceType,
+        fiscal_year: fiscalYear,
         date,
         voucher_number: voucherNumber.trim(),
         description: description.trim(),
@@ -195,7 +198,7 @@ export default function EntryVoucher() {
 
       <form onSubmit={handleSave} className="space-y-8">
         {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 bg-slate-50 p-6 rounded-xl border border-slate-200">
           <div className="lg:col-span-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Topic</label>
             <select
@@ -233,6 +236,19 @@ export default function EntryVoucher() {
             >
               <option value="आन्तरिक स्रोत">आन्तरिक स्रोत</option>
               <option value="सरकारी">सरकारी</option>
+            </select>
+          </div>
+
+          <div className="lg:col-span-1">
+            <label className="block text-sm font-bold text-slate-700 mb-2">Fiscal Year (आ.व.)</label>
+            <select
+              value={fiscalYear}
+              onChange={(e) => setFiscalYear(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-900"
+            >
+              {["2081/2082", "2082/2083", "2083/2084", "2084/2085", "2085/2086"].map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
             </select>
           </div>
 

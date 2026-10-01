@@ -235,6 +235,8 @@ create table public.accounting_vouchers (
     voucher_number text not null,
     description text,
     details jsonb,
+    fiscal_year text default '2083/2084',
+    topic_type text default 'Income',
     cash_debit numeric(12, 2) default 0,
     cash_credit numeric(12, 2) default 0,
     bank_debit numeric(12, 2) default 0,
