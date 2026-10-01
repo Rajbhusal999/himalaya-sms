@@ -31,12 +31,9 @@ export default function TrialBalance({ onBack }: Props) {
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Manual values for Peshi (since no dedicated columns exist in DB) and Remarks
+  // Manual values for Peshi (since no dedicated columns exist in DB)
   const [peshiDebit, setPeshiDebit] = useState("");
   const [peshiCredit, setPeshiCredit] = useState("");
-  const [remarks, setRemarks] = useState({
-    cash: "0", bank: "0", kharcha: "0", peshi: "0", bibidh: "0"
-  });
 
   useEffect(() => {
     fetchData();
@@ -73,16 +70,22 @@ export default function TrialBalance({ onBack }: Props) {
 
   const handleExport = () => {
     const headers = ["क्र.सं.", "विवरण", "डेबिट", "क्रेडिट", "कैफियत"];
-    
+    const diffCD = safeAdd(sumCD, -sumCC);
+    const diffBD = safeAdd(sumBD, -sumBC);
+    const diffKD = safeAdd(sumKD, -sumKC);
+    const diffPD = safeAdd(pDebitNum, -pCreditNum);
+    const diffBiD = safeAdd(sumBiD, -sumBiC);
+
     const rows = [
-      ["१", "नगद", sumCD || "", sumCC || "", remarks.cash],
-      ["२", "बैंक", sumBD || "", sumBC || "", remarks.bank],
-      ["३", "खर्च", sumKD || "", sumKC || "", remarks.kharcha],
-      ["४", "पेश्की", pDebitNum || "", pCreditNum || "", remarks.peshi],
-      ["५", "विविध", sumBiD || "", sumBiC || "", remarks.bibidh],
+      ["१", "नगद", sumCD || "", sumCC || "", diffCD === 0 ? "0" : diffCD],
+      ["२", "बैंक", sumBD || "", sumBC || "", diffBD === 0 ? "0" : diffBD],
+      ["३", "खर्च", sumKD || "", sumKC || "", diffKD === 0 ? "0" : diffKD],
+      ["४", "पेश्की", pDebitNum || "", pCreditNum || "", diffPD === 0 ? "0" : diffPD],
+      ["५", "विविध", sumBiD || "", sumBiC || "", diffBiD === 0 ? "0" : diffBiD],
     ];
 
-    const totalRow = ["", "जम्मा", totalDebit || "0", totalCredit || "0", "0"];
+    const diffTotal = safeAdd(totalDebit, -totalCredit);
+    const totalRow = ["", "जम्मा", totalDebit || "0", totalCredit || "0", diffTotal === 0 ? "0" : diffTotal];
 
     const csv = [
       [`सन्तुलन परीक्षण ( आ.व. ${selectedFY} )`],
@@ -101,9 +104,7 @@ export default function TrialBalance({ onBack }: Props) {
     URL.revokeObjectURL(url);
   };
 
-  const handleRemark = (key: keyof typeof remarks, val: string) => {
-    setRemarks(prev => ({ ...prev, [key]: val }));
-  };
+  const fmtK = (n: number) => n === 0 ? "0" : n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <>
@@ -195,8 +196,8 @@ export default function TrialBalance({ onBack }: Props) {
                   <td className="border border-slate-400 px-4 py-2 text-center text-black font-medium" style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}>नगद</td>
                   <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">{fmt(sumCD)}</td>
                   <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">{fmt(sumCC)}</td>
-                  <td className="border border-slate-400 px-2 py-2 text-right text-black">
-                    <input type="text" value={remarks.cash} onChange={e => handleRemark("cash", e.target.value)} className="w-full text-right bg-transparent border-0 focus:ring-0 p-0" />
+                  <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">
+                    {fmtK(safeAdd(sumCD, -sumCC))}
                   </td>
                 </tr>
                 
@@ -206,8 +207,8 @@ export default function TrialBalance({ onBack }: Props) {
                   <td className="border border-slate-400 px-4 py-2 text-center text-black font-medium" style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}>बैंक</td>
                   <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">{fmt(sumBD)}</td>
                   <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">{fmt(sumBC)}</td>
-                  <td className="border border-slate-400 px-2 py-2 text-right text-black">
-                    <input type="text" value={remarks.bank} onChange={e => handleRemark("bank", e.target.value)} className="w-full text-right bg-transparent border-0 focus:ring-0 p-0" />
+                  <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">
+                    {fmtK(safeAdd(sumBD, -sumBC))}
                   </td>
                 </tr>
 
@@ -217,8 +218,8 @@ export default function TrialBalance({ onBack }: Props) {
                   <td className="border border-slate-400 px-4 py-2 text-center text-black font-medium" style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}>खर्च</td>
                   <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">{fmt(sumKD)}</td>
                   <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">{fmt(sumKC)}</td>
-                  <td className="border border-slate-400 px-2 py-2 text-right text-black">
-                    <input type="text" value={remarks.kharcha} onChange={e => handleRemark("kharcha", e.target.value)} className="w-full text-right bg-transparent border-0 focus:ring-0 p-0" />
+                  <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">
+                    {fmtK(safeAdd(sumKD, -sumKC))}
                   </td>
                 </tr>
 
@@ -232,8 +233,8 @@ export default function TrialBalance({ onBack }: Props) {
                   <td className="border border-slate-400 px-2 py-2 text-right font-mono text-black">
                     <input type="number" value={peshiCredit} onChange={e => setPeshiCredit(e.target.value)} className="w-full text-right bg-transparent border-0 focus:ring-0 p-0 font-mono" placeholder="0.00" />
                   </td>
-                  <td className="border border-slate-400 px-2 py-2 text-right text-black">
-                    <input type="text" value={remarks.peshi} onChange={e => handleRemark("peshi", e.target.value)} className="w-full text-right bg-transparent border-0 focus:ring-0 p-0" />
+                  <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">
+                    {fmtK(safeAdd(pDebitNum, -pCreditNum))}
                   </td>
                 </tr>
 
@@ -243,8 +244,8 @@ export default function TrialBalance({ onBack }: Props) {
                   <td className="border border-slate-400 px-4 py-2 text-center text-black font-medium" style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}>विविध</td>
                   <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">{fmt(sumBiD)}</td>
                   <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">{fmt(sumBiC)}</td>
-                  <td className="border border-slate-400 px-2 py-2 text-right text-black">
-                    <input type="text" value={remarks.bibidh} onChange={e => handleRemark("bibidh", e.target.value)} className="w-full text-right bg-transparent border-0 focus:ring-0 p-0" />
+                  <td className="border border-slate-400 px-4 py-2 text-right font-mono text-black">
+                    {fmtK(safeAdd(sumBiD, -sumBiC))}
                   </td>
                 </tr>
 
@@ -253,7 +254,9 @@ export default function TrialBalance({ onBack }: Props) {
                   <td colSpan={2} className="border border-slate-400 px-4 py-3 text-center" style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}>जम्मा</td>
                   <td className="border border-slate-400 px-4 py-3 text-right font-mono text-black">{totalDebit > 0 ? fmt(totalDebit) : "0"}</td>
                   <td className="border border-slate-400 px-4 py-3 text-right font-mono text-black">{totalCredit > 0 ? fmt(totalCredit) : "0"}</td>
-                  <td className="border border-slate-400 px-4 py-3 text-right text-black font-mono">0</td>
+                  <td className="border border-slate-400 px-4 py-3 text-right text-black font-mono">
+                    {fmtK(safeAdd(totalDebit, -totalCredit))}
+                  </td>
                 </tr>
               </tbody>
             </table>
