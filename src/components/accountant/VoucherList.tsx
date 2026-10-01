@@ -179,7 +179,7 @@ export default function VoucherList() {
             <select
               value={filterFY}
               onChange={e => { setFilterFY(e.target.value); }}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+              className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
             >
               {FISCAL_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
@@ -190,7 +190,7 @@ export default function VoucherList() {
             <select
               value={filterType}
               onChange={e => setFilterType(e.target.value as any)}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+              className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
             >
               <option value="">All Types</option>
               <option value="Income">Income</option>
@@ -205,7 +205,7 @@ export default function VoucherList() {
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
               placeholder="Voucher no., description, topic..."
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
           </div>
         </div>
