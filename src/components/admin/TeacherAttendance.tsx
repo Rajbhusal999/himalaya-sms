@@ -167,7 +167,7 @@ export default function TeacherAttendance() {
   };
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
+    contentRef: printRef,
     documentTitle: `Teacher_Attendance_${selectedDate}`,
   });
 
