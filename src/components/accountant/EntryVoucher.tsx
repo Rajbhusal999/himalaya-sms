@@ -43,7 +43,7 @@ export default function EntryVoucher() {
   const [cashRows, setCashRows] = useState<AmountRow[]>([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
   const [bankRows, setBankRows] = useState<AmountRow[]>([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
   const [bibidhRows, setBibidhRows] = useState<AmountRow[]>([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
-  const [kharchaRows, setKharchaRows] = useState<SingleAmountRow[]>([{ id: generateId(), amount: "" }, { id: generateId(), amount: "" }]);
+  const [topicAmountRows, setTopicAmountRows] = useState<SingleAmountRow[]>([{ id: generateId(), amount: "" }, { id: generateId(), amount: "" }]);
 
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -104,17 +104,24 @@ export default function EntryVoucher() {
     }
 
     // Calculate totals for double-entry check
+    const totalTopicAmount = calculateTotal(topicAmountRows, 'amount');
+
     const totalCashDebit = calculateTotal(cashRows, 'debit');
     const totalBankDebit = calculateTotal(bankRows, 'debit');
-    const totalKharchaDebit = calculateTotal(kharchaRows, 'amount'); // Kharcha is considered an expense/debit
     const totalBibidhDebit = calculateTotal(bibidhRows, 'debit');
 
     const totalCashCredit = calculateTotal(cashRows, 'credit');
     const totalBankCredit = calculateTotal(bankRows, 'credit');
     const totalBibidhCredit = calculateTotal(bibidhRows, 'credit');
 
-    const grandTotalDebit = totalCashDebit + totalBankDebit + totalKharchaDebit + totalBibidhDebit;
-    const grandTotalCredit = totalCashCredit + totalBankCredit + totalBibidhCredit;
+    let grandTotalDebit = totalCashDebit + totalBankDebit + totalBibidhDebit;
+    let grandTotalCredit = totalCashCredit + totalBankCredit + totalBibidhCredit;
+
+    if (voucherType === 'Expense') {
+      grandTotalDebit += totalTopicAmount; // Expense is Debit
+    } else {
+      grandTotalCredit += totalTopicAmount; // Income is Credit
+    }
 
     if (Math.abs(grandTotalDebit - grandTotalCredit) > 0.001) {
       alert(`Error: The Debit and Credit amounts are not equal.\n\nTotal Debit: Rs. ${grandTotalDebit.toFixed(2)}\nTotal Credit: Rs. ${grandTotalCredit.toFixed(2)}`);
@@ -128,7 +135,7 @@ export default function EntryVoucher() {
       const details = {
         cash: cashRows.filter(r => r.debit || r.credit),
         bank: bankRows.filter(r => r.debit || r.credit),
-        kharcha: kharchaRows.filter(r => r.amount),
+        [voucherType === 'Expense' ? 'kharcha' : 'aamdani']: topicAmountRows.filter(r => r.amount),
         bibidh: bibidhRows.filter(r => r.debit || r.credit),
       };
 
@@ -143,8 +150,8 @@ export default function EntryVoucher() {
         cash_credit: calculateTotal(cashRows, 'credit'),
         bank_debit: calculateTotal(bankRows, 'debit'),
         bank_credit: calculateTotal(bankRows, 'credit'),
-        kharcha_debit: calculateTotal(kharchaRows, 'amount'), // Store all single kharcha amounts as debit by default
-        kharcha_credit: 0, 
+        kharcha_debit: voucherType === 'Expense' ? calculateTotal(topicAmountRows, 'amount') : 0, 
+        kharcha_credit: voucherType === 'Income' ? calculateTotal(topicAmountRows, 'amount') : 0, 
         bibidh_debit: calculateTotal(bibidhRows, 'debit'),
         bibidh_credit: calculateTotal(bibidhRows, 'credit'),
       }]);
@@ -160,7 +167,7 @@ export default function EntryVoucher() {
       setCashRows([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
       setBankRows([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
       setBibidhRows([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
-      setKharchaRows([{ id: generateId(), amount: "" }, { id: generateId(), amount: "" }]);
+      setTopicAmountRows([{ id: generateId(), amount: "" }, { id: generateId(), amount: "" }]);
 
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
@@ -386,11 +393,13 @@ export default function EntryVoucher() {
               </button>
             </div>
 
-            {/* Kharcha (Single Amount Column) */}
-            <div className="bg-rose-50/50 p-4 rounded-xl border border-rose-100 flex flex-col">
-              <h4 className="font-bold text-rose-800 mb-3 text-center">Kharcha (खर्च)</h4>
+            {/* Topic Amount (Aamdani/Kharcha) */}
+            <div className={`p-4 rounded-xl border flex flex-col ${voucherType === 'Expense' ? 'bg-rose-50/50 border-rose-100' : 'bg-amber-50/50 border-amber-100'}`}>
+              <h4 className={`font-bold mb-3 text-center ${voucherType === 'Expense' ? 'text-rose-800' : 'text-amber-800'}`}>
+                {voucherType === 'Expense' ? 'Kharcha (खर्च)' : 'Aamdani (आम्दानी)'}
+              </h4>
               <div className="space-y-4 flex-1">
-                {kharchaRows.map((row, idx) => (
+                {topicAmountRows.map((row, idx) => (
                   <div key={row.id} className="relative group">
                     <div className="space-y-2">
                       <div>
@@ -401,25 +410,25 @@ export default function EntryVoucher() {
                           min="0"
                           value={row.amount}
                           onChange={(e) => {
-                            const newRows = [...kharchaRows];
+                            const newRows = [...topicAmountRows];
                             newRows[idx].amount = e.target.value;
-                            setKharchaRows(newRows);
+                            setTopicAmountRows(newRows);
                           }}
-                          className="w-full px-2 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-rose-500 text-slate-900 font-mono text-sm"
+                          className={`w-full px-2 py-1.5 border border-slate-300 rounded focus:ring-2 text-slate-900 font-mono text-sm ${voucherType === 'Expense' ? 'focus:ring-rose-500' : 'focus:ring-amber-500'}`}
                           placeholder="0.00"
                         />
                       </div>
                     </div>
-                    {kharchaRows.length > 1 && (
-                      <button type="button" onClick={() => setKharchaRows(kharchaRows.filter(r => r.id !== row.id))} className="absolute -right-2 -top-2 bg-red-100 text-red-600 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
+                    {topicAmountRows.length > 1 && (
+                      <button type="button" onClick={() => setTopicAmountRows(topicAmountRows.filter(r => r.id !== row.id))} className="absolute -right-2 -top-2 bg-red-100 text-red-600 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
                     )}
                   </div>
                 ))}
               </div>
               <button
                 type="button"
-                onClick={() => setKharchaRows([...kharchaRows, { id: generateId(), amount: "" }])}
-                className="mt-4 flex items-center justify-center w-full py-1.5 text-xs font-bold text-rose-600 bg-rose-100 hover:bg-rose-200 rounded-lg transition-colors"
+                onClick={() => setTopicAmountRows([...topicAmountRows, { id: generateId(), amount: "" }])}
+                className={`mt-4 flex items-center justify-center w-full py-1.5 text-xs font-bold rounded-lg transition-colors ${voucherType === 'Expense' ? 'text-rose-600 bg-rose-100 hover:bg-rose-200' : 'text-amber-600 bg-amber-100 hover:bg-amber-200'}`}
               >
                 <Plus className="w-3 h-3 mr-1" /> Add Row
               </button>
