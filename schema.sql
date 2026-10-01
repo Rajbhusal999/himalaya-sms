@@ -224,3 +224,26 @@ alter table public.accounting_subtopics enable row level security;
 
 create policy "Enable full access for anon users" on public.accounting_topics for all to anon using (true) with check (true);
 create policy "Enable full access for anon users" on public.accounting_subtopics for all to anon using (true) with check (true);
+
+-- Create Accounting Vouchers Table
+create table public.accounting_vouchers (
+    id uuid default uuid_generate_v4() primary key,
+    topic_id uuid references public.accounting_topics(id) on delete restrict not null,
+    subtopic_id uuid references public.accounting_subtopics(id) on delete set null,
+    date text not null,
+    voucher_number text not null,
+    description text,
+    cash_debit numeric(12, 2) default 0,
+    cash_credit numeric(12, 2) default 0,
+    bank_debit numeric(12, 2) default 0,
+    bank_credit numeric(12, 2) default 0,
+    kharcha_debit numeric(12, 2) default 0,
+    kharcha_credit numeric(12, 2) default 0,
+    bibidh_debit numeric(12, 2) default 0,
+    bibidh_credit numeric(12, 2) default 0,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS for Accounting Vouchers
+alter table public.accounting_vouchers enable row level security;
+create policy "Enable full access for anon users" on public.accounting_vouchers for all to anon using (true) with check (true);

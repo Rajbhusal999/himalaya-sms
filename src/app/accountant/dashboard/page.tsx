@@ -18,6 +18,7 @@ import {
   FolderTree
 } from "lucide-react";
 import ManageTopics from "@/components/accountant/ManageTopics";
+import EntryVoucher from "@/components/accountant/EntryVoucher";
 
 export default function AccountantDashboard() {
   const router = useRouter();
@@ -132,6 +133,10 @@ export default function AccountantDashboard() {
       );
     }
 
+    if (activeTab === "voucher") {
+      return <EntryVoucher />;
+    }
+
     if (activeTab === "topics") {
       return <ManageTopics />;
     }
@@ -172,6 +177,19 @@ export default function AccountantDashboard() {
             <BarChart3 className="w-10 h-10 mb-4 text-blue-200" />
             <h3 className="text-xl font-bold mb-2">Financial Reports</h3>
             <p className="text-blue-100 text-sm mb-6">View day books, ledgers, and financial summary reports.</p>
+            <div className="flex items-center text-sm font-medium text-white">
+              Open Tool <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+
+          <div 
+            onClick={() => handleTabClick("voucher")}
+            className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl shadow-md text-white p-6 relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1"
+          >
+            <div className="absolute right-0 top-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+            <Calculator className="w-10 h-10 mb-4 text-emerald-100" />
+            <h3 className="text-xl font-bold mb-2">Entry Voucher</h3>
+            <p className="text-emerald-100 text-sm mb-6">Create new accounting vouchers and transactions.</p>
             <div className="flex items-center text-sm font-medium text-white">
               Open Tool <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
             </div>
