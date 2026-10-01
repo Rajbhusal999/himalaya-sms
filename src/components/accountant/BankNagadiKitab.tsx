@@ -25,7 +25,7 @@ type Props = {
 
 const SCHOOL_NAME = "श्री हिमालय आधारभूत विद्यालय , भरतपुर -११ , चितवन";
 const REPORT_TITLE = "नगद / बैंक खाता (१)";
-const ROWS_PER_PAGE = 20; // rows per A4 landscape page
+const ROWS_PER_PAGE = 9; // max 9 voucher entries per A4 landscape page
 
 // Safe number addition — avoids floating point errors
 const safeAdd = (a: number, b: number) =>
