@@ -25,10 +25,12 @@ import {
 } from "lucide-react";
 import ManageTopics from "@/components/accountant/ManageTopics";
 import EntryVoucher from "@/components/accountant/EntryVoucher";
+import BankNagadiKitab from "@/components/accountant/BankNagadiKitab";
 
 export default function AccountantDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
+  const [activeReport, setActiveReport] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
@@ -71,12 +73,21 @@ export default function AccountantDashboard() {
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
+    setActiveReport(null); // reset any open sub-report
     setIsMobileMenuOpen(false);
 
     // Update URL without full page reload
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
     window.history.pushState({}, "", url);
+  };
+
+  const handleReportOpen = (reportId: string) => {
+    setActiveReport(reportId);
+  };
+
+  const handleReportBack = () => {
+    setActiveReport(null);
   };
 
   const handleLogout = async () => {
@@ -95,6 +106,11 @@ export default function AccountantDashboard() {
   const renderContent = () => {
 
     if (activeTab === "report") {
+      // ── Sub-report: Bank Nagadi Kitab ──
+      if (activeReport === 'bank-nagadi') {
+        return <BankNagadiKitab onBack={handleReportBack} />;
+      }
+
       const reports = [
         { id: 'bank-nagadi', name: 'Bank Nagadi Kitab', np: 'बैंक नगदी किताब', icon: BookText, color: 'text-blue-600', bg: 'bg-blue-50', hover: 'hover:border-blue-500' },
         { id: 'aamdani-khata', name: 'Aamdani Khata', np: 'आम्दानी खाता', icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50', hover: 'hover:border-emerald-500' },
@@ -121,6 +137,7 @@ export default function AccountantDashboard() {
               <button
                 key={report.id}
                 type="button"
+                onClick={() => handleReportOpen(report.id)}
                 className={`flex flex-col items-start p-6 bg-white border-2 border-slate-100 rounded-2xl cursor-pointer transition-all hover:shadow-lg ${report.hover} group text-left w-full relative overflow-hidden`}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${report.bg} ${report.color}`}>
