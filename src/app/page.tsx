@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, Award, Heart, ChevronRight, Menu, X, MapPin, Phone, Mail, MessageCircle } from "lucide-react";
+import { GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, Award, Heart, ChevronRight, Menu, X, MapPin, Phone, Mail, MessageCircle, Calculator } from "lucide-react";
 import NewsTicker from "@/components/NewsTicker";
 import OurFaculty from "@/components/OurFaculty";
 import PublicRatings from "@/components/PublicRatings";
@@ -38,6 +38,10 @@ export default function LandingPage() {
               
               <div className="h-6 w-px bg-slate-200"></div>
               
+              <Link href="/accountant/login" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors flex items-center gap-2">
+                <Calculator className="w-4 h-4" />
+                Accountant
+              </Link>
               <Link href="/teacher/login" className="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 Staff
@@ -67,6 +71,10 @@ export default function LandingPage() {
               <button onClick={() => { setIsMenuOpen(false); setIsContactOpen(true); }} className="w-full text-left block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Contact Us</button>
               <Link href="/recent-news" onClick={() => setIsMenuOpen(false)} className="block px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">Recent News</Link>
               <div className="my-2 border-t border-slate-100"></div>
+              <Link href="/accountant/login" className="flex items-center gap-3 px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">
+                <Calculator className="w-5 h-5 text-slate-500" />
+                Accountant Portal
+              </Link>
               <Link href="/teacher/login" className="flex items-center gap-3 px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50 hover:text-brand-600 rounded-md">
                 <Users className="w-5 h-5 text-slate-500" />
                 Teacher Portal
@@ -320,6 +328,11 @@ export default function LandingPage() {
           <div>
             <h4 className="text-white font-bold mb-4 uppercase tracking-wider text-sm">Portals</h4>
             <ul className="space-y-3 text-sm">
+              <li>
+                <Link href="/accountant/login" className="hover:text-brand-400 transition-colors flex items-center gap-2 font-medium">
+                  <Calculator className="w-4 h-4 text-brand-500" /> Accountant Portal
+                </Link>
+              </li>
               <li>
                 <Link href="/admin/login" className="hover:text-brand-400 transition-colors flex items-center gap-2 font-medium">
                   <ShieldCheck className="w-4 h-4 text-brand-500" /> Admin Portal
