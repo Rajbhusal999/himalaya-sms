@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { Save, Loader2, RefreshCw } from "lucide-react";
+import { Save, Loader2, RefreshCw, Plus, Trash2 } from "lucide-react";
 import NepaliDatePicker from "@/components/common/NepaliDatePicker";
 import { getCurrentBsDate } from "@/lib/nepaliDate";
 
@@ -19,6 +19,11 @@ type Subtopic = {
   name: string;
 };
 
+type AmountRow = { id: string; debit: string; credit: string };
+type SingleAmountRow = { id: string; amount: string };
+
+const generateId = () => Math.random().toString(36).substring(2, 9);
+
 export default function EntryVoucher() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [subtopics, setSubtopics] = useState<Subtopic[]>([]);
@@ -34,14 +39,11 @@ export default function EntryVoucher() {
   const [voucherNumber, setVoucherNumber] = useState("");
   const [description, setDescription] = useState("");
   
-  const [cashDebit, setCashDebit] = useState("");
-  const [cashCredit, setCashCredit] = useState("");
-  const [bankDebit, setBankDebit] = useState("");
-  const [bankCredit, setBankCredit] = useState("");
-  const [kharchaDebit, setKharchaDebit] = useState("");
-  const [kharchaCredit, setKharchaCredit] = useState("");
-  const [bibidhDebit, setBibidhDebit] = useState("");
-  const [bibidhCredit, setBibidhCredit] = useState("");
+  // Ledger Arrays - initialize with 2 rows as requested
+  const [cashRows, setCashRows] = useState<AmountRow[]>([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
+  const [bankRows, setBankRows] = useState<AmountRow[]>([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
+  const [bibidhRows, setBibidhRows] = useState<AmountRow[]>([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
+  const [kharchaRows, setKharchaRows] = useState<SingleAmountRow[]>([{ id: generateId(), amount: "" }, { id: generateId(), amount: "" }]);
 
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -90,6 +92,10 @@ export default function EntryVoucher() {
     }
   }, [selectedTopicId, topics]);
 
+  const calculateTotal = (rows: any[], field: string) => {
+    return rows.reduce((acc, row) => acc + (parseFloat(row[field]) || 0), 0);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTopicId || !voucherNumber.trim()) {
@@ -101,20 +107,28 @@ export default function EntryVoucher() {
     setSuccess(false);
 
     try {
+      const details = {
+        cash: cashRows.filter(r => r.debit || r.credit),
+        bank: bankRows.filter(r => r.debit || r.credit),
+        kharcha: kharchaRows.filter(r => r.amount),
+        bibidh: bibidhRows.filter(r => r.debit || r.credit),
+      };
+
       const { error } = await supabase.from("accounting_vouchers").insert([{
         topic_id: selectedTopicId,
         source_type: selectedSourceType,
         date,
         voucher_number: voucherNumber.trim(),
         description: description.trim(),
-        cash_debit: parseFloat(cashDebit) || 0,
-        cash_credit: parseFloat(cashCredit) || 0,
-        bank_debit: parseFloat(bankDebit) || 0,
-        bank_credit: parseFloat(bankCredit) || 0,
-        kharcha_debit: parseFloat(kharchaDebit) || 0,
-        kharcha_credit: parseFloat(kharchaCredit) || 0,
-        bibidh_debit: parseFloat(bibidhDebit) || 0,
-        bibidh_credit: parseFloat(bibidhCredit) || 0,
+        details,
+        cash_debit: calculateTotal(cashRows, 'debit'),
+        cash_credit: calculateTotal(cashRows, 'credit'),
+        bank_debit: calculateTotal(bankRows, 'debit'),
+        bank_credit: calculateTotal(bankRows, 'credit'),
+        kharcha_debit: calculateTotal(kharchaRows, 'amount'), // Store all single kharcha amounts as debit by default
+        kharcha_credit: 0, 
+        bibidh_debit: calculateTotal(bibidhRows, 'debit'),
+        bibidh_credit: calculateTotal(bibidhRows, 'credit'),
       }]);
 
       if (error) throw error;
@@ -125,14 +139,10 @@ export default function EntryVoucher() {
       // Reset form amounts and desc
       setVoucherNumber("");
       setDescription("");
-      setCashDebit("");
-      setCashCredit("");
-      setBankDebit("");
-      setBankCredit("");
-      setKharchaDebit("");
-      setKharchaCredit("");
-      setBibidhDebit("");
-      setBibidhCredit("");
+      setCashRows([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
+      setBankRows([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
+      setBibidhRows([{ id: generateId(), debit: "", credit: "" }, { id: generateId(), debit: "", credit: "" }]);
+      setKharchaRows([{ id: generateId(), amount: "" }, { id: generateId(), amount: "" }]);
 
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
@@ -159,9 +169,8 @@ export default function EntryVoucher() {
       </div>
 
       <form onSubmit={handleSave} className="space-y-8">
-        {/* Top Section: Categorization and Meta */}
+        {/* Top Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-slate-50 p-6 rounded-xl border border-slate-200">
-          
           <div className="lg:col-span-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Topic</label>
             <select
@@ -211,7 +220,7 @@ export default function EntryVoucher() {
           </div>
         </div>
 
-        {/* Middle Section: Details */}
+        {/* Middle Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
             <div className="flex justify-between items-end mb-2">
@@ -247,129 +256,211 @@ export default function EntryVoucher() {
           <h3 className="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Ledger Amounts</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
             {/* Cash */}
-            <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+            <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 flex flex-col">
               <h4 className="font-bold text-emerald-800 mb-3 text-center">Cash (नगद)</h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Debit (Rs.)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={cashDebit}
-                    onChange={(e) => setCashDebit(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-emerald-500 text-slate-900 font-mono"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Credit (Rs.)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={cashCredit}
-                    onChange={(e) => setCashCredit(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-emerald-500 text-slate-900 font-mono"
-                    placeholder="0.00"
-                  />
-                </div>
+              <div className="space-y-4 flex-1">
+                {cashRows.map((row, idx) => (
+                  <div key={row.id} className="relative group">
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Debit (Rs.)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={row.debit}
+                          onChange={(e) => {
+                            const newRows = [...cashRows];
+                            newRows[idx].debit = e.target.value;
+                            setCashRows(newRows);
+                          }}
+                          className="w-full px-2 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-emerald-500 text-slate-900 font-mono text-sm"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Credit (Rs.)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={row.credit}
+                          onChange={(e) => {
+                            const newRows = [...cashRows];
+                            newRows[idx].credit = e.target.value;
+                            setCashRows(newRows);
+                          }}
+                          className="w-full px-2 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-emerald-500 text-slate-900 font-mono text-sm"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
+                    {cashRows.length > 1 && (
+                      <button type="button" onClick={() => setCashRows(cashRows.filter(r => r.id !== row.id))} className="absolute -right-2 -top-2 bg-red-100 text-red-600 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
+                    )}
+                  </div>
+                ))}
               </div>
+              <button
+                type="button"
+                onClick={() => setCashRows([...cashRows, { id: generateId(), debit: "", credit: "" }])}
+                className="mt-4 flex items-center justify-center w-full py-1.5 text-xs font-bold text-emerald-600 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition-colors"
+              >
+                <Plus className="w-3 h-3 mr-1" /> Add Row
+              </button>
             </div>
 
             {/* Bank */}
-            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex flex-col">
               <h4 className="font-bold text-blue-800 mb-3 text-center">Bank (बैंक)</h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Debit (Rs.)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={bankDebit}
-                    onChange={(e) => setBankDebit(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 text-slate-900 font-mono"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Credit (Rs.)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={bankCredit}
-                    onChange={(e) => setBankCredit(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 text-slate-900 font-mono"
-                    placeholder="0.00"
-                  />
-                </div>
+              <div className="space-y-4 flex-1">
+                {bankRows.map((row, idx) => (
+                  <div key={row.id} className="relative group">
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Debit (Rs.)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={row.debit}
+                          onChange={(e) => {
+                            const newRows = [...bankRows];
+                            newRows[idx].debit = e.target.value;
+                            setBankRows(newRows);
+                          }}
+                          className="w-full px-2 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 text-slate-900 font-mono text-sm"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Credit (Rs.)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={row.credit}
+                          onChange={(e) => {
+                            const newRows = [...bankRows];
+                            newRows[idx].credit = e.target.value;
+                            setBankRows(newRows);
+                          }}
+                          className="w-full px-2 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 text-slate-900 font-mono text-sm"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
+                    {bankRows.length > 1 && (
+                      <button type="button" onClick={() => setBankRows(bankRows.filter(r => r.id !== row.id))} className="absolute -right-2 -top-2 bg-red-100 text-red-600 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
+                    )}
+                  </div>
+                ))}
               </div>
+              <button
+                type="button"
+                onClick={() => setBankRows([...bankRows, { id: generateId(), debit: "", credit: "" }])}
+                className="mt-4 flex items-center justify-center w-full py-1.5 text-xs font-bold text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
+              >
+                <Plus className="w-3 h-3 mr-1" /> Add Row
+              </button>
             </div>
 
-            {/* Kharcha */}
-            <div className="bg-rose-50/50 p-4 rounded-xl border border-rose-100">
+            {/* Kharcha (Single Amount Column) */}
+            <div className="bg-rose-50/50 p-4 rounded-xl border border-rose-100 flex flex-col">
               <h4 className="font-bold text-rose-800 mb-3 text-center">Kharcha (खर्च)</h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Debit (Rs.)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={kharchaDebit}
-                    onChange={(e) => setKharchaDebit(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-rose-500 text-slate-900 font-mono"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Credit (Rs.)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={kharchaCredit}
-                    onChange={(e) => setKharchaCredit(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-rose-500 text-slate-900 font-mono"
-                    placeholder="0.00"
-                  />
-                </div>
+              <div className="space-y-4 flex-1">
+                {kharchaRows.map((row, idx) => (
+                  <div key={row.id} className="relative group">
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Amount (Rs.)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={row.amount}
+                          onChange={(e) => {
+                            const newRows = [...kharchaRows];
+                            newRows[idx].amount = e.target.value;
+                            setKharchaRows(newRows);
+                          }}
+                          className="w-full px-2 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-rose-500 text-slate-900 font-mono text-sm"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
+                    {kharchaRows.length > 1 && (
+                      <button type="button" onClick={() => setKharchaRows(kharchaRows.filter(r => r.id !== row.id))} className="absolute -right-2 -top-2 bg-red-100 text-red-600 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
+                    )}
+                  </div>
+                ))}
               </div>
+              <button
+                type="button"
+                onClick={() => setKharchaRows([...kharchaRows, { id: generateId(), amount: "" }])}
+                className="mt-4 flex items-center justify-center w-full py-1.5 text-xs font-bold text-rose-600 bg-rose-100 hover:bg-rose-200 rounded-lg transition-colors"
+              >
+                <Plus className="w-3 h-3 mr-1" /> Add Row
+              </button>
             </div>
 
             {/* Bibidh */}
-            <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100">
+            <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100 flex flex-col">
               <h4 className="font-bold text-purple-800 mb-3 text-center">Bibidh (विविध)</h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Debit (Rs.)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={bibidhDebit}
-                    onChange={(e) => setBibidhDebit(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-purple-500 text-slate-900 font-mono"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Credit (Rs.)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={bibidhCredit}
-                    onChange={(e) => setBibidhCredit(e.target.value)}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-purple-500 text-slate-900 font-mono"
-                    placeholder="0.00"
-                  />
-                </div>
+              <div className="space-y-4 flex-1">
+                {bibidhRows.map((row, idx) => (
+                  <div key={row.id} className="relative group">
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Debit (Rs.)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={row.debit}
+                          onChange={(e) => {
+                            const newRows = [...bibidhRows];
+                            newRows[idx].debit = e.target.value;
+                            setBibidhRows(newRows);
+                          }}
+                          className="w-full px-2 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-purple-500 text-slate-900 font-mono text-sm"
+                          placeholder="0.00"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">Credit (Rs.)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={row.credit}
+                          onChange={(e) => {
+                            const newRows = [...bibidhRows];
+                            newRows[idx].credit = e.target.value;
+                            setBibidhRows(newRows);
+                          }}
+                          className="w-full px-2 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-purple-500 text-slate-900 font-mono text-sm"
+                          placeholder="0.00"
+                        />
+                      </div>
+                    </div>
+                    {bibidhRows.length > 1 && (
+                      <button type="button" onClick={() => setBibidhRows(bibidhRows.filter(r => r.id !== row.id))} className="absolute -right-2 -top-2 bg-red-100 text-red-600 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
+                    )}
+                  </div>
+                ))}
               </div>
+              <button
+                type="button"
+                onClick={() => setBibidhRows([...bibidhRows, { id: generateId(), debit: "", credit: "" }])}
+                className="mt-4 flex items-center justify-center w-full py-1.5 text-xs font-bold text-purple-600 bg-purple-100 hover:bg-purple-200 rounded-lg transition-colors"
+              >
+                <Plus className="w-3 h-3 mr-1" /> Add Row
+              </button>
             </div>
+
           </div>
         </div>
 

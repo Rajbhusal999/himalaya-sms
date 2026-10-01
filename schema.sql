@@ -234,6 +234,7 @@ create table public.accounting_vouchers (
     date text not null,
     voucher_number text not null,
     description text,
+    details jsonb,
     cash_debit numeric(12, 2) default 0,
     cash_credit numeric(12, 2) default 0,
     bank_debit numeric(12, 2) default 0,
