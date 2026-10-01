@@ -182,3 +182,21 @@ create policy "Enable read access for anon users" on public.teacher_attendance f
 create policy "Enable insert for anon users" on public.teacher_attendance for insert to anon with check (true);
 create policy "Enable update for anon users" on public.teacher_attendance for update to anon using (true);
 create policy "Enable delete for anon users" on public.teacher_attendance for delete to anon using (true);
+
+-- Create Accountant Credentials Table
+create table public.accountant_credentials (
+    id text primary key,
+    username text not null,
+    password text not null,
+    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS for Accountant Credentials
+alter table public.accountant_credentials enable row level security;
+create policy "Enable read access for anon users" on public.accountant_credentials for select to anon using (true);
+create policy "Enable insert for anon users" on public.accountant_credentials for insert to anon with check (true);
+create policy "Enable update for anon users" on public.accountant_credentials for update to anon using (true);
+create policy "Enable delete for anon users" on public.accountant_credentials for delete to anon using (true);
+
+-- Insert default accountant credentials
+insert into public.accountant_credentials (id, username, password) values ('default', 'accountant', 'accountant123') on conflict (id) do nothing;

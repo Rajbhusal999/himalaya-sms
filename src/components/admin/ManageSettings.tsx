@@ -26,6 +26,12 @@ export default function ManageSettings() {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // Accountant Credentials state
+  const [accountantUsername, setAccountantUsername] = useState("");
+  const [accountantPassword, setAccountantPassword] = useState("");
+  const [accountantSaving, setAccountantSaving] = useState(false);
+  const [accountantSaveSuccess, setAccountantSaveSuccess] = useState(false);
+
   // Security & Password state (Saved as SHA-256 hash to Supabase admin_credentials table)
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -105,6 +111,27 @@ export default function ManageSettings() {
       }
     };
     fetchProfile();
+  }, []);
+
+  // Fetch accountant credentials
+  useEffect(() => {
+    const fetchAccountant = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("accountant_credentials")
+          .select("*")
+          .eq("id", "default")
+          .single();
+
+        if (data && !error) {
+          if (data.username) setAccountantUsername(data.username);
+          if (data.password) setAccountantPassword(data.password);
+        }
+      } catch (err) {
+        console.error("Error fetching accountant credentials:", err);
+      }
+    };
+    fetchAccountant();
   }, []);
 
   // Fetch 2FA status from Supabase
@@ -317,6 +344,34 @@ export default function ManageSettings() {
     }
   };
 
+  const handleSaveAccountant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAccountantSaving(true);
+    setAccountantSaveSuccess(false);
+
+    try {
+      const payload = {
+        id: "default",
+        username: accountantUsername,
+        password: accountantPassword,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from("accountant_credentials")
+        .upsert(payload, { onConflict: "id" });
+
+      if (error) throw error;
+
+      setAccountantSaveSuccess(true);
+      setTimeout(() => setAccountantSaveSuccess(false), 4000);
+    } catch (err: any) {
+      alert("Failed to save accountant credentials: " + (err.message || err));
+    } finally {
+      setAccountantSaving(false);
+    }
+  };
+
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError(null);
@@ -494,6 +549,12 @@ export default function ManageSettings() {
           <User className="w-4 h-4" /> Profile
         </button>
         <button
+          onClick={() => setActiveTab("accountant")}
+          className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "accountant" ? "border-brand-600 text-brand-600 font-bold" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+        >
+          <ShieldCheck className="w-4 h-4" /> Accountant
+        </button>
+        <button
           onClick={() => setActiveTab("notifications")}
           className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "notifications" ? "border-brand-600 text-brand-600 font-bold" : "border-transparent text-slate-500 hover:text-slate-700"}`}
         >
@@ -567,6 +628,57 @@ export default function ManageSettings() {
                 <><RefreshCw className="w-4 h-4 animate-spin" /> Saving...</>
               ) : (
                 <><Save className="w-4 h-4" /> Save Changes</>
+              )}
+            </button>
+          </form>
+        )}
+
+        {activeTab === "accountant" && (
+          <form onSubmit={handleSaveAccountant} className="max-w-2xl space-y-6">
+            <h2 className="text-xl font-bold text-slate-800 mb-4">Accountant Login Details</h2>
+            <p className="text-slate-500 text-sm mb-4">Set the login ID and password for the Accountant Portal. The accountant will use these credentials to access their dashboard.</p>
+
+            {accountantSaveSuccess && (
+              <div className="p-3.5 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-xl text-sm font-bold flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                Accountant credentials saved successfully!
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Accountant Login ID (Username)</label>
+                <input
+                  type="text"
+                  required
+                  value={accountantUsername}
+                  onChange={(e) => setAccountantUsername(e.target.value)}
+                  placeholder="e.g. accountant"
+                  className="w-full px-4 py-2.5 border-2 border-slate-200 bg-slate-50 text-slate-800 font-medium rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:bg-white focus:outline-none transition-all text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Accountant Password</label>
+                <input
+                  type="text"
+                  required
+                  value={accountantPassword}
+                  onChange={(e) => setAccountantPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-2.5 border-2 border-slate-200 bg-slate-50 text-slate-800 font-medium rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:bg-white focus:outline-none transition-all text-sm"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={accountantSaving}
+              className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-all font-bold shadow-md disabled:opacity-50 mt-4"
+            >
+              {accountantSaving ? (
+                <><RefreshCw className="w-4 h-4 animate-spin" /> Saving...</>
+              ) : (
+                <><Save className="w-4 h-4" /> Save Accountant Details</>
               )}
             </button>
           </form>
