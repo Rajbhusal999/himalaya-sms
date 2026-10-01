@@ -119,7 +119,7 @@ export default function TeacherAttendance() {
   };
 
   const markAllAs = (status: AttendanceRecord["status"]) => {
-    if (!window.confirm(`Are you sure you want to mark all filtered teachers as ${status}?`)) return;
+    if (!window.confirm(`Are you sure you want to mark all filtered personnel as ${status}?`)) return;
     
     const newData = { ...attendanceData };
     filteredTeachers.forEach(t => {
@@ -137,13 +137,18 @@ export default function TeacherAttendance() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const recordsToUpsert = Object.values(attendanceData).map(record => ({
-        id: record.id, // Will be undefined for new records
-        teacher_id: record.teacher_id,
-        date: record.date,
-        status: record.status,
-        remarks: record.remarks
-      }));
+      const recordsToUpsert = Object.values(attendanceData).map(record => {
+        const payload: any = {
+          teacher_id: record.teacher_id,
+          date: record.date,
+          status: record.status,
+          remarks: record.remarks
+        };
+        if (record.id) {
+          payload.id = record.id;
+        }
+        return payload;
+      });
 
       if (recordsToUpsert.length === 0) {
         alert("No attendance data to save.");
@@ -157,7 +162,7 @@ export default function TeacherAttendance() {
 
       if (error) throw error;
       
-      alert("Teacher attendance saved successfully!");
+      alert("Attendance saved successfully!");
       fetchData(); // Refresh to get IDs
     } catch (error: any) {
       alert("Failed to save attendance: " + (error.message || error));
@@ -195,10 +200,10 @@ export default function TeacherAttendance() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <UserCheck className="w-7 h-7 text-blue-200" />
-              <h2 className="text-2xl font-bold">Teacher Attendance</h2>
+              <h2 className="text-2xl font-bold">Teacher & Staff Attendance</h2>
             </div>
             <p className="text-blue-100 text-sm max-w-2xl">
-              Manage daily attendance for teachers using the Nepali B.S. Calendar.
+              Manage daily attendance for teachers and staff using the Nepali B.S. Calendar.
             </p>
           </div>
 
@@ -233,7 +238,7 @@ export default function TeacherAttendance() {
             />
           </div>
           <div className="relative md:col-span-4 lg:col-span-4">
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Search Teacher</label>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Search Name</label>
             <Search className="w-4 h-4 absolute left-3 bottom-3 text-slate-400" />
             <input
               type="text"
@@ -280,7 +285,7 @@ export default function TeacherAttendance() {
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-xs text-slate-600 uppercase tracking-wider">
                   <th className="px-4 py-3 font-semibold">S.N</th>
-                  <th className="px-4 py-3 font-semibold">Teacher Name</th>
+                  <th className="px-4 py-3 font-semibold">Name</th>
                   <th className="px-4 py-3 font-semibold text-center">Status</th>
                   <th className="px-4 py-3 font-semibold w-1/3">Remarks</th>
                 </tr>
@@ -338,7 +343,7 @@ export default function TeacherAttendance() {
                 ) : (
                   <tr>
                     <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
-                      No teachers found.
+                      No records found.
                     </td>
                   </tr>
                 )}
@@ -353,14 +358,14 @@ export default function TeacherAttendance() {
         <div ref={printRef} className="p-8 bg-white text-black font-sans">
           <div className="text-center mb-6 border-b-2 border-black pb-4">
             <h1 className="text-2xl font-bold uppercase tracking-wider mb-1">Himalaya Basic School</h1>
-            <h2 className="text-xl font-semibold">Teacher Attendance Report</h2>
+            <h2 className="text-xl font-semibold">Teacher & Staff Attendance Report</h2>
             <p className="mt-2 text-lg">
               <b>Date:</b> {formatBsDateDisplay(selectedDate)} B.S.
             </p>
           </div>
 
           <div className="flex gap-6 mb-6 font-medium text-sm">
-            <div>Total Teachers: {teachers.length}</div>
+            <div>Total Personnel: {teachers.length}</div>
             <div className="text-green-700">Present: {presentCount}</div>
             <div className="text-red-700">Absent: {absentCount}</div>
             <div className="text-yellow-600">Leave: {leaveCount}</div>
@@ -370,7 +375,7 @@ export default function TeacherAttendance() {
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-black p-2 text-left w-12">S.N.</th>
-                <th className="border border-black p-2 text-left">Teacher Name</th>
+                <th className="border border-black p-2 text-left">Name</th>
                 <th className="border border-black p-2 text-center w-24">Status</th>
                 <th className="border border-black p-2 text-left">Remarks</th>
               </tr>
