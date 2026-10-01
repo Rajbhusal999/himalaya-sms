@@ -32,6 +32,7 @@ import KharchaKhata from "@/components/accountant/KharchaKhata";
 import VoucherList from "@/components/accountant/VoucherList";
 import NagadBankKhata from "@/components/accountant/NagadBankKhata";
 import AayaVyaya from "@/components/accountant/AayaVyaya";
+import TrialBalance from "@/components/accountant/TrialBalance";
 
 export default function AccountantDashboard() {
   const router = useRouter();
@@ -131,6 +132,10 @@ export default function AccountantDashboard() {
       // ── Sub-report: Aaya Vyaya ──
       if (activeReport === 'aaya-vyaya') {
         return <AayaVyaya onBack={handleReportBack} />;
+      }
+      // ── Sub-report: Trial Balance ──
+      if (activeReport === 'trial-balance') {
+        return <TrialBalance onBack={handleReportBack} />;
       }
 
       const reports = [
