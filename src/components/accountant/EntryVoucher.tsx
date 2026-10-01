@@ -216,6 +216,7 @@ export default function EntryVoucher() {
             <NepaliDatePicker
               value={date}
               onChange={setDate}
+              hideToday={true}
             />
           </div>
         </div>

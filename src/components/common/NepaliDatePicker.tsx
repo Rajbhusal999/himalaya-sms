@@ -10,6 +10,7 @@ type NepaliDatePickerProps = {
   className?: string;
   label?: string;
   required?: boolean;
+  hideToday?: boolean;
 };
 
 const BS_YEARS = Array.from({ length: 15 }, (_, i) => 2078 + i); // 2078 BS to 2092 BS
@@ -19,7 +20,8 @@ export default function NepaliDatePicker({
   onChange,
   className = "",
   label,
-  required = false
+  required = false,
+  hideToday = false
 }: NepaliDatePickerProps) {
   // Parse current value or fallback to today's BS date
   const initialParts = (value || getCurrentBsDate()).split("-");
@@ -88,7 +90,7 @@ export default function NepaliDatePicker({
         <select
           value={year}
           onChange={handleYearChange}
-          className="bg-white border border-slate-200 text-xs font-bold text-slate-800 rounded px-2 py-1.5 focus:outline-none cursor-pointer"
+          className="bg-white border border-slate-200 text-xs font-bold text-slate-800 rounded px-1.5 py-1.5 focus:outline-none cursor-pointer min-w-0"
           title="Select Nepali Year (B.S.)"
         >
           {BS_YEARS.map((y) => (
@@ -102,7 +104,7 @@ export default function NepaliDatePicker({
         <select
           value={month}
           onChange={handleMonthChange}
-          className="bg-white border border-slate-200 text-xs font-bold text-slate-800 rounded px-2 py-1.5 focus:outline-none flex-1 cursor-pointer"
+          className="bg-white border border-slate-200 text-xs font-bold text-slate-800 rounded px-1.5 py-1.5 focus:outline-none flex-1 min-w-0 cursor-pointer text-ellipsis"
           title="Select Nepali Month"
         >
           {NEPALI_MONTHS_EN.map((mName, idx) => (
@@ -116,7 +118,7 @@ export default function NepaliDatePicker({
         <select
           value={day}
           onChange={handleDayChange}
-          className="bg-white border border-slate-200 text-xs font-bold text-slate-800 rounded px-2 py-1.5 focus:outline-none cursor-pointer"
+          className="bg-white border border-slate-200 text-xs font-bold text-slate-800 rounded px-1.5 py-1.5 focus:outline-none cursor-pointer min-w-0"
           title="Select Nepali Day"
         >
           {Array.from({ length: 32 }, (_, i) => i + 1).map((d) => (
@@ -127,14 +129,16 @@ export default function NepaliDatePicker({
         </select>
 
         {/* Quick Today Button */}
-        <button
-          type="button"
-          onClick={setToday}
-          className="px-2 py-1 bg-blue-600 text-white rounded text-[11px] font-bold hover:bg-blue-700 transition-colors flex-shrink-0"
-          title="Set to Today (BS)"
-        >
-          Today
-        </button>
+        {!hideToday && (
+          <button
+            type="button"
+            onClick={setToday}
+            className="px-2 py-1 bg-blue-600 text-white rounded text-[11px] font-bold hover:bg-blue-700 transition-colors flex-shrink-0"
+            title="Set to Today (BS)"
+          >
+            Today
+          </button>
+        )}
       </div>
     </div>
   );
