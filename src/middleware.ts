@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 const PUBLIC_ROUTES = ["/", "/apply", "/recent-news"];
 
 // Routes always allowed regardless of maintenance mode
-const ALWAYS_ALLOWED = ["/admin", "/teacher", "/maintenance", "/_next", "/favicon", "/logo", "/school", "/api"];
+const ALWAYS_ALLOWED = ["/admin", "/teacher", "/accountant", "/maintenance", "/_next", "/favicon", "/logo", "/school", "/api"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
