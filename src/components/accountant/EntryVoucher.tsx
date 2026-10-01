@@ -103,6 +103,24 @@ export default function EntryVoucher() {
       return;
     }
 
+    // Calculate totals for double-entry check
+    const totalCashDebit = calculateTotal(cashRows, 'debit');
+    const totalBankDebit = calculateTotal(bankRows, 'debit');
+    const totalKharchaDebit = calculateTotal(kharchaRows, 'amount'); // Kharcha is considered an expense/debit
+    const totalBibidhDebit = calculateTotal(bibidhRows, 'debit');
+
+    const totalCashCredit = calculateTotal(cashRows, 'credit');
+    const totalBankCredit = calculateTotal(bankRows, 'credit');
+    const totalBibidhCredit = calculateTotal(bibidhRows, 'credit');
+
+    const grandTotalDebit = totalCashDebit + totalBankDebit + totalKharchaDebit + totalBibidhDebit;
+    const grandTotalCredit = totalCashCredit + totalBankCredit + totalBibidhCredit;
+
+    if (Math.abs(grandTotalDebit - grandTotalCredit) > 0.001) {
+      alert(`Error: The Debit and Credit amounts are not equal.\n\nTotal Debit: Rs. ${grandTotalDebit.toFixed(2)}\nTotal Credit: Rs. ${grandTotalCredit.toFixed(2)}`);
+      return;
+    }
+
     setSaving(true);
     setSuccess(false);
 
