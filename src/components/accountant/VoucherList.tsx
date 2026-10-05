@@ -42,7 +42,7 @@ export default function VoucherList() {
 
   // Filters
   const [filterFY, setFilterFY] = useState("2083/2084");
-  const [filterType, setFilterType] = useState<"" | "Income" | "Expense">("");
+  const [filterType, setFilterType] = useState<"" | "Income" | "Expense" | "Null">("");
   const [search, setSearch] = useState("");
 
   // Pagination
@@ -195,6 +195,7 @@ export default function VoucherList() {
               <option value="">All Types</option>
               <option value="Income">Income</option>
               <option value="Expense">Expense</option>
+              <option value="Null">Null</option>
             </select>
           </div>
           {/* Search */}
@@ -254,9 +255,9 @@ export default function VoucherList() {
                           <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold ${
                             v.topic_type === "Income"
                               ? "bg-emerald-100 text-emerald-700"
-                              : "bg-rose-100 text-rose-700"
+                              : v.topic_type === "Null" ? "bg-slate-200 text-slate-700" : "bg-rose-100 text-rose-700"
                           }`}>
-                            {v.topic_type === "Income" ? "Income" : "Expense"}
+                            {v.topic_type === "Income" ? "Income" : v.topic_type === "Null" ? "Null" : "Expense"}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-xs text-slate-600" style={{ fontFamily: "Kalimati, sans-serif" }}>
@@ -375,7 +376,7 @@ export default function VoucherList() {
                     {[
                       ["Cash (नगद)", viewVoucher.cash_debit, viewVoucher.cash_credit],
                       ["Bank (बैंक)", viewVoucher.bank_debit, viewVoucher.bank_credit],
-                      [viewVoucher.topic_type === "Income" ? "Aamdani (आम्दानी)" : "Kharcha (खर्च)", viewVoucher.kharcha_debit, viewVoucher.kharcha_credit],
+                      ...(viewVoucher.topic_type === "Null" ? [] : [[viewVoucher.topic_type === "Income" ? "Aamdani (आम्दानी)" : "Kharcha (खर्च)", viewVoucher.kharcha_debit, viewVoucher.kharcha_credit]]),
                       ["Bibidh (विविध)", viewVoucher.bibidh_debit, viewVoucher.bibidh_credit],
                     ].map(([label, d, c]) => (
                       <tr key={label as string} className={(!d && !c) ? "opacity-30" : ""}>
@@ -419,6 +420,7 @@ export default function VoucherList() {
                   <input type="text" value={editForm.voucher_number || ""} onChange={e => ef("voucher_number", e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
                 </div>
+                {editForm.topic_type !== "Null" && (
                 <div>
                   <label className="block text-xs font-bold text-slate-600 mb-1">Source Type</label>
                   <select value={editForm.source_type || ""} onChange={e => ef("source_type", e.target.value)}
@@ -427,6 +429,7 @@ export default function VoucherList() {
                     <option value="सरकारी">सरकारी</option>
                   </select>
                 </div>
+                )}
                 <div>
                   <label className="block text-xs font-bold text-slate-600 mb-1">Fiscal Year</label>
                   <select value={editForm.fiscal_year || ""} onChange={e => ef("fiscal_year", e.target.value)}
@@ -450,8 +453,10 @@ export default function VoucherList() {
                   {([
                     ["Cash Debit", "cash_debit"], ["Cash Credit", "cash_credit"],
                     ["Bank Debit", "bank_debit"], ["Bank Credit", "bank_credit"],
-                    [editForm.topic_type === "Income" ? "Aamdani Debit" : "Kharcha Debit", "kharcha_debit"],
-                    [editForm.topic_type === "Income" ? "Aamdani Credit" : "Kharcha Credit", "kharcha_credit"],
+                    ...(editForm.topic_type === "Null" ? [] : [
+                      [editForm.topic_type === "Income" ? "Aamdani Debit" : "Kharcha Debit", "kharcha_debit"],
+                      [editForm.topic_type === "Income" ? "Aamdani Credit" : "Kharcha Credit", "kharcha_credit"],
+                    ] as [string, keyof Voucher][]),
                     ["Bibidh Debit", "bibidh_debit"], ["Bibidh Credit", "bibidh_credit"],
                   ] as [string, keyof Voucher][]).map(([label, field]) => (
                     <div key={field}>

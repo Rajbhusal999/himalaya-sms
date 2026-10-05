@@ -32,7 +32,7 @@ export default function EntryVoucher() {
   const [lastVoucher, setLastVoucher] = useState<string>("");
 
   // Form states
-  const [voucherType, setVoucherType] = useState<"Income" | "Expense">("Income");
+  const [voucherType, setVoucherType] = useState<"Income" | "Expense" | "Null">("Income");
   const [selectedTopicId, setSelectedTopicId] = useState("");
   const [selectedSourceType, setSelectedSourceType] = useState<"सरकारी" | "आन्तरिक स्रोत">("आन्तरिक स्रोत");
   const [fiscalYear, setFiscalYear] = useState("2083/2084");
@@ -86,12 +86,18 @@ export default function EntryVoucher() {
     }
   };
 
+  // "Null" vouchers have no topic: they only affect Cash/Bank/Bibidh and appear in Bank Nagadi Kitab
+  // (not in Aamdani Khata or Kharcha Khata).
+  const isNullType = voucherType === "Null";
   const filteredTopics = topics.filter(t => t.type === voucherType);
   const alyaTopicId = topics.find(t => t.name === "अ.ल्या.")?.id;
 
   // Reset topic when voucher type changes
   useEffect(() => {
     setSelectedTopicId("");
+    if (voucherType === "Null") {
+      setTopicAmountRows([{ id: generateId(), amount: "" }, { id: generateId(), amount: "" }]);
+    }
   }, [voucherType]);
 
   // Sync source type when topic changes manually
@@ -114,13 +120,13 @@ export default function EntryVoucher() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTopicId || !voucherNumber.trim()) {
-      alert("Please select a topic and enter a voucher number.");
+    if ((!isNullType && !selectedTopicId) || !voucherNumber.trim()) {
+      alert(isNullType ? "Please enter a voucher number." : "Please select a topic and enter a voucher number.");
       return;
     }
 
-    // Calculate totals for double-entry check
-    const totalTopicAmount = calculateTotal(topicAmountRows, 'amount');
+    // Calculate totals for double-entry check (Null vouchers have no Aamdani/Kharcha amount)
+    const totalTopicAmount = isNullType ? 0 : calculateTotal(topicAmountRows, 'amount');
 
     const totalCashDebit = calculateTotal(cashRows, 'debit');
     const totalBankDebit = calculateTotal(bankRows, 'debit');
@@ -135,7 +141,7 @@ export default function EntryVoucher() {
 
     if (voucherType === 'Expense') {
       grandTotalDebit += totalTopicAmount; // Expense is Debit
-    } else {
+    } else if (voucherType === 'Income') {
       grandTotalCredit += totalTopicAmount; // Income is Credit
     }
 
@@ -151,14 +157,14 @@ export default function EntryVoucher() {
       const details = {
         cash: cashRows.filter(r => r.debit || r.credit),
         bank: bankRows.filter(r => r.debit || r.credit),
-        [voucherType === 'Expense' ? 'kharcha' : 'aamdani']: topicAmountRows.filter(r => r.amount),
+        ...(isNullType ? {} : { [voucherType === 'Expense' ? 'kharcha' : 'aamdani']: topicAmountRows.filter(r => r.amount) }),
         bibidh: bibidhRows.filter(r => r.debit || r.credit),
       };
 
       const { error } = await supabase.from("accounting_vouchers").insert([{
-        topic_id: selectedTopicId,
+        topic_id: isNullType ? null : selectedTopicId,
         topic_type: voucherType,
-        source_type: selectedSourceType,
+        source_type: isNullType ? null : selectedSourceType,
         fiscal_year: fiscalYear,
         date,
         voucher_number: voucherNumber.trim(),
@@ -218,14 +224,16 @@ export default function EntryVoucher() {
             <label className="block text-sm font-bold text-slate-700 mb-2">Topic</label>
             <select
               value={voucherType}
-              onChange={(e) => setVoucherType(e.target.value as "Income" | "Expense")}
+              onChange={(e) => setVoucherType(e.target.value as "Income" | "Expense" | "Null")}
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white text-slate-900"
             >
               <option value="Income">Income</option>
               <option value="Expense">Expenditure</option>
+              <option value="Null">Null</option>
             </select>
           </div>
 
+          {!isNullType && (
           <div className="lg:col-span-3 md:col-span-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Subtopic</label>
             <select
@@ -241,7 +249,9 @@ export default function EntryVoucher() {
               ))}
             </select>
           </div>
+          )}
 
+          {!isNullType && (
           <div className="lg:col-span-2 md:col-span-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Source Type</label>
             {alyaTopicId && selectedTopicId === alyaTopicId ? (
@@ -259,6 +269,7 @@ export default function EntryVoucher() {
               </select>
             )}
           </div>
+          )}
 
           <div className="lg:col-span-2 md:col-span-1">
             <label className="block text-sm font-bold text-slate-700 mb-2">Fiscal Year (आ.व.)</label>
@@ -318,7 +329,7 @@ export default function EntryVoucher() {
         <div>
           <h3 className="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Ledger Amounts</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className={`grid grid-cols-1 md:grid-cols-2 ${isNullType ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6`}>
             
             {/* Cash */}
             <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 flex flex-col">
@@ -430,7 +441,8 @@ export default function EntryVoucher() {
               </button>
             </div>
 
-            {/* Topic Amount (Aamdani/Kharcha) */}
+            {/* Topic Amount (Aamdani/Kharcha) — not applicable for Null vouchers */}
+            {!isNullType && (
             <div className={`p-4 rounded-xl border flex flex-col ${voucherType === 'Expense' ? 'bg-rose-50/50 border-rose-100' : 'bg-amber-50/50 border-amber-100'}`}>
               <h4 className={`font-bold mb-3 text-center ${voucherType === 'Expense' ? 'text-rose-800' : 'text-amber-800'}`}>
                 {voucherType === 'Expense' ? 'Kharcha (खर्च)' : 'Aamdani (आम्दानी)'}
@@ -470,6 +482,7 @@ export default function EntryVoucher() {
                 <Plus className="w-3 h-3 mr-1" /> Add Row
               </button>
             </div>
+            )}
 
             {/* Bibidh */}
             <div className="bg-purple-50/50 p-4 rounded-xl border border-purple-100 flex flex-col">
