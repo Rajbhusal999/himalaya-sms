@@ -175,38 +175,41 @@ export default function VoucherList() {
         <div className="flex flex-wrap gap-3">
           {/* Fiscal Year */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Fiscal Year</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Fiscal Year</label>
             <select
               value={filterFY}
               onChange={e => { setFilterFY(e.target.value); }}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+              style={{ color: "#000000" }}
+              className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-black focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
             >
-              {FISCAL_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+              {FISCAL_YEARS.map(y => <option key={y} value={y} className="text-black bg-white">{y}</option>)}
             </select>
           </div>
           {/* Type */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1">Type</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Type</label>
             <select
               value={filterType}
               onChange={e => setFilterType(e.target.value as any)}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+              style={{ color: "#000000" }}
+              className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-black focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
             >
-              <option value="">All Types</option>
-              <option value="Income">Income</option>
-              <option value="Expense">Expense</option>
-              <option value="Null">Null</option>
+              <option value="" className="text-black bg-white">All Types</option>
+              <option value="Income" className="text-black bg-white">Income</option>
+              <option value="Expense" className="text-black bg-white">Expense</option>
+              <option value="Null" className="text-black bg-white">Null</option>
             </select>
           </div>
           {/* Search */}
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-xs font-bold text-slate-500 mb-1">Search</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Search</label>
             <input
               type="text"
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
               placeholder="Voucher no., description, topic..."
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              style={{ color: "#000000" }}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-black placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
           </div>
         </div>
@@ -396,7 +399,7 @@ export default function VoucherList() {
       {/* ═══════════ EDIT MODAL ═══════════ */}
       {editVoucher && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto text-slate-900">
             <div className="flex items-center justify-between p-6 border-b border-slate-100">
               <div>
                 <h3 className="text-xl font-bold text-slate-800">Edit Voucher</h3>
@@ -411,43 +414,69 @@ export default function VoucherList() {
               {/* Basic fields */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1">Date</label>
-                  <input type="text" value={editForm.date || ""} onChange={e => ef("date", e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Date</label>
+                  <input
+                    type="text"
+                    value={editForm.date || ""}
+                    onChange={e => ef("date", e.target.value)}
+                    style={{ color: "#000000" }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-black bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1">Voucher No.</label>
-                  <input type="text" value={editForm.voucher_number || ""} onChange={e => ef("voucher_number", e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Voucher No.</label>
+                  <input
+                    type="text"
+                    value={editForm.voucher_number || ""}
+                    onChange={e => ef("voucher_number", e.target.value)}
+                    style={{ color: "#000000" }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-black bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  />
                 </div>
                 {editForm.topic_type !== "Null" && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1">Source Type</label>
-                  <select value={editForm.source_type || ""} onChange={e => ef("source_type", e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
-                    <option value="आन्तरिक स्रोत">आन्तरिक स्रोत</option>
-                    <option value="सरकारी">सरकारी</option>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Source Type</label>
+                  <select
+                    value={editForm.source_type || ""}
+                    onChange={e => ef("source_type", e.target.value)}
+                    style={{ color: "#000000" }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-black focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+                  >
+                    <option value="आन्तरिक स्रोत" className="text-black bg-white">आन्तरिक स्रोत</option>
+                    <option value="सरकारी" className="text-black bg-white">सरकारी</option>
                   </select>
                 </div>
                 )}
                 <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1">Fiscal Year</label>
-                  <select value={editForm.fiscal_year || ""} onChange={e => ef("fiscal_year", e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
-                    {FISCAL_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Fiscal Year</label>
+                  <select
+                    value={editForm.fiscal_year || ""}
+                    onChange={e => ef("fiscal_year", e.target.value)}
+                    style={{ color: "#000000" }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-black focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
+                  >
+                    {FISCAL_YEARS.map(y => (
+                      <option key={y} value={y} className="text-black bg-white">{y}</option>
+                    ))}
                   </select>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1">Description</label>
-                <input type="text" value={editForm.description || ""} onChange={e => ef("description", e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                <label className="block text-xs font-bold text-slate-700 mb-1">Description</label>
+                <input
+                  type="text"
+                  value={editForm.description || ""}
+                  onChange={e => ef("description", e.target.value)}
+                  style={{ color: "#000000" }}
+                  placeholder="विवरण लेख्नुहोस्..."
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-black placeholder:text-slate-400 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                />
               </div>
 
               {/* Amount fields */}
               <div className="border border-slate-200 rounded-xl overflow-hidden">
                 <div className="bg-slate-100 px-4 py-2">
-                  <p className="text-xs font-bold text-slate-600 uppercase">Ledger Amounts</p>
+                  <p className="text-xs font-bold text-slate-700 uppercase">Ledger Amounts</p>
                 </div>
                 <div className="p-4 grid grid-cols-2 gap-4">
                   {([
@@ -460,12 +489,13 @@ export default function VoucherList() {
                     ["Bibidh Debit", "bibidh_debit"], ["Bibidh Credit", "bibidh_credit"],
                   ] as [string, keyof Voucher][]).map(([label, field]) => (
                     <div key={field}>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">{label}</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">{label}</label>
                       <input
                         type="number" step="0.01" min="0"
                         value={(editForm[field] as number) || ""}
                         onChange={e => ef(field, e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        style={{ color: "#000000" }}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-black placeholder:text-slate-400 bg-white font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         placeholder="0.00"
                       />
                     </div>

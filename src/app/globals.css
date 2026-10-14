@@ -19,19 +19,17 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617;
-    --foreground: #f8fafc;
-  }
+  color-scheme: light;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+input, select, textarea {
+  color: #0f172a;
 }
 
 /* Base interactive utilities */
