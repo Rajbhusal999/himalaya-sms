@@ -48,7 +48,7 @@ type Props = {
 
 const SCHOOL_NAME = "श्री हिमालय आधारभूत विद्यालय , भरतपुर -११ , चितवन";
 const REPORT_TITLE = "नगद / बैंक खाता (१)";
-const ROWS_PER_PAGE = 9;
+const ROWS_PER_PAGE = 18;
 
 const safeAdd = (a: number, b: number) =>
   Math.round((a + b) * 100) / 100;
