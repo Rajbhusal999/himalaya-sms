@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { Mail, Lock, LogIn, ArrowLeft, AlertCircle, ShieldCheck, Shield } from "lucide-react";
-import { setSession, clearSession } from "@/app/actions/auth";
-import { verifyAdminPassword, get2FAStatus, verifyTOTPToken } from "@/lib/authCrypto";
+import { clearSession } from "@/app/actions/auth";
+import { getRole, toLoginEmail } from "@/lib/authIdentity";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -16,53 +16,21 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 2FA Step
+  // 2FA step (Supabase native TOTP MFA)
   const [loginStep, setLoginStep] = useState<"credentials" | "totp">("credentials");
   const [totpCode, setTotpCode] = useState("");
   const [totpLoading, setTotpLoading] = useState(false);
   const [totpError, setTotpError] = useState<string | null>(null);
-  const [totpSecret, setTotpSecret] = useState<string | null>(null);
-  // Keep validated email+password so we can finalize session on 2FA success
-  const [validatedEmail, setValidatedEmail] = useState<string | null>(null);
+  const [factorId, setFactorId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Clear session when login page mounts (prevents forward button bypassing login)
+    // Clear any existing session when the login page mounts (prevents forward-button bypass)
     clearSession();
   }, []);
 
-  const finalizeSession = async () => {
-    const sessionId = crypto.randomUUID();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 1);
-
-    // Fetch IP + geolocation (free, no permission needed)
-    let ipAddress: string | null = null;
-    let city: string | null = null;
-    let country: string | null = null;
-    try {
-      const geoRes = await fetch("https://ipapi.co/json/", { cache: "no-store" });
-      if (geoRes.ok) {
-        const geo = await geoRes.json();
-        ipAddress = geo.ip ?? null;
-        city = geo.city ?? null;
-        country = geo.country_name ?? null;
-      }
-    } catch {
-      // Geolocation is best-effort — don't block login if it fails
-    }
-
-    await supabase.from("active_sessions").insert([{
-      id: sessionId,
-      role: "admin",
-      expires_at: expiresAt.toISOString(),
-      user_agent: navigator.userAgent,
-      ip_address: ipAddress,
-      city,
-      country,
-    }]);
-
-    await setSession(sessionId, expiresAt);
+  const goToDashboard = () => {
     router.replace("/admin/dashboard");
+    router.refresh();
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -71,43 +39,40 @@ export default function AdminLogin() {
     setError(null);
 
     try {
-      // Fetch admin email from admin_profile table
-      const { data: profile } = await supabase
-        .from("admin_profile")
-        .select("email")
-        .eq("id", "default_admin")
-        .single();
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: toLoginEmail("admin", email),
+        password,
+      });
 
-      const validEmail = profile?.email?.trim().toLowerCase() || "himalayabasicschool01@gmail.com";
-      const inputEmail = email.trim().toLowerCase();
+      // Same message for every failure so we never reveal which part was wrong.
+      if (signInError || !data.user || getRole(data.user) !== "admin") {
+        if (data?.user) await supabase.auth.signOut();
+        setError("Invalid admin email or password. Please try again.");
+        setLoading(false);
+        return;
+      }
 
-      // Verify SHA-256 password hash stored in Supabase
-      const isPasswordValid = await verifyAdminPassword(password);
-
-      const emailOk = inputEmail === validEmail || inputEmail === "himalayabasicschool01@gmail.com";
-
-      if (emailOk && isPasswordValid) {
-        // Check if 2FA is enabled
-        const { enabled, secret } = await get2FAStatus();
-
-        if (enabled && secret) {
-          // Transition to TOTP step
-          setTotpSecret(secret);
-          setValidatedEmail(inputEmail);
-          setLoginStep("totp");
+      // Does this admin have a second factor that still needs to be verified?
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+        const { data: factors } = await supabase.auth.mfa.listFactors();
+        const totp = factors?.totp?.find((f) => f.status === "verified");
+        if (!totp) {
+          await supabase.auth.signOut();
+          setError("Two-factor setup is incomplete. Please contact the system owner.");
           setLoading(false);
           return;
         }
-
-        // No 2FA — finalize session directly
-        await finalizeSession();
-      } else {
-        setError("Invalid admin email or password. Please try again.");
+        setFactorId(totp.id);
+        setLoginStep("totp");
         setLoading(false);
+        return;
       }
+
+      goToDashboard();
     } catch (err) {
       console.error("Authentication error:", err);
-      setError("Failed to authenticate with database.");
+      setError("Failed to sign in. Please try again.");
       setLoading(false);
     }
   };
@@ -116,28 +81,41 @@ export default function AdminLogin() {
     e.preventDefault();
     setTotpError(null);
 
-    if (totpCode.length !== 6 || !/^\d{6}$/.test(totpCode)) {
+    if (!/^\d{6}$/.test(totpCode)) {
       setTotpError("Please enter the 6-digit code from your authenticator app.");
       return;
     }
 
     setTotpLoading(true);
     try {
-      if (!totpSecret) throw new Error("Missing 2FA secret.");
+      if (!factorId) throw new Error("Missing 2FA factor.");
 
-      const valid = verifyTOTPToken(totpSecret, totpCode);
-      if (!valid) {
+      const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({
+        factorId,
+        code: totpCode,
+      });
+
+      if (verifyError) {
         setTotpError("Invalid authenticator code. Make sure your phone clock is accurate and try again.");
         setTotpLoading(false);
         return;
       }
 
-      await finalizeSession();
+      goToDashboard();
     } catch (err) {
       console.error("2FA verification error:", err);
       setTotpError("Failed to verify 2FA code.");
       setTotpLoading(false);
     }
+  };
+
+  const handleBackToCredentials = async () => {
+    await supabase.auth.signOut();
+    setLoginStep("credentials");
+    setTotpCode("");
+    setTotpError(null);
+    setFactorId(null);
+    setPassword("");
   };
 
   return (
@@ -169,7 +147,7 @@ export default function AdminLogin() {
               </div>
 
               {error && (
-                <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start gap-3 text-red-200">
+                <div role="alert" className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start gap-3 text-red-200">
                   <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <p className="text-sm">{error}</p>
                 </div>
@@ -177,7 +155,7 @@ export default function AdminLogin() {
 
               <form onSubmit={handleLogin} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-brand-100 mb-1.5 ml-1">
+                  <label htmlFor="admin-email" className="block text-sm font-medium text-brand-100 mb-1.5 ml-1">
                     Admin Email Address
                   </label>
                   <div className="relative">
@@ -185,8 +163,10 @@ export default function AdminLogin() {
                       <Mail className="h-5 w-5 text-brand-300" />
                     </div>
                     <input
+                      id="admin-email"
                       type="email"
                       required
+                      autoComplete="username"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-xl leading-5 bg-white/5 text-white placeholder-brand-300/50 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400 sm:text-sm transition-all"
@@ -196,7 +176,7 @@ export default function AdminLogin() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-brand-100 mb-1.5 ml-1">
+                  <label htmlFor="admin-password" className="block text-sm font-medium text-brand-100 mb-1.5 ml-1">
                     Password
                   </label>
                   <div className="relative">
@@ -204,8 +184,10 @@ export default function AdminLogin() {
                       <Lock className="h-5 w-5 text-brand-300" />
                     </div>
                     <input
+                      id="admin-password"
                       type={showPassword ? "text" : "password"}
                       required
+                      autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="block w-full pl-10 pr-10 py-3 border border-white/20 rounded-xl leading-5 bg-white/5 text-white placeholder-brand-300/50 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400 sm:text-sm transition-all"
@@ -214,6 +196,7 @@ export default function AdminLogin() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-xl"
                     >
                       {showPassword ? "🙈" : "👁️"}
@@ -248,7 +231,7 @@ export default function AdminLogin() {
               </div>
 
               {totpError && (
-                <div className="mb-5 p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start gap-3 text-red-200">
+                <div role="alert" className="mb-5 p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start gap-3 text-red-200">
                   <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <p className="text-sm">{totpError}</p>
                 </div>
@@ -256,12 +239,14 @@ export default function AdminLogin() {
 
               <form onSubmit={handleTotpVerify} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-brand-100 mb-2 text-center">
+                  <label htmlFor="admin-totp" className="block text-sm font-medium text-brand-100 mb-2 text-center">
                     Authenticator Code
                   </label>
                   <input
+                    id="admin-totp"
                     type="text"
                     inputMode="numeric"
+                    autoComplete="one-time-code"
                     maxLength={6}
                     required
                     value={totpCode}
@@ -290,7 +275,7 @@ export default function AdminLogin() {
 
                 <button
                   type="button"
-                  onClick={() => { setLoginStep("credentials"); setTotpCode(""); setTotpError(null); }}
+                  onClick={handleBackToCredentials}
                   className="w-full text-brand-300 hover:text-white text-sm font-medium transition-colors py-1"
                 >
                   ← Back to login

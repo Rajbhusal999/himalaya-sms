@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import { upsertTeacherLogin } from "@/app/actions/users";
 
 type Teacher = {
   id?: string;
@@ -71,7 +72,7 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSuccess }: Te
         phone_number: teacher.phone_number || "",
         account_number: teacher.account_number || "",
         username: teacher.username || "",
-        password: teacher.password || "",
+        password: "", // never pre-filled: passwords are write-only
         pan_no: teacher.pan_no || "",
         role: teacher.role || "",
       });
@@ -111,6 +112,7 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSuccess }: Te
     setLoading(true);
 
     try {
+      // The password is intentionally excluded: it goes to Supabase Auth only.
       const payload = {
         first_name: formData.first_name,
         middle_name: formData.middle_name,
@@ -126,22 +128,38 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSuccess }: Te
         phone_number: formData.phone_number,
         account_number: formData.account_number,
         username: formData.username,
-        password: formData.password,
         pan_no: formData.pan_no,
         role: formData.role,
       };
 
-      if (teacher?.id) {
-        const { error } = await supabase.from("teachers").update(payload).eq("id", teacher.id);
+      let teacherId = teacher?.id;
+      if (teacherId) {
+        const { error } = await supabase.from("teachers").update(payload).eq("id", teacherId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("teachers").insert([payload]);
+        const { data, error } = await supabase.from("teachers").insert([payload]).select("id").single();
         if (error) throw error;
+        teacherId = data.id;
       }
+
+      // Create/update the login when a password was entered, or when an existing
+      // teacher's username changed (so the login email stays in sync).
+      const usernameChanged = !!teacher?.id && (formData.username || "") !== (teacher.username || "");
+      if (teacherId && formData.username && (formData.password || usernameChanged)) {
+        const result = await upsertTeacherLogin({
+          teacherId,
+          username: formData.username,
+          password: formData.password || undefined,
+        });
+        if (!result.ok) {
+          alert("Teacher saved, but the login could not be updated: " + result.error);
+        }
+      }
+
       onSuccess();
       onClose();
-    } catch (error: any) {
-      alert("Error saving teacher: " + error.message);
+    } catch (error: unknown) {
+      alert("Error saving teacher: " + (error instanceof Error ? error.message : "Unknown error"));
     } finally {
       setLoading(false);
     }
@@ -248,8 +266,9 @@ export default function TeacherModal({ isOpen, onClose, teacher, onSuccess }: Te
               <input type="text" name="username" value={formData.username} onChange={handleChange} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-slate-900" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-              <input type="text" name="password" value={formData.password} onChange={handleChange} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-slate-900" />
+              <label htmlFor="teacher-password" className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <input id="teacher-password" type="password" name="password" autoComplete="new-password" minLength={8} placeholder={teacher ? "Leave blank to keep current password" : "Min 8 characters, letters and numbers"} value={formData.password} onChange={handleChange} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-500 focus:border-brand-500 text-slate-900" />
+              <p className="text-xs text-slate-500 mt-1">The teacher must choose a new password on first login. Passwords are write-only and can't be viewed.</p>
             </div>
           </form>
         </div>

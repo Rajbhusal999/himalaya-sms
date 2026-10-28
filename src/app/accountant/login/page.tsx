@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { Lock, LogIn, ArrowLeft, AlertCircle, ShieldCheck, User } from "lucide-react";
-import { setSession, clearSession } from "@/app/actions/auth";
+import { clearSession } from "@/app/actions/auth";
+import { getRole, toLoginEmail } from "@/lib/authIdentity";
 
 export default function AccountantLogin() {
   const router = useRouter();
@@ -26,57 +27,23 @@ export default function AccountantLogin() {
     setError(null);
 
     try {
-      // Verify against accountant_credentials table
-      const { data, error: fetchError } = await supabase
-        .from("accountant_credentials")
-        .select("*")
-        .eq("username", username.trim())
-        .eq("password", password)
-        .single();
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: toLoginEmail("accountant", username),
+        password,
+      });
 
-      if (fetchError || !data) {
+      if (signInError || !data.user || getRole(data.user) !== "accountant") {
+        if (data?.user) await supabase.auth.signOut();
         setError("Invalid accountant username or password. Please try again.");
         setLoading(false);
         return;
       }
 
-      // Finalize Session
-      const sessionId = crypto.randomUUID();
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 1);
-
-      // Fetch IP + geolocation (best-effort)
-      let ipAddress: string | null = null;
-      let city: string | null = null;
-      let country: string | null = null;
-      try {
-        const geoRes = await fetch("https://ipapi.co/json/", { cache: "no-store" });
-        if (geoRes.ok) {
-          const geo = await geoRes.json();
-          ipAddress = geo.ip ?? null;
-          city = geo.city ?? null;
-          country = geo.country_name ?? null;
-        }
-      } catch {
-        // Ignore geo errors
-      }
-
-      await supabase.from("active_sessions").insert([{
-        id: sessionId,
-        role: "accountant",
-        expires_at: expiresAt.toISOString(),
-        user_agent: navigator.userAgent,
-        ip_address: ipAddress,
-        city,
-        country,
-      }]);
-
-      await setSession(sessionId, expiresAt);
       router.replace("/accountant/dashboard");
-
+      router.refresh();
     } catch (err) {
       console.error("Authentication error:", err);
-      setError("Failed to authenticate with database.");
+      setError("Failed to sign in. Please try again.");
       setLoading(false);
     }
   };

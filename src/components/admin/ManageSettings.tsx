@@ -3,18 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Save, User, Bell, Lock, Globe, Key, Shield, Smartphone, Laptop, History, CheckCircle, RefreshCw, AlertCircle, QrCode, X, ShieldCheck, ShieldOff, Copy, Monitor, Tablet, Trash2, TriangleAlert } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
-import {
-  verifyAdminPassword,
-  updateAdminPasswordHash,
-  generateTOTPSecret,
-  getTOTPUri,
-  verifyTOTPToken,
-  get2FAStatus,
-  enable2FA,
-  disable2FA,
-} from "@/lib/authCrypto";
-import { getSessionId } from "@/app/actions/auth";
-import QRCode from "qrcode";
+import { verifyOwnPassword, changeOwnPassword } from "@/app/actions/auth";
+import { setAccountantLogin, signOutEverywhere } from "@/app/actions/users";
+import { validatePasswordStrength } from "@/lib/authIdentity";
 
 export default function ManageSettings() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -32,7 +23,7 @@ export default function ManageSettings() {
   const [accountantSaving, setAccountantSaving] = useState(false);
   const [accountantSaveSuccess, setAccountantSaveSuccess] = useState(false);
 
-  // Security & Password state (Saved as SHA-256 hash to Supabase admin_credentials table)
+  // Security & Password state (handled by Supabase Auth; passwords are bcrypt-hashed server-side)
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -54,6 +45,7 @@ export default function ManageSettings() {
   const [setupPassword, setSetupPassword] = useState("");
   const [setupPasswordError, setSetupPasswordError] = useState<string | null>(null);
   const [pendingSecret, setPendingSecret] = useState<string | null>(null);
+  const [pendingFactorId, setPendingFactorId] = useState<string | null>(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [setupTotpCode, setSetupTotpCode] = useState("");
   const [setupTotpError, setSetupTotpError] = useState<string | null>(null);
@@ -119,13 +111,12 @@ export default function ManageSettings() {
       try {
         const { data, error } = await supabase
           .from("accountant_credentials")
-          .select("*")
+          .select("username")
           .eq("id", "default")
           .single();
 
         if (data && !error) {
           if (data.username) setAccountantUsername(data.username);
-          if (data.password) setAccountantPassword(data.password);
         }
       } catch (err) {
         console.error("Error fetching accountant credentials:", err);
@@ -139,8 +130,8 @@ export default function ManageSettings() {
     const fetch2FA = async () => {
       setTwoFALoading(true);
       try {
-        const { enabled } = await get2FAStatus();
-        setTwoFAEnabled(enabled);
+        const { data: factors } = await supabase.auth.mfa.listFactors();
+        setTwoFAEnabled(!!factors?.totp?.some((f) => f.status === "verified"));
       } catch {
         setTwoFAEnabled(false);
       } finally {
@@ -155,17 +146,22 @@ export default function ManageSettings() {
     const fetchSessions = async () => {
       setSessionsLoading(true);
       try {
-        const [{ data }, sessionId] = await Promise.all([
-          supabase
-            .from("active_sessions")
-            .select("id, role, created_at, expires_at, user_agent, ip_address, city, country")
-            .eq("role", "admin")
-            .gt("expires_at", new Date().toISOString())
-            .order("created_at", { ascending: false }),
-          getSessionId(),
+        // Supabase does not expose a per-device session list to the client, so
+        // we show this device and offer a global sign-out for everything else.
+        const { data: { user } } = await supabase.auth.getUser();
+        setSessions([
+          {
+            id: "current",
+            role: "admin",
+            created_at: user?.last_sign_in_at ?? new Date().toISOString(),
+            expires_at: new Date().toISOString(),
+            user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+            ip_address: null,
+            city: null,
+            country: null,
+          },
         ]);
-        setSessions((data as SessionRow[]) || []);
-        setCurrentSessionId(sessionId);
+        setCurrentSessionId("current");
       } catch (err) {
         console.error("Error fetching sessions:", err);
       } finally {
@@ -251,16 +247,22 @@ export default function ManageSettings() {
     return `Active ${days} day${days > 1 ? "s" : ""} ago`;
   };
 
+  // Individual session revocation is not available with Supabase Auth; use sign-out-everywhere.
   const handleRevokeSession = async (sessionId: string) => {
-    setRevokingId(sessionId);
-    try {
-      await supabase.from("active_sessions").delete().eq("id", sessionId);
-      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-    } catch (err) {
-      console.error("Failed to revoke session:", err);
-    } finally {
+    void sessionId;
+    await handleSignOutEverywhere();
+  };
+
+  const handleSignOutEverywhere = async () => {
+    if (!window.confirm("Sign out of all devices, including this one?")) return;
+    setRevokingId("all");
+    const result = await signOutEverywhere();
+    if (!result.ok) {
+      alert("Failed to sign out everywhere: " + result.error);
       setRevokingId(null);
+      return;
     }
+    window.location.assign("/admin/login");
   };
 
   const handleSaveSystemSettings = async () => {
@@ -350,18 +352,13 @@ export default function ManageSettings() {
     setAccountantSaveSuccess(false);
 
     try {
-      const payload = {
-        id: "default",
+      // The password goes only to Supabase Auth (admin-gated server action).
+      const result = await setAccountantLogin({
         username: accountantUsername,
-        password: accountantPassword,
-        updated_at: new Date().toISOString()
-      };
-
-      const { error } = await supabase
-        .from("accountant_credentials")
-        .upsert(payload, { onConflict: "id" });
-
-      if (error) throw error;
+        password: accountantPassword || undefined,
+      });
+      if (!result.ok) throw new Error(result.error);
+      setAccountantPassword("");
 
       setAccountantSaveSuccess(true);
       setTimeout(() => setAccountantSaveSuccess(false), 4000);
@@ -382,8 +379,9 @@ export default function ManageSettings() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters long.");
+    const weak = validatePasswordStrength(newPassword);
+    if (weak) {
+      setPasswordError(weak);
       return;
     }
 
@@ -394,16 +392,17 @@ export default function ManageSettings() {
 
     setPasswordSaving(true);
     try {
-      const isValid = await verifyAdminPassword(currentPassword);
+      const isValid = await verifyOwnPassword(currentPassword);
       if (!isValid) {
         setPasswordError("Current password is incorrect.");
         setPasswordSaving(false);
         return;
       }
 
-      await updateAdminPasswordHash(newPassword);
+      const changed = await changeOwnPassword(newPassword);
+      if (!changed.ok) throw new Error(changed.error);
 
-      setPasswordSuccess("Password updated successfully! Salted SHA-256 encrypted hash saved to Supabase database.");
+      setPasswordSuccess("Password updated successfully.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -433,20 +432,35 @@ export default function ManageSettings() {
       setSetupPasswordError("Please enter your admin password to continue.");
       return;
     }
-    const valid = await verifyAdminPassword(setupPassword);
+    const valid = await verifyOwnPassword(setupPassword);
     if (!valid) {
       setSetupPasswordError("Incorrect admin password. Please try again.");
       return;
     }
 
-    // Generate a new TOTP secret and QR code (using admin email as label)
-    const secret = generateTOTPSecret();
-    const uri = getTOTPUri(secret, email); // email = admin email from profile state
-    const dataUrl = await QRCode.toDataURL(uri, { width: 220, margin: 2, color: { dark: "#1e293b", light: "#ffffff" } });
+    try {
+      // Clear leftovers from an abandoned setup attempt
+      const { data: existing } = await supabase.auth.mfa.listFactors();
+      for (const f of existing?.all ?? []) {
+        if (f.factor_type === "totp" && f.status === "unverified") {
+          await supabase.auth.mfa.unenroll({ factorId: f.id });
+        }
+      }
 
-    setPendingSecret(secret);
-    setQrCodeDataUrl(dataUrl);
-    setSetupStep(2);
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: "totp",
+        issuer: "Himalaya SMS",
+        friendlyName: `Authenticator ${new Date().toISOString()}`,
+      });
+      if (error || !data) throw error ?? new Error("Could not start 2FA setup.");
+
+      setPendingFactorId(data.id);
+      setPendingSecret(data.totp.secret);
+      setQrCodeDataUrl(data.totp.qr_code);
+      setSetupStep(2);
+    } catch (err: unknown) {
+      setSetupPasswordError(err instanceof Error ? err.message : "Could not start 2FA setup.");
+    }
   };
 
   const handleSetupStep3Verify = async () => {
@@ -455,27 +469,33 @@ export default function ManageSettings() {
       setSetupTotpError("Please enter the 6-digit code from your authenticator app.");
       return;
     }
-    if (!pendingSecret) return;
-
-    const valid = verifyTOTPToken(pendingSecret, setupTotpCode);
-    if (!valid) {
-      setSetupTotpError("Invalid code. Make sure your phone clock is accurate and try again.");
-      return;
-    }
+    if (!pendingFactorId) return;
 
     setSetupSaving(true);
     try {
-      await enable2FA(pendingSecret);
+      const { error } = await supabase.auth.mfa.challengeAndVerify({
+        factorId: pendingFactorId,
+        code: setupTotpCode,
+      });
+      if (error) {
+        setSetupTotpError("Invalid code. Make sure your phone clock is accurate and try again.");
+        return;
+      }
       setTwoFAEnabled(true);
+      setPendingSecret(null);
       setSetupStep(4);
-    } catch (err: any) {
-      setSetupTotpError("Failed to save 2FA to Supabase: " + (err.message || err));
+    } catch (err: unknown) {
+      setSetupTotpError("Failed to enable 2FA: " + (err instanceof Error ? err.message : "Unknown error"));
     } finally {
       setSetupSaving(false);
     }
   };
 
   const closeSetup = () => {
+    if (pendingFactorId && !twoFAEnabled) {
+      supabase.auth.mfa.unenroll({ factorId: pendingFactorId }).catch(() => {});
+    }
+    setPendingFactorId(null);
     setShowSetup2FA(false);
     setSetupStep(1);
     setSetupPassword("");
@@ -506,24 +526,29 @@ export default function ManageSettings() {
 
     setDisableSaving(true);
     try {
-      const pwValid = await verifyAdminPassword(disablePassword);
+      const pwValid = await verifyOwnPassword(disablePassword);
       if (!pwValid) {
         setDisableError("Incorrect admin password.");
         setDisableSaving(false);
         return;
       }
 
-      const { secret } = await get2FAStatus();
-      if (!secret) throw new Error("No 2FA secret found.");
+      const { data: factors } = await supabase.auth.mfa.listFactors();
+      const factor = factors?.totp?.find((f) => f.status === "verified");
+      if (!factor) throw new Error("No 2FA factor found.");
 
-      const codeValid = verifyTOTPToken(secret, disableTotpCode);
-      if (!codeValid) {
+      const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({
+        factorId: factor.id,
+        code: disableTotpCode,
+      });
+      if (verifyError) {
         setDisableError("Invalid authenticator code. Please try again.");
         setDisableSaving(false);
         return;
       }
 
-      await disable2FA();
+      const { error: unenrollError } = await supabase.auth.mfa.unenroll({ factorId: factor.id });
+      if (unenrollError) throw unenrollError;
       setTwoFAEnabled(false);
       setShowDisable2FA(false);
     } catch (err: any) {
@@ -658,13 +683,14 @@ export default function ManageSettings() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Accountant Password</label>
+                <label htmlFor="accountant-password" className="block text-sm font-bold text-slate-700 mb-1">New Accountant Password</label>
                 <input
-                  type="text"
-                  required
+                  id="accountant-password"
+                  type="password"
+                  autoComplete="new-password"
                   value={accountantPassword}
                   onChange={(e) => setAccountantPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Leave blank to keep current password"
                   className="w-full px-4 py-2.5 border-2 border-slate-200 bg-slate-50 text-slate-800 font-medium rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:bg-white focus:outline-none transition-all text-sm"
                 />
               </div>
@@ -925,7 +951,7 @@ export default function ManageSettings() {
                             {" · "}
                             <span className="text-slate-400">{relativeTime(session.created_at)}</span>
                             {" · "}
-                            <span className="text-slate-400">Expires {new Date(session.expires_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                            <span className="text-slate-400">This device</span>
                           </p>
                           {/* IP address */}
                           {session.ip_address && (
@@ -953,6 +979,15 @@ export default function ManageSettings() {
                   })}
                 </div>
               )}
+
+              <button
+                type="button"
+                onClick={handleSignOutEverywhere}
+                disabled={revokingId === "all"}
+                className="mt-4 flex items-center gap-2 px-4 py-2.5 border-2 border-red-300 text-red-600 bg-white hover:bg-red-50 rounded-xl font-bold text-sm transition-all disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" /> Sign out of all devices
+              </button>
             </div>
           </div>
         )}

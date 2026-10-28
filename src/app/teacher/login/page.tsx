@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { Mail, Lock, LogIn, ArrowLeft, AlertCircle } from "lucide-react";
-import { setSession, clearSession } from "@/app/actions/auth";
+import { clearSession } from "@/app/actions/auth";
+import { getRole, toLoginEmail } from "@/lib/authIdentity";
 
 export default function TeacherLogin() {
   const router = useRouter();
@@ -26,37 +27,19 @@ export default function TeacherLogin() {
     setError(null);
 
     try {
-      // Query the teachers table directly
-      const { data, error } = await supabase
-        .from("teachers")
-        .select("*")
-        .eq("username", email)
-        .eq("password", password)
-        .single();
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: toLoginEmail("teacher", email),
+        password,
+      });
 
-      if (error || !data) {
+      if (signInError || !data.user || getRole(data.user) !== "teacher") {
+        if (data?.user) await supabase.auth.signOut();
         throw new Error("Invalid username or password");
       }
 
-      const sessionId = crypto.randomUUID();
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 1); // 1 day
-
-      const { error: sessionError } = await supabase
-        .from("active_sessions")
-        .insert([{
-          id: sessionId,
-          user_id: data.id,
-          role: "teacher",
-          expires_at: expiresAt.toISOString(),
-        }]);
-
-      if (sessionError) throw new Error("Failed to create session");
-
-      await setSession(sessionId, expiresAt);
-      
       router.replace("/teacher/dashboard");
-    } catch (err: any) {
+      router.refresh();
+    } catch {
       setError("Invalid username or password");
     } finally {
       setLoading(false);

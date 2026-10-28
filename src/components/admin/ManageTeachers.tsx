@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Plus, Search, RefreshCw, Trash2, Edit } from "lucide-react";
 import TeacherModal from "./TeacherModal";
+import { deleteTeacherLogin } from "@/app/actions/users";
 
 type Teacher = {
   id: string;
@@ -21,7 +22,7 @@ type Teacher = {
   phone_number?: string;
   account_number?: string;
   username?: string;
-  password?: string;
+  auth_user_id?: string | null;
   pan_no?: string;
   role?: string;
 };
@@ -38,7 +39,7 @@ export default function ManageTeachers() {
     try {
       const { data, error } = await supabase
         .from("teachers")
-        .select("*")
+        .select("id, first_name, middle_name, last_name, gender, post, teacher_category, subject_teach, permanent_address, temporary_address, dob, joining_date, phone_number, account_number, username, pan_no, role, auth_user_id")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setTeachers(data || []);
@@ -67,11 +68,15 @@ export default function ManageTeachers() {
     if (!window.confirm("Are you sure you want to delete this teacher/staff?")) return;
     
     try {
+      // Remove the login first so the account can no longer sign in.
+      const loginResult = await deleteTeacherLogin(id);
+      if (!loginResult.ok) throw new Error(loginResult.error);
+
       const { error } = await supabase.from("teachers").delete().eq("id", id);
       if (error) throw error;
       fetchTeachers();
-    } catch (err: any) {
-      alert("Error deleting teacher: " + err.message);
+    } catch (err: unknown) {
+      alert("Error deleting teacher: " + (err instanceof Error ? err.message : "Unknown error"));
     }
   };
 

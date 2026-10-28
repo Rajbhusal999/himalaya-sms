@@ -49,6 +49,8 @@ type Props = {
 const SCHOOL_NAME = "श्री हिमालय आधारभूत विद्यालय , भरतपुर -११ , चितवन";
 const REPORT_TITLE = "नगद / बैंक खाता (१)";
 const ROWS_PER_PAGE = 18;
+const FISCAL_YEARS = ["2081/2082", "2082/2083", "2083/2084", "2084/2085", "2085/2086"];
+const DEFAULT_FISCAL_YEAR = "2083/2084";
 
 const safeAdd = (a: number, b: number) =>
   Math.round((a + b) * 100) / 100;
@@ -153,10 +155,11 @@ function expandVoucher(v: VoucherRaw): DisplayRow[] {
 export default function BankNagadiKitab({ onBack }: Props) {
   const [vouchers, setVouchers] = useState<VoucherRaw[]>([]);
   const [loading, setLoading]   = useState(true);
+  const [selectedFiscalYear, setSelectedFiscalYear] = useState(DEFAULT_FISCAL_YEAR);
 
   useEffect(() => {
     fetchVouchers();
-  }, []);
+  }, [selectedFiscalYear]);
 
   const fetchVouchers = async () => {
     setLoading(true);
@@ -165,6 +168,7 @@ export default function BankNagadiKitab({ onBack }: Props) {
       .select(
         "id,date,voucher_number,description,cash_debit,cash_credit,bank_debit,bank_credit,kharcha_debit,kharcha_credit,bibidh_debit,bibidh_credit,details"
       )
+      .eq("fiscal_year", selectedFiscalYear)
       .order("date", { ascending: true })
       .order("voucher_number", { ascending: true });
 
@@ -222,7 +226,7 @@ export default function BankNagadiKitab({ onBack }: Props) {
       grandBibD, grandBibC,
     ];
     const csv = [
-      [SCHOOL_NAME], [REPORT_TITLE], [],
+      [SCHOOL_NAME], [`आ.व. ${selectedFiscalYear}`], [REPORT_TITLE], [],
       headers, ...rows, [], totals,
     ]
       .map((r) => r.join(","))
@@ -232,7 +236,7 @@ export default function BankNagadiKitab({ onBack }: Props) {
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement("a");
     a.href     = url;
-    a.download = "bank-nagadi-kitab.csv";
+    a.download = `bank-nagadi-kitab-${selectedFiscalYear.replace("/", "-")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -246,6 +250,15 @@ export default function BankNagadiKitab({ onBack }: Props) {
           style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
         >
           {SCHOOL_NAME}
+        </td>
+      </tr>
+      <tr>
+        <td
+          colSpan={10}
+          className="text-center font-semibold border border-slate-400 bg-slate-50 py-1 text-xs text-black"
+          style={{ fontFamily: "Kalimati, 'Arial Unicode MS', sans-serif" }}
+        >
+          आ.व. {selectedFiscalYear}
         </td>
       </tr>
       <tr>
@@ -313,7 +326,18 @@ export default function BankNagadiKitab({ onBack }: Props) {
               <p className="text-slate-500 text-xs">नगद / बैंक खाता — individual row view</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <div>
+              <label htmlFor="bnk-fiscal-year" className="block text-xs font-bold text-slate-600 mb-1">Fiscal Year (आ.व.)</label>
+              <select
+                id="bnk-fiscal-year"
+                value={selectedFiscalYear}
+                onChange={(e) => setSelectedFiscalYear(e.target.value)}
+                className="px-3 py-2 border border-slate-300 rounded-lg text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+              >
+                {FISCAL_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
             <button
               onClick={handleExport}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-sm shadow transition-colors"
@@ -371,7 +395,7 @@ export default function BankNagadiKitab({ onBack }: Props) {
                       {pageRows.length === 0 ? (
                         <tr>
                           <td colSpan={10} className="text-center py-12 text-slate-400 border border-slate-300">
-                            No voucher entries found. Please add entry vouchers first.
+                            No voucher entries found for fiscal year {selectedFiscalYear}. Please add entry vouchers first.
                           </td>
                         </tr>
                       ) : (
